@@ -29,6 +29,7 @@ from compliance.core.mail import send_mail_template
 from compliance.core.models import Cliente, Tarefa, Evento, TarefaEvento, MODULO_CHOICE, Documento, UserCliente, Backup, \
     CLIENTE_NIVELS
 
+
 # api_url_base = 'http://3.224.26.231:8081/'
 # userAndPass = b64encode(b"assist:123456").decode("ascii")
 # headers = {'Content-Type': 'application/json',
@@ -459,8 +460,6 @@ def ClienteUsuario(request, pk):
     return render(request, 'core/cliente_usuario.html', context)
 
 
-
-
 @login_required(login_url='login')
 def ClienteListView(request):
     context = {}
@@ -677,6 +676,80 @@ def clienteUpdate(request, pk):
 
 
 @login_required(login_url='login')
+def ClienteTarefaNew(request, pk):
+    context = {}
+    cliente = Cliente.objects.get(pk=pk)
+    tarefa = Tarefa()
+    tarefa.user = request.user
+    form = TarefaForm(request.POST or None, instance=tarefa)
+    if request.method == 'POST':
+        try:
+            if not tarefa.user:
+                tarefa.user = request.user
+            tarefa.cliente = cliente
+            tarefa.solicitante = request.POST.get('solicitante')
+            tarefa.celular = request.POST.get('celular')
+            tarefa.email = request.POST.get('email')
+            tarefa.modulo = request.POST.get('modulo')
+            tarefa.resumo = request.POST.get('resumo')
+            tarefa.demanda = request.POST.get('demanda')
+            if not tarefa.identificador:
+                ultimo = Tarefa.objects.aggregate(Max('identificador'))['identificador__max'] or 0
+                ultimo += 1
+                tarefa.identificador = ultimo
+
+            tarefa.save()
+            addEventoTarefaMsg(request, tarefa, 'inclusão de tarefa / ' + str(tarefa.identificador))
+            messages.success(request, 'gravado com sucesso')
+            return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
+
+        except Exception as e:
+            messages.error(request, e)
+            pass
+
+    context['form'] = form
+    context['tarefa'] = tarefa
+    context['cliente'] = cliente
+    context['status'] = tarefa.getStatusSAC(request.user)
+
+    return render(request, 'core/cliente_tarefa_edit.html', context)
+
+
+@login_required(login_url='login')
+def TarefaImprimir(request, pk):
+    tarefa = Tarefa.objects.get(pk=pk)
+    url = settings.COMPLIANCE_URL + 'tarefa/imprimir/'
+    response = requests.post(url, tarefa.dump(), auth=("assist", "123456"))
+    if response.status_code == 200:
+        return FileResponse(open(response.text, 'rb'), content_type='application/pdf')
+    else:
+        return HttpResponse(response.status_code)
+
+
+def home(request):
+    context = {}
+    template = loader.get_template('home.html')
+
+    if request.user.is_authenticated:
+        if request.user.pk:
+            request.session['is_consulta'] = request.user.is_consulta
+
+            if request.user.is_consulta:
+                return HttpResponseRedirect(reverse('url_cliente_list'))
+
+            filtro_status = Q(encerrado_dt__isnull=True, user=request.user)
+            filtro_tipo = Q(Q(status='PRODUCAO') | Q(status='PAUSA'))
+            lista = Tarefa.objects.filter(filtro_status, filtro_tipo).order_by('identificador').reverse()
+            context['lista'] = lista
+        else:
+            request.session['is_consulta'] = None
+    else:
+        return HttpResponseRedirect(reverse('login'))
+
+    return HttpResponse(template.render(context, request))
+
+
+@login_required(login_url='login')
 def ClienteTarefaEdit(request, pk):
     msgevento = ''
     context = {}
@@ -691,6 +764,15 @@ def ClienteTarefaEdit(request, pk):
 
     if request.method == 'POST':
         try:
+
+            if request.POST.get('btn_observar') and request.POST.get('observacao'):
+                valor = [tarefa.demanda, chr(13),
+                         datetime.now().strftime("%d/%m/%Y %H:%M:%S") + ' / ' + request.user.name, chr(13),
+                         request.POST.get('observacao')]
+                tarefa.demanda = "".join(valor)
+                tarefa.save()
+                return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
+
             usuario = User.objects.get(pk=request.POST.get('user_encaminha'))
             msgevento = request.POST.get('msgevento')
             if (not msgevento and
@@ -838,6 +920,7 @@ def ClienteTarefaEdit(request, pk):
             tarefa.encerrado_dt or not cliente.is_active or request.user != tarefa.user) or request.user.is_consulta
 
     context['form'] = form
+    context['demanda'] = tarefa.demanda
     context['bloqueado'] = bloqueado
     context['tarefa'] = tarefa
     context['cliente'] = cliente
@@ -848,79 +931,3 @@ def ClienteTarefaEdit(request, pk):
     context['status'] = tarefa.getStatusSAC(request.user)
 
     return render(request, 'core/cliente_tarefa_edit.html', context)
-
-
-
-
-@login_required(login_url='login')
-def ClienteTarefaNew(request, pk):
-    context = {}
-    cliente = Cliente.objects.get(pk=pk)
-    tarefa = Tarefa()
-    tarefa.user = request.user
-    form = TarefaForm(request.POST or None, instance=tarefa)
-    if request.method == 'POST':
-        try:
-            if not tarefa.user:
-                tarefa.user = request.user
-            tarefa.cliente = cliente
-            tarefa.solicitante = request.POST.get('solicitante')
-            tarefa.celular = request.POST.get('celular')
-            tarefa.email = request.POST.get('email')
-            tarefa.modulo = request.POST.get('modulo')
-            tarefa.resumo = request.POST.get('resumo')
-            tarefa.demanda = request.POST.get('demanda')
-            if not tarefa.identificador:
-                ultimo = Tarefa.objects.aggregate(Max('identificador'))['identificador__max'] or 0
-                ultimo += 1
-                tarefa.identificador = ultimo
-
-            tarefa.save()
-            addEventoTarefaMsg(request, tarefa, 'inclusão de tarefa / ' + str(tarefa.identificador))
-            messages.success(request, 'gravado com sucesso')
-            return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
-
-        except Exception as e:
-            messages.error(request, e)
-            pass
-
-    context['form'] = form
-    context['tarefa'] = tarefa
-    context['cliente'] = cliente
-    context['status'] = tarefa.getStatusSAC(request.user)
-
-    return render(request, 'core/cliente_tarefa_edit.html', context)
-
-
-@login_required(login_url='login')
-def TarefaImprimir(request, pk):
-    tarefa = Tarefa.objects.get(pk=pk)
-    url = settings.COMPLIANCE_URL + 'tarefa/imprimir/'
-    response = requests.post(url, tarefa.dump(), auth=("assist", "123456"))
-    if response.status_code == 200:
-        return FileResponse(open(response.text, 'rb'), content_type='application/pdf')
-    else:
-        return HttpResponse(response.status_code)
-
-
-def home(request):
-    context = {}
-    template = loader.get_template('home.html')
-
-    if request.user.is_authenticated:
-        if request.user.pk:
-            request.session['is_consulta'] = request.user.is_consulta
-
-            if request.user.is_consulta:
-                return HttpResponseRedirect(reverse('url_cliente_list'))
-
-            filtro_status = Q(encerrado_dt__isnull=True, user=request.user)
-            filtro_tipo = Q(Q(status='PRODUCAO') | Q(status='PAUSA'))
-            lista = Tarefa.objects.filter(filtro_status, filtro_tipo).order_by('identificador').reverse()
-            context['lista'] = lista
-        else:
-            request.session['is_consulta'] = None
-    else:
-        return HttpResponseRedirect(reverse('login'))
-
-    return HttpResponse(template.render(context, request))

@@ -30,8 +30,6 @@
 
 {% block conteudo %}
 
-<h1>sousa</h1>
-
 <div class="pure-g-r content-ribbon" id="tarefa">
 
     <div class="pure-u-1">
@@ -39,6 +37,23 @@
         <form action="#tarefa" method="POST">
 
             {% csrf_token %}
+
+            <div class="modal" id="box_demanda">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Incluir Observação</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <input autofocus type="text" name="observacao" class="form-control">
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" name="btn_observar" value="Aplicar" class="btn btn-danger">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <fieldset {% if bloqueado %} disabled="true" {% endif %}>
 
@@ -73,7 +88,14 @@
                     </div>
                 </div>
 
+                {% if status.pode_salvar %}
                 {{ form.demanda|bootstrap }}
+                {% else %}
+                <div class="form-group">
+                    <label>Demanda</label>
+                    <textarea disabled class="form-control" rows="3">{{demanda}}</textarea>
+                </div>
+                {% endif %}
 
                 {% if tarefa.status != 'PAUSA' %}
                 <div class="form-group">
@@ -97,6 +119,9 @@
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fas fa-save"></i>Salvar Tarefa
                     </button>
+                    {% elif not status.pode_salvar and not user.is_consulta %}
+                    <input type="button" class="btn btn-primary" data-toggle="modal" data-target="#box_demanda"
+                           value="Add Observação">
                     {% endif %}
 
                     {% if status.pode_encaminhar %}
@@ -142,7 +167,7 @@
 
                     {% if tarefa.pk and not user.is_consulta %}
                     <a href="{% url 'url_tarefa_anexo' tarefa.id %}">
-                        <button type="button" class="btn btn-secondary btn-sm" title="anexos">
+                        <button disabled type="button" class="btn btn-secondary btn-sm" title="anexos">
                             <i class="fas fa-paperclip"></i>Anexo
                         </button>
                     </a>
@@ -154,9 +179,9 @@
                 </div>
             </div>
             {% elif status.pode_salvar and not user.is_consulta %}
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fas fa-save"></i>Salvar Tarefa
-                </button>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-save"></i>Salvar Tarefa
+            </button>
             {% endif %}
 
             {% if tarefa.encerrado_dt or not cliente.is_active %}
@@ -175,11 +200,11 @@
                     </button>
                 </a>
 
+
                 <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#eventos">Eventos
                 </button>
             </div>
             {% endif %}
-
 
             <div id="encaminhamento" class="collapse">
                 <div class="jumbotron">
@@ -211,6 +236,7 @@
 
     </div>
 </div>
+
 
 {% include "core/tarefa_eventos.html" %}
 

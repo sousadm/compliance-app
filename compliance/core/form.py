@@ -10,27 +10,6 @@ MONITOR_CHOICES = (
 )
 
 
-class TarefaForm(ModelForm):
-    class Meta:
-        model = Tarefa
-        fields = ['solicitante', 'celular', 'email', 'modulo', 'resumo', 'demanda', 'prioridade', 'identificador']
-        widgets = {
-            'demanda': forms.Textarea(attrs={'rows': 3}),
-            'solicitante': forms.TextInput(attrs={'autofocus': 'autofocus'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(TarefaForm, self).__init__(*args, **kwargs)
-        self.fields['celular'].required = False
-        self.fields['email'].required = False
-        self.fields['identificador'].required = False
-
-
-class TarefaPausaForm(TarefaForm):
-    class Meta(TarefaForm.Meta):
-        exclude = ('demanda',)
-
-
 class MonitorForm(forms.Form):
     inicio = forms.DateField(widget=forms.widgets.DateInput(attrs={'type': 'date'}))
 
@@ -62,7 +41,7 @@ class ClienteForm(ModelForm):
 class ClienteConsultaForm(ModelForm):
     class Meta:
         model = Cliente
-        exclude = ('nivel', 'monitora','pode_sms')
+        exclude = ('nivel', 'monitora', 'pode_sms')
 
     def __init__(self, *args, **kwargs):
         super(ClienteConsultaForm, self).__init__(*args, **kwargs)
@@ -81,3 +60,24 @@ class DocumentForm(forms.ModelForm):
 class ClienteAddUser(forms.Form):
     email = forms.EmailField(label='E-mail para contato')
     nome = forms.CharField(label='Nome de usuário')
+
+
+class TarefaForm(ModelForm):
+    class Meta:
+        model = Tarefa
+        fields = ['solicitante', 'celular', 'email', 'modulo', 'resumo', 'demanda', 'prioridade', 'identificador']
+        widgets = {
+            'demanda': forms.Textarea(attrs={'rows': 3}),
+            'solicitante': forms.TextInput(attrs={'autofocus': 'autofocus'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(TarefaForm, self).__init__(*args, **kwargs)
+        self.fields['celular'].required = False
+        self.fields['email'].required = False
+        self.fields['identificador'].required = False
+
+
+class TarefaPausaForm(TarefaForm):
+    class Meta(TarefaForm.Meta):
+        exclude = ('demanda',)
