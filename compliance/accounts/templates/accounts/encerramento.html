@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block content %}
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <div class="jumbotron">
+
+        <button type="submit" class="btn btn-secondary btn-lg" name="btn_intervalo" value="btn_intervalo">
+            <i class="fas fa-pause"></i> Pausa de intervalo
+        </button>
+        </br>
+        </br>
+        <button type="submit" class="btn btn-secondary btn-lg" name="btn_encerramento" value="btn_encerramento">
+            <i class="fas fa-address-book"></i> Final de expediente
+        </button>
+        </br>
+        </br>
+        <button type="submit" class="btn btn-danger btn-lg">
+            <i class="fas fa-sign-out-alt"></i> Encerrar sessão
+        </button>
+
+    </div>
+
+</form>
+
+{% endblock %}

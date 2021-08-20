@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %} Tarefa {% endblock %}
+
+{% block content %}
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <h1>Lista de tarefas</h1>
+
+    {% csrf_token %}
+
+    <div class="row">
+        <div class="col-12 col-md-4 form-group">
+            <label>Valor para pesquisa</label>
+            <input type="text" class="form-control" name="pesquisa" autofocus value="{{ pesquisa }}">
+        </div>
+
+        <div class="col-12 col-md-2 form-group">
+            <label>Usuário</label>
+            <select class="form-control" name="txt_usuario" id="txt_usuario"
+                    {%if user.is_consulta%} disabled {%endif%} >
+                {% for u in user_list %}
+                <option value="{{u.value}}" {% if u.value == txt_usuario %} selected{% endif %}>{{u.label}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2 form-group">
+            <label>Módulo</label>
+            <select class="form-control" name="modulo" id="modulo">
+                {% for m in modulo_lista %}
+                <option value="{{m.value}}"{% if m.value == modulo %} selected{% endif %}>{{m.label}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-4 form-group">
+            <label/><br/>
+            <button type="submit" class="btn btn-info btn-sm">
+                <i class="fas fa-search"></i>Pesquisar
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr style="background-color: silver;">
+                <th>Tarefa</th>
+                <th>Empresa</th>
+                <th>Opção de menu</th>
+                <th>Módulo</th>
+                <th>Status</th>
+                <th width="90"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tar in lista %}
+            <tr>
+                <td>
+                    <a href="{% url 'url_cliente_tarefa_edit' tar.id %}">
+                        <span {% if tar.encerrado_dt %} class="text-danger" {%endif%}>{{ tar.identificador|default_if_none:"" }}</span>
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'url_cliente_update' tar.cliente.id %}">
+                        <span {% if tar.encerrado_dt %} class="text-danger" {%endif%}>{{ tar.cliente.nome|default_if_none:"" }}</span>
+                    </a>
+                </td>
+                <td><span {% if tar.encerrado_dt %} class="text-danger" {%endif%}>{{ tar.resumo|default_if_none:"" }}</span></td>
+                <td><span {% if tar.encerrado_dt %} class="text-danger" {%endif%}>{{ tar.moduloToStr|default_if_none:"" }}</span></td>
+                <td><span {% if tar.encerrado_dt %} class="text-danger" {%endif%}>{{ tar.statusToStr|default_if_none:"" }}</span></td>
+                <td>
+                    <a href="{% url 'url_cliente_tarefa_edit' tar.id %}">
+                        <button type="button" class="btn btn-sm" title="acessar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
+                    <a href="{% url 'url_tarefa_imprimir' tar.id %}">
+                        <button type="button" class="btn btn-sm" title="imprimir">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4"><span>sem registros</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% include "core/paginacao.html" %}
+
+    </div>
+
+</form>
+
+{% endblock %}
+
+
+
+<!--        <div class="col-12 col-md-2 form-group">-->
+<!--            <label>Status</label>-->
+<!--            <select class="form-control" name="status" id="status">-->
+<!--                {% for m in status_lista %}-->
+<!--                <option value="{{m.value}}" {% if m.value == status %} selected{% endif %}>{{m.label}}</option>-->
+<!--                {% endfor %}-->
+<!--            </select>-->
+<!--        </div>-->

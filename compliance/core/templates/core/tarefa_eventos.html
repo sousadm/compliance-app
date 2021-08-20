@@ -1,0 +1,29 @@
+<div id="eventos" class="collapse">
+
+    {% if eventos %}
+
+    <h5>Lista de Eventos</h5>
+
+    <div class="table-responsive-sm">
+        <table class="table table-sm">
+            <thead>
+            <tr style="background-color: silver;">
+                <th width="150">Data</th>
+                <th>Usuário</th>
+                <th>Descrição</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in eventos %}
+            <tr>
+                <td>{{ item.evento.created_at|date:'d/m/Y H:i' }}</td>
+                <td>{{ item.evento.user }}</td>
+                <td>{{ item.evento.descricao }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>

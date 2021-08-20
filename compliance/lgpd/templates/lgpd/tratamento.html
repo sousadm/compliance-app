@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div class="jumbotron">
+
+        <h2>LGPD - Tratamento de Dados</h2>
+
+        </br>
+
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Empresa</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input disabled type="text" name="empresa_nome" value="{{ empresa.nome }}" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Nome completo</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input readonly type="text" name="nome" value="{{ titular.nome }}" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>CPF</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input readonly type="text" class="form-control cpf-mask" value="{{ titular.cpf }}" name="cpf"
+                       maxlength="11">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>E-mail</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="email" name="email" value="{{tratamento.email}}" maxlength="254"
+                       class="form-control" autofocus>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Celular</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="text" class="form-control" value="{{tratamento.celular}}" name="celular"
+                       maxlength="20">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-md-3">Opção de tratamento</div>
+            <div class="col-12 col-md-9">
+                <select class="form-control" name="opcao" id="opcao">
+                    {% for l in lista %}
+                    <option value="{{ l.id }}" {% if opcao_id == l.id %} selected {% endif %}>{{ l.descricao }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% if hashcode %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Código de autorização</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input name="protocolo" value="{{ protocolo }}" class="form-control"
+                       maxlength="6" style="color: red; background-color: #edf7f0; width:200px; !important"
+                       onkeydown="upperCaseF(this)">
+                <label style="float: right; color: red">digite o código que foi enviado para seu e-mail e clique em gravar</label>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row" style="margin-top: 10px">
+            <div class="col-12 col-md-6">
+                <a href="{% url 'lgpd_consulta' titular.cpf %}">
+                    <button type="button" class="btn btn-secondary" title="controladores">
+                        <i class="fas fa-user-secret"></i> Controladores
+                    </button>
+                </a>
+            </div>
+            <div class="col-12 col-md-6" align="right">
+                <button type="submit" class="btn btn-warning" name="btn_solicitar" value="btn_solicitar">
+                    <i class="fas fa-envelope-open"></i> {%if hashcode%} Reenviar código {%else%} Enviar código
+                    {%endif%}
+                </button>
+
+                {% if hashcode %}
+                <button type="submit" class="btn btn-primary" name="btn_gravar" value="btn_gravar">
+                    <i class="fas fa-save"></i> Gravar
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if tratamentos %}
+        <div class="table-responsive" style="margin-top: 5px">
+            <table class="table table-striped">
+                <tr>
+                    <th>Incluido em</th>
+                    <th>Protocolo</th>
+                    <th>Opção de tratamento</th>
+                    <th>Ult. resposta</th>
+                </tr>
+                {% for n in tratamentos %}
+                <tr>
+                    <td>{{ n.created_at|date:'d/m/Y H:i' }}</td>
+                    <td>{{ n.protocolo }}</td>
+                    <td>{{ n.opcao }}</td>
+                    <td>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        <input type="hidden" id="hashcode" name="hashcode" value={{hashcode}}>
+        <input type="hidden" id="opcao_id" name="opcao_id" value={{opcao_id}}>
+
+    </div>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if lista %}
+
+{% if not user.is_consulta %}
+<div class="card-columns" style="margin-top: 15px">
+    {% for tarefa in lista %}
+    <div class="card shadow mb-3 {%if tarefa.status == 'PAUSA' %}border-danger{%else%}border-success{%endif%}" style="max-width: 11rem;">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <h3>
+                    <a href="{% url 'url_cliente_tarefa_edit' tarefa.id %}">
+                        {{tarefa.identificador|default_if_none:""}}</a></h3>
+                <a href="{% url 'url_tarefa_imprimir' tarefa.id %}">
+                    <button type="button" class="btn btn-sm" title="imprimir">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <p>{{ tarefa.cliente }}</p>
+            <p class="{%if tarefa.status == 'PAUSA' %}text-danger{%else%}text-success{%endif%}">
+                {{ tarefa.user|default_if_none:"" }}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endif %}
+
+{% endblock %}

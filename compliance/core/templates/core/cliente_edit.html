@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block content %}
+
+<form method="POST">
+
+    <h1>
+        {% if cliente.is_active %} Cadastro de Cliente {% else %} Cliente Inativo {% endif %}
+    </h1>
+
+    {% csrf_token %}
+
+    <fieldset {% if not cliente.is_active %} disabled {% endif %}>
+
+        <div class="row">
+
+            <div class="col-12 col-md-3">
+                {{ form.cnpj|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.serie|default_if_none:""|bootstrap }}
+            </div>
+            {% if user.is_consulta %}
+            <div class="col-12 col-md-7">
+                {{ form.nome|default_if_none:""|bootstrap }}
+            </div>
+
+            {% else %}
+            <div class="col-12 col-md-5">
+                {{ form.nome|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.monitora|default_if_none:"false"|bootstrap }}
+            </div>
+            {% endif %}
+
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-md-3">
+                {{ form.fone|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-3">
+                {{ form.celular|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-4">
+                {{ form.email|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.contato|bootstrap }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-md-4">
+                {{ form.logradouro|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-3">
+                {{ form.bairro|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.numero|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-3">
+                {{ form.complemento|default_if_none:""|bootstrap }}
+            </div>
+        </div>
+
+        {% if user.is_consulta %}
+        <div class="row">
+            <div class="col-12 col-md-7 form-group">
+                {{ form.cidade|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2 form-group">
+                {{ form.uf|default_if_none:"CE"|bootstrap }}
+            </div>
+            <div class="col-12 col-md-3 form-group">
+                {{ form.cep|default_if_none:""|bootstrap }}
+            </div>
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                {{ form.cidade|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-1">
+                {{ form.uf|default_if_none:"CE"|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.cep|default_if_none:""|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.nivel|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.pode_sms|bootstrap }}
+            </div>
+            <div class="col-12 col-md-2">
+                {{ form.pode_lgpd|bootstrap }}
+            </div>
+        </div>
+        {% endif %}
+
+
+    </fieldset>
+
+    <button type="submit" class="btn btn-primary" title="Salvar" {% if not cliente.is_active %} disabled {% endif %}>
+        <i class="fas fa-save"></i>Salvar
+    </button>
+
+    {% if cliente.pk %}
+
+    {% if not user.is_consulta %}
+    <button type="submit" value="btn_ativa" name="btn_ativa" class="btn btn-warning btn-sm">
+        <i class="fas fa-save"></i>
+        {%if cliente.is_active %} Inativar {% else %} Ativar {% endif %}
+    </button>
+    {% endif %}
+
+    {% if cliente.is_active %}
+
+    {% if user.is_staff and sem_usuario %}
+    <a href="{% url 'url_cliente_usuario' cliente.pk %}">
+        <button type="button" class="btn btn-warning" title="adiciona usuário para cliente">
+            <i class="fas fa-user-friends"></i>Add User
+        </button>
+    </a>
+    {% endif %}
+
+    {% if user.is_fin %}
+    <a href="{% url 'url_cliente_serie' cliente.pk %}">
+        <button type="button" class="btn btn-secondary" title="número de série">
+            <i class="fas fa-ear"></i>Gerar série
+        </button>
+    </a>
+    {% endif %}
+    {% endif %}
+
+    {% if not user.is_consulta %}
+    <a href="{% url 'url_cliente_tarefa_new' cliente.pk %}">
+        <button type="button" class="btn btn-secondary" title="tarefas">
+            <i class="fas fa-calendar-alt"></i>Tarefas
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_evento' cliente.pk %}">
+        <button type="button" class="btn btn-secondary" title="eventos">
+            <i class="fas fa-calendar-check"></i>Eventos
+        </button>
+    </a>
+    {% endif %}
+
+    <a href="{% url 'url_cliente_aws' cliente.pk %}">
+        <button type="button" class="btn btn-secondary" title="ambiente remoto">
+            <i class="fab fa-aws"></i> Aws S3
+        </button>
+    </a>
+
+    <a href="{% url 'url_cliente_consentimento' cliente.pk %}">
+        <button type="button" class="btn btn-secondary" title="consentimento lgpd">
+             Consentimento
+        </button>
+    </a>
+
+    <a href="{% url 'url_cliente_tratamento' cliente.pk %}">
+        <button type="button" class="btn btn-secondary" title="tratamento lgpd">
+             Tratamento
+        </button>
+    </a>
+
+    {% endif %}
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div class="jumbotron">
+
+        <h2>LGPD - Controladores de Dados</h2>
+
+        {% if bloqueia %}
+        <input autofocus type="text" name="cpf" value="{{cpf}}" placeholder="digite seu cpf">
+        <input type="submit" value="consultar">
+        {% else %}
+        <p>
+            CPF: {{ cpf }}
+        </p>
+        {% endif %}
+
+        {% if lista %}
+
+        <p>
+            Lista dos controladores de seus dados, conforme a Lei Geral de Proteção de Dados (DLG), número
+            <a href="http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank">13.709</a>
+            de 14 de agosto de 2018.
+        </p>
+
+        <div class="table-responsive" style="margin-top: 5px">
+            <table class="table table-striped">
+                <tr>
+                    <th>Nome do Controlador</th>
+                    <th width="150">Autorizado Em</th>
+                    <th width="20"></th>
+                </tr>
+                {% for n in lista %}
+                <tr>
+                    <td>{{ n.cliente.nome }}</td>
+                    <td>{{ n.autorizado_dt|date:'d/m/Y H:i' }}</td>
+                    <td>
+                        <a href="{% url 'lgpd_tratamento_id' n.id %}">
+                            <button type="button" class="btn btn-sm" title="solicitar informações">
+                                <i class="fas fa-question-circle"></i>
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% else %}
+        <p style="color: red">Não foram identificados controladores com seus dados</p>
+        {% endif %}
+
+        {% include "lgpd/lgpd_direitos.html" %}
+
+        <!--        {{ lista }}-->
+
+    </div>
+
+</form>
+
+{% endblock %}

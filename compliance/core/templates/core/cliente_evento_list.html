@@ -1,0 +1,54 @@
+{% extends "base_cliente.html" %}
+
+{% block titulo %} Lista de Eventos {% endblock %}
+
+{% block botao %}
+<div style="text-align: right; margin-top: 10px">
+    <a href="{% url 'url_cliente_update' cliente.id %}">
+        <button type="button" class="btn btn-secondary">
+            <i class="fas fa-user"></i>Cliente
+        </button>
+    </a>
+</div>
+{% endblock %}
+
+{% block conteudo %}
+
+{% if lista %}
+<div class="table-responsive-sm">
+    <table class="table table-sm">
+        <thead>
+        <tr style="background-color: silver;">
+            <th width="150">Data</th>
+            <th width="50">Módulo</th>
+            <th>Setor</th>
+            <th>Descrição</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for evento in lista %}
+        <tr>
+            <td>{{ evento.created_at|date:'d/m/Y H:i' }}</td>
+            <td>{{ evento.modulo|default_if_none:"" }}</td>
+            <td>{{ evento.setor|default_if_none:"" }}</td>
+            <td>{{ evento.descricao|default_if_none:"" }}</td>
+            <th>
+
+            </th>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4"><span>sem registros</span></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<span>*** sem registro de eventos ***</span>
+{% endif %}
+
+{% include "core/paginacao.html" %}
+
+{% endblock %}

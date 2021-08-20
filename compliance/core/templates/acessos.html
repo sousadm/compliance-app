@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block script %}
+$(document).ready(function(){
+$("select").change(function(){
+$("#btn").click();
+});
+});
+{% endblock %}
+
+{% block content %}
+
+<form id="form" method="post">
+
+    {% csrf_token %}
+
+    <h2>Monitor de acessos</h2>
+
+    <div style="text-align: right; margin-top: -20px;">
+        {{ form.inicio }}
+        <button class="btn btn-primary">
+            <i class="fas fa-search"></i>Pesquisar
+        </button>
+    </div>
+
+    <div class="table-responsive-sm">
+        <table class="table table-sm">
+            <thead>
+            <tr style="background-color: silver;">
+                <th>Cliente</th>
+                <th>Prim.Acesso</th>
+                <th>Ult.Acesso</th>
+                <th>Setor</th>
+                <th width="40"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in lista %}
+            <tr>
+                <td>{{ item.cliente__nome }}</td>
+                <td>{{ item.prim_acesso|date:'d/m/Y H:i' }}</td>
+                <td>{{ item.ult_acesso|date:'d/m/Y H:i' }}</td>
+                <td>{{ item.qt_setor }}</td>
+                <td>
+                    <a href="{% url 'url_cliente_update' item.cliente %}">
+                        <button type="button" class="btn btn-sm" title="editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+
+            {% include "core/paginacao.html" %}
+
+        </table>
+
+
+    </div>
+
+</form>
+
+{% endblock %}

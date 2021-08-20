@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12 col-md-6">
+        <h1>
+            {% block titulo %} Tarefas de Cliente {% endblock %}
+        </h1>
+    </div>
+    <div class="col-12 col-md-6">
+        {% block botao %}   {% endblock %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-3 form-group">
+        <b>CNPJ</b>
+        <input type="text" disabled value="{{ cliente.cnpj|default_if_none:'' }}" style="width: 100%">
+    </div>
+    <div class="col-12 col-md-6 form-group">
+        <b>Nome do Cliente</b>
+        <input type="text" disabled value="{{ cliente.nome|default_if_none:'' }}" style="width: 100%">
+    </div>
+    <div class="col-12 col-md-3 form-group">
+        <b>Usuário</b>
+        <input type="text" disabled value="{{ usuario|default_if_none:'' }}" style="width: 100%">
+    </div>
+</div>
+
+{% block conteudo %}        {% endblock %}
+
+
+{% endblock %}

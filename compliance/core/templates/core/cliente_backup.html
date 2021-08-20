@@ -1,0 +1,62 @@
+{% extends "base_cliente.html" %}
+
+{% block titulo %} Área Remota - AWS {% endblock %}
+
+{% block botao %}
+<div style="text-align: right; margin-top: 10px">
+    <a href="{% url 'url_cliente_update' cliente.id %}">
+        <button type="buttont" class="btn btn-secondary">
+            <i class="fas fa-user"></i>Cliente
+        </button>
+    </a>
+</div>
+{% endblock %}
+
+{% block conteudo %}
+
+<form method="GET">
+
+    {% csrf_token %}
+
+    <div class="jumbotron">
+        <h2>Senha de Backup</h2>
+
+        <table style="width:100%">
+            <tr>
+                <td>Nome do arquivo</td>
+                <td>{{arquivo}}</td>
+            </tr>
+            {% if backup %}
+            <tr>
+                <td>Data de envio</td>
+                <td>{{backup.created_at|date:'d/m/Y H:i'}}</td>
+            </tr>
+            <tr>
+                <td>Senha de recuperação</td>
+                <td><strong>{{backup.senha}}</strong></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <a href="{% url 'url_download_s3' url %}">
+                        <button type="button" class="btn btn-sm" title="download">
+                            <i class='{{key.classe}}'></i>
+                        </button>
+                    </a>
+                </td>
+                {% else %}
+            <tr>
+                <td></td>
+                <td>
+                    <div class="alert alert-danger">
+                        senha não localizada.
+                    </div>
+                </td>
+            </tr>
+            {% endif %}
+        </table>
+
+    </div>
+
+</form>
+
+{% endblock %}

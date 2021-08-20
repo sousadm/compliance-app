@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="post">
+
+    <h2>Monitor de backup</h2>
+
+    {% csrf_token %}
+
+    <div class="table-responsive-sm">
+        <table class="table table-sm">
+            <thead>
+            <tr style="background-color: silver;">
+                <th>Cliente</th>
+                <th width="150">Dt.Ult Bkp</th>
+                <th width="120"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cliente in lista %}
+            <tr style="color: {{ cliente.cor }}">
+                <td>{{ cliente.nome|default_if_none:"" }}</td>
+                <td>{{ cliente.data_ult_backup|date:'d/m/Y H:i' }}</td>
+                <th>
+                    <a href="{% url 'url_cliente_update' cliente.id %}">
+                        <button type="button" class="btn btn-sm" title="editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
+                    <a href="{% url 'url_cliente_tarefa' cliente.id %}">
+                        <button type="button" class="btn btn-sm" title="tarefas">
+                            <i class="fas fa-calendar-alt"></i>
+                        </button>
+                    </a>
+                    <a href="{% url 'url_sac_cliente' cliente.id %}">
+                        <button type="button" class="btn btn-sm" title="sac">
+                            <i class="fas fa-calendar-check"></i>
+                        </button>
+                    </a>
+                </th>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4"><span>sem registros</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "core/paginacao.html" %}
+
+</form>
+
+{% endblock %}

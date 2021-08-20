@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!--<form class="form-inline" method="POST">-->
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div class="jumbotron">
+
+        <h2>LGPD - Consentimento de Dados</h2>
+
+        <p>
+            Conforme a Lei Geral de Proteção de Dados (DLG), número
+            <a href="http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank">13.709</a>
+            de 14 de agosto de 2018,
+            que promove a proteção dos dados pessoais de pessoas naturais que estão sob posse de pessoas físicas e
+            jurídicas,
+            a empresa <b>{{ empresa.nome }}</b>, de cnpj {{empresa.cnpj}}, solicita sua autorização para tratamento de
+            seus dados.
+            Você deve preencher todos os campos solicitados, preencher o código de autorização que foi
+            enviado exclusivamente para seu e-mail, para confirmar esta requisição.
+        </p>
+
+        {% if obj %}
+
+        {% if obj.operador %}
+        <p>
+            Para contato ou dúvida quanto a esta solicitação, favor contatar
+            <b>{{obj.operador.nome}}</b> pelo e-mail
+            <a href="mailto:{{obj.operador.email}}">{{obj.operador.email}}</a>
+            {% if obj.operador.celular %}, ou pelo celular {{obj.operador.celular}}
+            {% endif %}
+        </p>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Nome completo</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="text" name="nome" value="{{ obj.nome }}" class="form-control" autofocus>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>CPF</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="text" class="form-control cpf-mask" value="{{obj.cpf}}" name="cpf"
+                       maxlength="11">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>E-mail</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="email" name="email" value="{{obj.email}}" maxlength="254"
+                       class="form-control">
+            </div>
+        </div>
+
+        {% if obj.ende_logra or obj.ende_logra == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Endereço</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <div class="input-group">
+                    <input required type="text" name="ende_logra" value="{{obj.ende_logra}}" maxlength="100"
+                           id="ende_logra" placeholder="logradouro" class="form-control">
+                    <div class="input-group-append">
+                        <input required type="text" name="ende_numero" value="{{obj.ende_numero}}" maxlength="10"
+                               id="ende_numero" placeholder="número" class="form-control"
+                               style="margin-left: 5px;">
+                    </div>
+                    <div class="input-group-append">
+                        <input required type="text" name="ende_bairro" value="{{obj.ende_bairro}}" maxlength="100"
+                               id="ende_bairro" placeholder="bairro" class="form-control"
+                               style="margin-left: 5px;">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input required type="text" name="ende_cidade" value="{{obj.ende_cidade}}" maxlength="100"
+                           id="ende_cidade" placeholder="cidade" class="form-control">
+                    <div class="input-group-append">
+                        <input required type="text" name="ende_uf" value="{{obj.ende_uf}}" maxlength="2"
+                               id="ende_uf" placeholder="UF" class="form-control"
+                               style="margin-left: 5px;">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" name="ende_compl" value="{{obj.ende_compl}}" maxlength="30"
+                           id="ende_compl" placeholder="complemento" class="form-control">
+                    <div class="input-group-append">
+                        <input required type="text" name="ende_cep" value="{{obj.ende_cep}}" maxlength="8"
+                               id="ende_cep" placeholder="CEP" class="form-control"
+                               style="margin-left: 5px;">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% endif %}
+
+        {% if obj.telefone or obj.telefone == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Contato</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <div class="input-group">
+                    <input required type="text" name="celular" value="{{obj.celular}}" maxlength="20"
+                           id="celular" placeholder="celular" class="form-control">
+                    {% if obj.celular or obj.celular == '' %}
+                    <div class="input-group-append">
+                        <input type="text" name="telefone" value="{{obj.telefone}}" maxlength="20" id="fone"
+                               class="form-control" placeholder="telefone" style="margin-left: 5px;">
+                    </div>
+                    {% endif %}
+                    {% if obj.whatsapp or obj.whatsapp == '' %}
+                    <div class="input-group-append">
+                        <input type="text" name="whatsapp" value="{{obj.whatsapp}}" maxlength="20"
+                               id="whatsapp" placeholder="whatsapp" class="form-control"
+                               style="margin-left: 5px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if obj.banco or obj.banco == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Dados bancários</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <div class="input-group">
+                    <input required type="text" name="banco" value="{{obj.banco}}" maxlength="3"
+                           id="banco" placeholder="banco número" class="form-control">
+                    {% if obj.agencia or obj.agencia == '' %}
+                    <div class="input-group-append">
+                        <input required type="text" name="agencia" value="{{obj.agencia}}" maxlength="20"
+                               id="agencia" placeholder="agência" class="form-control"
+                               style="margin-left: 5px;">
+                    </div>
+                    {% endif %}
+                    {% if obj.conta or obj.conta == '' %}
+                    <div class="input-group-append">
+                        <input required type="text" name="conta" value="{{obj.conta}}" maxlength="20"
+                               id="conta" placeholder="conta" class="form-control"
+                               style="margin-left: 5px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if obj.ident_numero or obj.ident_numero == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Identidade</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <div class="input-group">
+                    <div class="input-group-append" style="width:30%">
+                        <input required type="text" name="ident_numero" value="{{obj.ident_numero}}"
+                               maxlength="20"
+                               id="ident_numero" placeholder="número" class="form-control">
+                    </div>
+                    {% if obj.ident_emissao or obj.ident_emissao == '' %}
+                    <div class="input-group-append" style="margin-left: 15px; !important;">
+                        <span style='position:absolute; bottom:0px;'>Emissão</span>
+                        <input required type="date" name="ident_emissao" required id="id_vencimento"
+                               value="{{ ident_emissao }}" style="margin-left:80px" class="form-control">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if obj.nome_pai or obj.nome_pai == '' or obj.nome_mae or obj.nome_mae == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Filiação</label>
+            </div>
+            <div class="col-12 col-md-9">
+                {% if obj.nome_pai or obj.nome_pai == '' %}
+                <input required type="text" name="nome_pai" value="{{ obj.nome_pai }}" placeholder="nome do pai"
+                       maxlength="100" class="form-control">
+                {% endif %}
+                {% if obj.nome_mae or obj.nome_mae == '' %}
+                <input required type="text" name="nome_mae" value="{{ obj.nome_mae }}" placeholder="nome da mãe"
+                       maxlength="100" class="form-control">
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if obj.titulo_numero or obj.titulo_numero == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Título eleitoral</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="text" name="titulo_numero" value="{{ obj.titulo_numero }}" placeholder="número"
+                       maxlength="20" class="form-control">
+            </div>
+        </div>
+        {% endif %}
+        {% if obj.reservista_numero or obj.reservista_numero == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Reservista</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="text" name="reservista_numero" value="{{ obj.reservista_numero }}"
+                       placeholder="número" maxlength="20" class="form-control">
+            </div>
+        </div>
+        {% endif %}
+        {% if obj.cnh_numero or obj.cnh_numero == '' %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Habilitação</label>
+            </div>
+            <div class="col-12 col-md-9">
+                <input required type="text" name="cnh_numero" value="{{ obj.cnh_numero }}" placeholder="CNH"
+                       maxlength="20" class="form-control">
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Código de autorização</label>
+            </div>
+            <div class="col-12 col-md-5">
+                <input required name="autorizador" value="{{ autorizador }}" class="form-control"
+                       maxlength="6" style="color: red; background-color: #edf7f0; width:200px; !important"
+                       onkeydown="upperCaseF(this)">
+            </div>
+        </div>
+        <div align="right">
+            <button type="submit" class="btn btn-primary" title="Salvar"
+                    onClick='return confirma("Deseja confirmar o tratamento de seus dados?")'>
+                <i class="fas fa-save"></i> Confirmar
+            </button>
+        </div>
+
+        {% if obj.tratamentos %}
+        <h5>Dados Solicitados Para Tratamento</h5>
+        <lo>
+            {% for n in obj.tratamentos %}
+            <li> {{ n }}</li>
+            {% endfor %}
+        </lo>
+        {% endif %}
+
+        {% endif %}
+        </br>
+
+        {% include "lgpd/lgpd_direitos.html" %}
+
+    </div>
+
+</form>
+
+{% endblock %}

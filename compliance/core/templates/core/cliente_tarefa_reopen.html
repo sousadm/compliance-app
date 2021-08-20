@@ -1,0 +1,67 @@
+{% extends "base_cliente.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %}
+Reabertura de Tarefa
+{% endblock %}
+
+{% block botao %}
+<div style="text-align: right; margin-top: 10px">
+    <a href="{% url 'url_cliente_update' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-user"></i>Cliente
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-clipboard-list"></i>Lista
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa_new' cliente.id %}">
+        <button type="button" class="btn btn-primary btn-sm">
+            <i class="fas fa-file"></i>Nova
+        </button>
+    </a>
+</div>
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="pure-g-r content-ribbon" id="tarefa">
+
+    <div class="pure-u-1">
+        <form action="#tarefa" method="POST">
+
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-12 col-md-2 form-group">
+                    <label>Identificador</label>
+                    <input type="text" class="form-control" name="identificador" value="{{ identificador }}" disabled>
+                </div>
+                <div class="col-12 col-md-2 form-group">
+                    {{ form.prioridade|bootstrap }}
+                </div>
+                <div class="col-12 col-md-8 form-group">
+                    <label>Resumo</label>
+                    <input type="text" class="form-control" name="resumo" value="{{ resumo }}" disabled>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form.motivo|bootstrap }}
+            </div>
+
+            <div style="text-align: right;">
+                <button type="submit" class="btn btn-primary btn-sm" title="Confirmar">
+                    <i class="fas fa-check-circle"></i>Confirmar
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

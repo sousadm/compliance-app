@@ -1,0 +1,215 @@
+{% extends "base_cliente.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %}
+{{ tarefa.titulo }}
+{% endblock %}
+
+{% block botao %}
+{% if not user.is_consulta %}
+<div style="text-align: right; margin-top: 10px">
+    <a href="{% url 'url_cliente_update' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-user"></i>Cliente
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-clipboard-list"></i>Lista
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa_new' cliente.id %}">
+        <button type="button" class="btn btn-primary btn-sm" {% if not cliente.is_active %} disabled {% endif %}>
+            <i class="fas fa-file"></i>Nova
+        </button>
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="pure-g-r content-ribbon" id="tarefa">
+
+    <div class="pure-u-1">
+
+        <form action="#tarefa" method="POST">
+
+            {% csrf_token %}
+
+            <fieldset {% if bloqueado %} disabled="true" {% endif %}>
+
+                {% if is_valid %}
+                <p>enviado com sucesso</p>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-12 col-md-2 form-group">
+                        {{ form.identificador|bootstrap }}
+                    </div>
+                    <div class="col-12 col-md-4 form-group">
+                        {{ form.solicitante|bootstrap }}
+                    </div>
+                    <div class="col-12 col-md-3 form-group">
+                        {{ form.celular|bootstrap }}
+                    </div>
+                    <div class="col-12 col-md-3 form-group">
+                        {{ form.email|bootstrap }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-2 form-group">
+                        {{ form.modulo|bootstrap }}
+                    </div>
+                    <div class="col-12 col-md-2 form-group">
+                        {{ form.prioridade|bootstrap }}
+                    </div>
+                    <div class="col-12 col-md-8 form-group">
+                        {{ form.resumo|bootstrap }}
+                    </div>
+                </div>
+
+                {{ form.demanda|bootstrap }}
+
+                {% if tarefa.status != 'PAUSA' %}
+                <div class="form-group">
+                    <label>Sobre o evento realizado</label>
+                    <input type="text" class="form-control" name="msgevento" value="{{ msgevento }}">
+                </div>
+                {% endif %}
+            </fieldset>
+
+            {% if tarefa.pk and not tarefa.encerrado_dt and cliente.is_active %}
+            <div class="row">
+                <div class="col-12 col-md-8">
+
+                    <a href="{% url 'url_tarefa_imprimir' tarefa.id %}">
+                        <button type="button" class="btn btn-secondary btn-sm" title="imprimir">
+                            <i class="fas fa-print"></i>Imprimir
+                        </button>
+                    </a>
+
+                    {% if status.pode_salvar and not user.is_consulta %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-save"></i>Salvar Tarefa
+                    </button>
+                    {% endif %}
+
+                    {% if status.pode_encaminhar %}
+                    <button type="button" class="btn btn-warning btn-sm" data-toggle="collapse"
+                            data-target="#encaminhamento">
+                        <i class="fas fa-file-export"></i>Encaminhar
+                    </button>
+                    {% endif %}
+
+                    {% if status.pode_iniciar %}
+                    <button type="submit" value="btn_start" name="btn_start" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-play-circle"></i>Iniciar
+                    </button>
+                    {% endif %}
+
+                    {% if status.pode_reiniciar %}
+                    <button type="submit" value="btn_reinicia" name="btn_reinicia" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-power-off"></i>Reiniciar
+                    </button>
+                    {% endif %}
+
+                    {% if status.pode_pausar %}
+                    <button type="submit" value="btn_pausa" name="btn_pausa" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-pause"></i>Pausar
+                    </button>
+                    {% endif %}
+
+                    {% if status.pode_encerrar %}
+                    <button type="submit" value="btn_encerra" name="btn_encerra" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-circle"></i>Encerrar
+                    </button>
+                    {% endif %}
+
+                </div>
+
+                <div class="col-12 col-md-4" style="text-align: right">
+
+                    {% if status.pode_cancelar %}
+                    <button type="submit" value="btn_cancela" name="btn_cancela" class="btn btn-danger btn-sm">
+                        <i class="fas fa-circle-notch"></i>Cancelar
+                    </button>
+                    {% endif %}
+
+                    {% if tarefa.pk and not user.is_consulta %}
+                    <a href="{% url 'url_tarefa_anexo' tarefa.id %}">
+                        <button type="button" class="btn btn-secondary btn-sm" title="anexos">
+                            <i class="fas fa-paperclip"></i>Anexo
+                        </button>
+                    </a>
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#eventos">
+                        Eventos
+                    </button>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% elif status.pode_salvar and not user.is_consulta %}
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-save"></i>Salvar Tarefa
+                </button>
+            {% endif %}
+
+            {% if tarefa.encerrado_dt or not cliente.is_active %}
+            <div style="text-align: right">
+
+                <a href="{% url 'url_tarefa_imprimir' tarefa.id %}">
+                    <button type="button" class="btn btn-secondary btn-sm" title="imprimir">
+                        <i class="fas fa-print"></i>Imprimir
+                    </button>
+                </a>
+
+                <a href="{% url 'url_tarefa_reopen' tarefa.id %}">
+                    <button type="button" class="btn btn-secondary btn-sm" title="reabrir" {% if not cliente.is_active%}
+                            disabled {% endif %}>
+                        <i class="fas fa-lock-open"></i>Reabrir
+                    </button>
+                </a>
+
+                <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#eventos">Eventos
+                </button>
+            </div>
+            {% endif %}
+
+
+            <div id="encaminhamento" class="collapse">
+                <div class="jumbotron">
+
+                    <h6>Redirecionamento para usuário</h6>
+
+                    <select name="user_encaminha" class="form-control">
+                        {% for u in usuarios %}
+                        <option value="{{u.pk}}">{{u}}</option>
+                        {% endfor %}
+                    </select>
+
+                    <div style="text-align: right">
+                        {% if tarefa.status == 'ANALISE' %}
+                        <button type="submit" value="btn_analise" name="btn_analise" class="btn btn-primary btn-sm">
+                            <i class="fas fa-save"></i> Liberar p/ desenvolvimento
+                        </button>
+                        {% else %}
+                        <button type="submit" value="btn_analise" name="btn_analise" class="btn btn-primary btn-sm">
+                            <i class="fas fa-save"></i> Liberar p/ análise
+                        </button>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% include "core/tarefa_eventos.html" %}
+
+{% endblock %}

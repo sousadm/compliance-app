@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block titulo %} Tarefa {% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div class="jumbotron">
+
+        <div style="text-align: right; margin-top: -10px">
+            <a href="{% url 'url_cliente_update' cliente.id %}">
+                <button type="button" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-user"></i>Cliente
+                </button>
+            </a>
+        </div>
+
+        <h2>Definição de Usuário</h2>
+        <span><strong>Cliente: </strong> {{ cliente }}</span>
+        <hr>
+        <fieldset>
+            {{ form|crispy }}
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary">Adicionar Usuário</button>
+
+    </div>
+</form>
+
+
+{% endblock %}

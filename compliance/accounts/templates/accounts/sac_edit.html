@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %} SAC {% endblock %}
+
+{% block content %}
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <h1>{{ tarefa.titulo }}</h1>
+
+    <fieldset>
+
+        {% if tarefa.cliente %}
+        <div class="row row-sm">
+            <div class="col-12 col-md-4 form-group">
+                <label>CNPJ</label>
+                <input type="text" disabled value="{{ tarefa.cliente.cnpj|default_if_none:'' }}" style="width: 100%">
+            </div>
+            <div class="col-12 col-md-8 form-group">
+                <label>Nome do Cliente</label>
+                <input type="text" disabled value="{{ tarefa.cliente.nome|default_if_none:'' }}" style="width: 100%">
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row row-sm">
+            <div class="col-12 col-md-2 form-group">
+                <label>Número</label>
+                <input type="text" disabled value="{{ tarefa.pk|default_if_none:'' }}" class="form-control">
+            </div>
+            <div class="col-12 col-md-4 form-group">
+                {% if status.pode_salvar %}
+                {{ form.solicitante|bootstrap }}
+                {% else %}
+                <label>Quem solicitou</label>
+                <input type="text" disabled value="{{ tarefa.solicitante }}" class="form-control">
+                {% endif %}
+            </div>
+            <div class="col-12 col-md-2 form-group">
+                {% if status.pode_salvar %}
+                {{ form.celular|bootstrap }}
+                {% else %}
+                <label>Celular</label>
+                <input type="text" disabled value="{{ tarefa.celular }}" class="form-control">
+                {% endif %}
+            </div>
+            <div class="col-12 col-md-4 form-group">
+                {% if status.pode_salvar %}
+                {{ form.email|bootstrap }}
+                {% else %}
+                <label>E-mail</label>
+                <input type="email" disabled value="{{ tarefa.email|default_if_none:'' }}" class="form-control">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row row-sm">
+            <div class="col-12 col-md-6 form-group">
+                {% if status.pode_salvar %}
+                {{ form.categoria_sac|bootstrap }}
+                {% else %}
+                <label>Categoria sac</label>
+                <input type="text" disabled value="{{ tarefa.categoria_sac }}" class="form-control">
+                {% endif %}
+            </div>
+            <div class="col-12 col-md-2 form-group">
+                <label>Status</label>
+                <input type="text" disabled value="{{ tarefa.statusToStr }}" class="form-control">
+            </div>
+            <div class="col-12 col-md-4 form-group">
+                <label>Usuário</label>
+                <input type="text" disabled value="{{ usuario|default_if_none:'' }}" class="form-control">
+            </div>
+        </div>
+
+        <div class="row row-sm">
+            <div class="col-12 form-group">
+                {% if status.pode_salvar %}
+                {{ form.demanda|bootstrap }}
+                {% else %}
+                <label>Demanda</label>
+                <textarea disabled rows="3" class="form-control">{{ demanda|default_if_none:'' }}</textarea>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if status.pode_salvar %}
+        <button type="submit" class="btn btn-primary" title="Salvar">
+            <i class="fas fa-save"></i>Salvar
+        </button>
+        {% endif %}
+
+        {% if tarefa.pk %}
+        <button type="submit" value="btn_email" name="btn_email" class="btn btn-info btn-sm" title="enviar por email" >
+            <i class="fas fa-save"></i>Enviar
+        </button>
+        {% endif %}
+
+        {% if status.pode_observar %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#contramedida">
+            <i class="fas fa-file-export"></i>Observar
+        </button>
+        {% endif %}
+
+        {% if status.pode_iniciar %}
+        <button type="submit" class="btn btn-secondary" name="btn_iniciar" value="btn_iniciar"
+                title="iniciar atendimento">
+            <i class="fas fa-play-circle"></i>Iniciar
+        </button>
+        {% endif %}
+
+        {% if status.pode_reiniciar %}
+        <button type="submit" class="btn btn-secondary" name="btn_reiniciar" value="btn_reiniciar"
+                title="reiniciar atendimento">
+            <i class="fas fa-play-circle"></i>Reiniciar
+        </button>
+        {% endif %}
+
+        {% if status.pode_encaminhar %}
+        <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#encaminhamento">
+            <i class="fas fa-file-export"></i>Encaminhar
+        </button>
+        {% endif %}
+
+        {% if status.pode_encerrar %}
+        <input type='submit' value='Finalizar' name='btn_finalizar' class="btn btn-danger"
+               onClick='return confirma("Deseja finalizar o atendimento atual?")'>
+        {% endif %}
+
+        {% if eventos %}
+        <button type="button" style="float:right;" class="btn btn-info btn-sm" data-toggle="collapse"
+                data-target="#eventos">
+            Eventos
+        </button>
+        {% endif %}
+
+    </fieldset>
+
+    <div id="encaminhamento" class="collapse" style="margin-top: -50px">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-12 col-md-8 form-group"></div>
+                <div class="col-12 col-md-4 form-group">
+                    <h6>Redirecionamento para usuário</h6>
+                    {% if lista_encaminha %}
+                    <select name="user_encaminha" class="form-control">
+                        {% for u in lista_encaminha %}
+                        <option value="{{u.pk}}">{{u}}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <button type="submit" class="btn btn-danger" name="btn_encaminhar" value="btn_encaminhar">
+                        Confirma
+                    </button>
+                    <button type="button" class="btn btn-warning" data-toggle="collapse"
+                            data-target="#encaminhamento">
+                        Cancela
+                    </button>
+
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="contramedida" class="collapse" style="margin-top: 10px">
+        <div class="jumbotron">
+            <div style="float:right;">
+                <input type="text" name="observacao" placeholder="observação">
+                <input type="submit" class="btn btn-danger" name="btn_observar" value="Confirma">
+                <input type="button" class="btn btn-warning" data-toggle="collapse" data-target="#contramedida"
+                       value="Cancela">
+            </div>
+        </div>
+    </div>
+
+    {% include "core/tarefa_eventos.html" %}
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <a href="{% url 'minha_lgpd' %}" style="float: right; margin:2px">
+            Minha LGPD
+        </a>
+
+        <div class="card" style="width:200px; margin-top:2%">
+            <div class="card-body">
+                {{ form.username|bootstrap }}
+                {{ form.password|bootstrap }}
+                <button type="submit" class="btn btn-primary btn-md">Acessar Sistema</button>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

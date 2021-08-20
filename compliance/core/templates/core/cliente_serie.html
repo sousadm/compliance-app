@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block content %}
+
+<form method="POST">
+
+    <div class="jumbotron">
+        <h1>Gerador de Série</h1>
+        <br>
+        {% csrf_token %}
+
+        <div class="input-group mb-3 input-group-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Nome do cliente</span>
+            </div>
+            <input type="text" value="{{ cliente.nome }}" disabled>
+        </div>
+
+        <div class="input-group mb-3 input-group-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Data de vencimento</span>
+            </div>
+            {% if serie %}
+                {{ vencimento|date:"d/m/Y" }}
+            {% else %}
+            {{ form.vencimento }}
+            {% endif %}
+        </div>
+
+        {% if serie %}
+        <div class="input-group mb-3 input-group-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Número de série atualizado</span>
+            </div>
+            <input name="serie" value="{{serie}}" disabled>
+        </div>
+        {% endif %}
+
+        <a href="{% url 'url_cliente_update' cliente.pk %}">
+            <button type="button" class="btn btn-secondary" title="cliente">
+                <i class="fas fa-user"></i> Ir para cadastro
+            </button>
+        </a>
+
+        {% if serie %}
+        <button type="submit" class="btn btn-warning" title="limpar" name="btn_limpar" value="btn_limpar">
+            <i class="fas fa-cog"></i> Limpar
+        </button>
+        {% else %}
+        <button type="submit" class="btn btn-warning" title="novo" name="btn_gerar" value="btn_gerar">
+            <i class="fas fa-cog"></i> Gerar novo número
+        </button>
+        {% endif %}
+
+        {% if serie %}
+        <button type="submit" class="btn btn-primary" title="novo" name="btn_email" value="btn_email">
+            <i class="fas fa-mailchimp"></i> Enviar por e-mail
+        </button>
+        {% endif %}
+
+    </div>
+</form>
+
+{% endblock %}

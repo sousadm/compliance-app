@@ -1,0 +1,185 @@
+<!doctype html>
+
+{% load static %}
+
+{% load bootstrap %}
+<!--{% load crispy_forms_tags %}-->
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+    <script src="{% static 'js/jquery/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.1/umd/popper.min.js"></script>
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+
+    <meta name="description" content="Sistema de Gerenciamento"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title> {% block titulo %} Compliance {% endblock %} </title>
+
+    <script>   {% block script %} {% endblock %}
+
+        $(document).ready(function() {
+            $("#success-alert").fadeTo(3000, 1000).slideUp(1000, function() {
+              $("#success-alert").slideUp(5000);
+            });
+        });
+
+        function confirma(pergunta) {
+            var agree=confirm(pergunta);
+            if (agree)
+                return true ;
+            else
+            return false ;
+        }
+
+        function upperCaseF(a){
+            setTimeout(function(){
+                a.value = a.value.toUpperCase();
+            }, 1);
+        }
+
+
+    </script>
+
+</head>
+<body>
+
+<!--{{ perms.core }}-->
+
+<!--{{ user.id }}-->
+
+<label></label>
+
+<div class="container">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+
+
+        <div class="container">
+
+            <a class="navbar-brand" href="#">
+                <img height="35" src="{% static 'img/assist.bmp' %}" alt="">
+            </a>
+
+            {% if not user.is_authenticated %}
+            <h2 style="color: white">Compliance</h2>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+            <p style="color: white">Olá, {{ user.username }}.</p>
+            {% endif %}
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+
+                    {% if user.is_authenticated %}
+
+                    {% if not user.is_consulta %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'monitor' %}">Backup</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'acessos' %}">Acessos</a>
+                    </li>
+<!--                    <li class="nav-item active">-->
+<!--                        <a class="nav-link" href="{% url 'url_sac_list' %}">SAC</a>-->
+<!--                    </li>-->
+                    {% endif %}
+
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'url_cliente_list' %}">Clientes</a>
+                    </li>
+
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'url_tarefa_list' %}">Tarefas</a>
+                    </li>
+
+                    {% if user.is_consulta %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'url_sair' %}">Sair</a>
+                    </li>
+                    {% else %}
+                    <li class="dropdown-submenu" style="margin-top: 8px;">
+
+                        <a style="color: white;" href="#" class="dropdown-toggle nav-item"
+                           data-toggle="dropdown">Opções</a>
+
+                        <ul class="dropdown-menu" style="background-color: black">
+
+                            <li class="nav-item">
+                                {% if not user.is_consulta %}
+                                <a style="color: white;" href="{% url 'url_sair' %}">Sair</a>
+                                {% else %}
+                                <a style="color: white;" href="{% url 'logout' %}">Sair</a>
+                                {% endif %}
+                            </li>
+
+                            <li class="nav-item">
+                                {% if user.is_superuser %}
+                                <a style="color: white;" href="{% url 'url_user_list' %}">Usuários</a>
+                                {% else %}
+                                <a style="color: white;" href="{% url 'url_user_edit' user.id %}">usuário</a>
+                                {% endif %}
+                            </li>
+
+                            {% if user.is_superuser %}
+                            <li class="nav-item">
+                                <a style="color: white;" href="{% url 'admin:index' %}">Admin</a>
+                            </li>
+                            {% endif %}
+
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% else %}
+                    <!--                    <li class="nav-item">-->
+                    <!--                        <a class="nav-link" href="{% url 'login' %}">Entrar</a>-->
+                    <!--                    </li>-->
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="content">
+
+        {% include 'accounts/messages.html' %}
+
+        {% block content %}
+
+        {% endblock %}
+
+    </div>
+
+    <footer id="footer" style="position: absolute; bottom: 10px;">
+        {% block footer %}
+        <div style="text-align: right;">
+            <span style="color: #cccccc">
+            Copyright © 2021 Assist Sistemas
+            </span>
+        </div>
+        {% endblock %}
+    </footer>
+
+</div>
+
+</body>
+
+</html>

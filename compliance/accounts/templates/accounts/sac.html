@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %} SAC {% endblock %}
+
+{% block content %}
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <h1>SAC - Atendimento</h1>
+
+    <div class="row">
+        <div class="col-12 col-md-6 form-group">
+            <input type="text" class="form-control" placeholder="digite um valor para pesquisa" autofocus
+                   name="pesquisa" value="{{ pesquisa }}">
+        </div>
+        <div class="col-12 col-md-6 form-group">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-search"></i>Pesquisar
+            </button>
+            {% if user.is_sac %}
+            <a href="{% url 'url_sac_avulso' %}">
+                <button type="button" class="btn btn-secondary" title="avulso">
+                    <i class="fas fa-file"></i>Incluir Avulso
+                </button>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr style="background-color: silver;">
+                <th>Num</th>
+                <th>Nome / Empresa</th>
+                <th>Usuário</th>
+                <th>Solicitado em</th>
+                <th>Iniciado em</th>
+                <th>Encerrado em</th>
+                <th width="40"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in lista %}
+            <tr>
+                <td>{{ item.pk|default_if_none:"" }}</td>
+                <td>
+                    {{ item.solicitante|default_if_none:"" }}
+                    {% if item.cliente %} /
+                    <a href="{% url 'url_cliente_update' item.cliente.id %}">
+                        {{ item.cliente|default_if_none:"" }}
+                    </a>
+                    {% endif %}
+                </td>
+                <td>{{ item.user|default_if_none:"" }}</td>
+                <td>{{ item.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ item.iniciado_dt|date:"d/m/Y H:i" }}</td>
+                <td>{{ item.encerrado_dt|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'url_sac_edit' item.id %}">
+                        <button type="button" class="btn btn-sm" title="editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4"><span>sem registros</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% include "core/paginacao.html" %}
+
+    </div>
+
+</form>
+
+{% endblock %}

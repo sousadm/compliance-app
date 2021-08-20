@@ -1,0 +1,81 @@
+{% extends "base_cliente.html" %}
+
+{% block titulo %} Lista de Tarefas {% endblock %}
+
+{% block botao %}
+{% if not user.is_consulta %}
+<div style="text-align: right; margin-top: 10px">
+    <a href="{% url 'url_cliente_update' cliente.id %}">
+        <button type="buttont" class="btn btn-secondary">
+            <i class="fas fa-user"></i>Cliente
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa' cliente.id %}">
+        <button type="buttont" class="btn btn-secondary">
+            <i class="fas fa-clipboard-list"></i>Lista
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa_new' cliente.id %}">
+        <button type="buttont" class="btn btn-primary" {% if not cliente.is_active %} disabled {% endif %}>
+            <i class="fas fa-file"></i>Nova
+        </button>
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block conteudo %}
+
+{% if lista %}
+<div class="table-responsive-sm">
+    <table class="table table-sm">
+        <thead>
+        <tr style="background-color: silver;">
+            <th>Tarefa</th>
+            <th width="150">Data</th>
+            <th width="200">Solicitante</th>
+            <th>Resumo</th>
+            <th width="120">Status</th>
+            <th width="90"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for tarefa in lista %}
+        <tr>
+            <td>
+                <a href="{% url 'url_cliente_tarefa_edit' tarefa.id %}">
+                    <span {% if tarefa.encerrado_dt %} class="text-danger" {%endif%}>{{ tarefa.identificador|default_if_none:"" }}</span>
+                </a>
+            </td>
+            <td>{{ tarefa.created_at|date:'d/m/Y H:i' }}</td>
+            <td>{{ tarefa.solicitante|default_if_none:"" }}</td>
+            <td>{{ tarefa.resumo|default_if_none:"" }}</td>
+            <td>{{ tarefa.statusToStr }}</td>
+            <th>
+                <a href="{% url 'url_cliente_tarefa_edit' tarefa.pk   %}">
+                    <button class="btn btn-sm" title="acessar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </a>
+                <a href="{% url 'url_tarefa_imprimir' tarefa.id %}">
+                    <button type="button" class="btn btn-sm" title="imprimir">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </a>
+            </th>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4"><span>sem registros</span></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<span>*** sem registro de tarefas ***</span>
+{% endif %}
+
+{% include "core/paginacao.html" %}
+
+{% endblock %}

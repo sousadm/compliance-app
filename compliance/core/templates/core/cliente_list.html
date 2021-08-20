@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %} Cliente {% endblock %}
+
+{% block content %}
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <h1>Lista de Clientes</h1>
+
+    <div class="row">
+        <div class="col-12 col-md-6 form-group">
+            <label>Pesquisa</label>
+            <input type="text" class="form-control" placeholder="digite um valor para pesquisa" autofocus
+                   name="pesquisa" value="{{ pesquisa }}">
+        </div>
+        {% if not user.is_consulta %}
+        <div class="col-12 col-md-2 form-group">
+            <label>Nível</label>
+            <select class="form-control" name="nivel" id="nivel">
+                {% for m in nivel_lista %}
+                <option value="{{m.value}}"{% if m.value == nivel %} selected{% endif %}>{{m.label}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="col-12 col-md-4 form-group">
+            <br/>
+            <button type="submit" class="btn btn-info btn-sm">
+                <i class="fas fa-search"></i>Pesquisar
+            </button>
+            {% if not user.is_consulta %}
+            <a href="{% url 'url_cliente_new' %}">
+                <button type="button" class="btn btn-secondary" title="novo cliente">
+                    <i class="fas fa-file"></i>Incluir
+                </button>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr style="background-color: silver;">
+                <th>Nome</th>
+                <th>CNPJ</th>
+                <th width="150">Fone</th>
+                <th width="150">Celular</th>
+                <th width="120"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cli in lista %}
+            <tr>
+                <td><span {% if not cli.is_active %} class="text-danger"
+                          {%endif%}>{{ cli.nome|default_if_none:"" }}</span></td>
+                <td><span {% if not cli.is_active %} class="text-danger"
+                          {%endif%}> {{ cli.cnpj|default_if_none:"" }}</span></td>
+                <td><span {% if not cli.is_active %} class="text-danger"
+                          {%endif%}>{{ cli.fone|default_if_none:"" }}</span></td>
+                <td><span {% if not cli.is_active %} class="text-danger"
+                          {%endif%}>{{ cli.celular|default_if_none:"" }}</span>
+                </td>
+                <td>
+                    <a href="{% url 'url_cliente_update' cli.id %}">
+                        <button type="button" class="btn btn-sm" title="editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
+
+                    {% if cli.is_active and not user.is_consulta %}
+                    <a href="{% url 'url_cliente_tarefa_new' cli.id %}">
+                        <button type="button" class="btn btn-sm" title="tarefa">
+                            <i class="fas fa-calendar-alt"></i>
+                        </button>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'url_cliente_tarefa' cli.id %}">
+                        <button type="button" class="btn btn-sm" title="tarefa">
+                            <i class="fas fa-calendar-alt"></i>
+                        </button>
+                    </a>
+                    {% endif %}
+
+                    {% if user.is_sac %}
+                    <a href="{% url 'url_sac_cliente' cli.id %}">
+                        <button type="button" class="btn btn-sm" title="sac">
+                            <i class="fas fa-calendar-check"></i>
+                        </button>
+                    </a>
+                    {% endif %}
+
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4"><span>sem registros</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% include "core/paginacao.html" %}
+    </div>
+
+</form>
+
+{% endblock %}

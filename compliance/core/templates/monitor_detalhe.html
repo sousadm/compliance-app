@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pessoa{% endblock %}
+
+{% block content %}
+
+<h1>Monitor de Backup</h1>
+
+<div class="card">
+    <div class="card-header">{{ dados.empresa.nome }}</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-4">
+                <span>CNPJ</span>
+            </div>
+            <div class="col-8">
+                {{ dados.cnpj }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <span>Contato</span>
+            </div>
+            <div class="col-8">
+                {{ dados.empresa.contato }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <span>Fone / Celular</span>
+            </div>
+            <div class="col-8">
+                {{ dados.empresa.fone }}
+                {{ dados.empresa.celular }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <span>Último backup realizado</span>
+            </div>
+            <div class="col-8">
+                {{ dados.dataUltimoBackup }}
+            </div>
+        </div>
+  </div>
+
+    <!--
+    <div class="card-footer">Footer
+    </div>
+    -->
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base_cliente.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %}
+Anexo de Tarefa
+{% endblock %}
+
+{% block botao %}
+<div style="text-align: right; margin-top: 10px">
+    <a href="{% url 'url_cliente_update' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-user"></i>Cliente
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-clipboard-list"></i>Lista
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa_new' cliente.id %}">
+        <button type="button" class="btn btn-primary btn-sm" {% if not cliente.is_active %} disabled {% endif %}>
+            <i class="fas fa-file"></i>Nova
+        </button>
+    </a>
+</div>
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="row">
+    <div class="col-12 col-md-2 form-group">
+        <div class="form-group">
+            <label>Tarefa</label>
+            <input disabled type="text" class="form-control" value="{{ tarefa.identificador }}">
+        </div>
+    </div>
+    <div class="col-12 col-md-10 form-group">
+        <div class="form-group">
+            <label>Opção de menu</label>
+            <input disabled type="text" class="form-control" value="{{ tarefa.resumo }}">
+        </div>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    {% if lista %}
+    <div class="table-responsive-sm">
+        <table class="table table-sm">
+            <thead>
+            <tr style="background-color: silver;">
+                <th width="150">Data</th>
+                <th>Nome do arquivo</th>
+                <th width="80"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in lista %}
+            <tr>
+                <td>{{ item.created_at|date:'d/m/Y H:i' }}</td>
+                <td>{{ item.arquivo }}</td>
+                <td>
+
+                    <button type="button" name='btn_excluir' class="btn btn-sm"
+                            onClick='return confirma("Deseja excluir o arquivo anexo?")'>
+                        <i class="fas fa-trash"></i>
+                    </button>
+
+                    <a href="{% url 'url_download' item.id %}">
+                        <button type="button" class="btn btn-sm" title="download">
+                            <i class="fas fa-file-download"></i>
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if form_upload %}
+    <fieldset>
+        <div class="form-group">
+            {{ form_upload.arquivo|bootstrap }}
+        </div>
+        <a href="#">
+            <button type="submit" class="btn btn-primary btn-sm" title="upload">
+                <i class="fas fa-file-upload"></i>Upload
+            </button>
+        </a>
+        <a href="{% url 'url_tarefa_anexo' tarefa.id %}">
+            <button type="button" class="btn btn-secondary btn-sm" title="arquivos">
+                <i class="fas fa-stream"></i>Lista de arquivos
+            </button>
+        </a>
+    </fieldset>
+    {% else %}
+    <a href="{% url 'url_tarefa_anexo_add' tarefa.id %}">
+        <button type="button" class="btn btn-secondary btn-sm" title="upload">
+            <i class="fas fa-file-upload"></i>Upload
+        </button>
+    </a>
+    <a href="{% url 'url_cliente_tarefa_edit' tarefa.id %}">
+        <button type="button" class="btn btn-secondary btn-sm" title="acessar">
+            <i class="fas fa-edit"></i>Tarefa
+        </button>
+    </a>
+    {% endif %}
+
+</form>
+
+<div class="pure-g-r content-ribbon" id="tarefa">
+
+
+</div>
+
+{% endblock %}
