@@ -21,10 +21,10 @@ from django.urls import path, include
 
 from compliance.accounts.views import userEdit, userRegister, userList, edit_password, \
     atendimentoSAC, atendimentoEditSAC, SAC_avulso, SAC_cliente, clienteSerie, encerramento
-from compliance.core.views import home, ClienteListView, clienteNew, clienteUpdate, \
-    ClienteTarefaNew, ClienteTarefaList, ClienteTarefaEdit, ClienteEventoList, MonitorBackupNew, acessos, TarefaLista, \
-    TarefaImprimir, TarefaReopen, download, ClienteAWS, \
-    ClienteFolderAWS, ClienteBackup, ClienteUsuario, downloadObjectS3, deleteObjectS3, TarefaAnexo
+from compliance.core.views import home, ClienteListView, clienteNew, clienteUpdate, ClienteTarefaNew, \
+    ClienteTarefaList, ClienteTarefaEdit, ClienteEventoList, MonitorBackupNew, acessos, TarefaLista, \
+    TarefaImprimir, TarefaReopen, download, ClienteAWS, ClienteFolderAWS, ClienteBackup, ClienteUsuario, \
+    downloadObjectS3, TarefaAnexo, TarefaRemoveAnexo
 from compliance.lgpd.views import LgpdConsentimento, LgpdConsultaTitular, LgpdTratamentoId, \
     LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF
 
@@ -57,7 +57,6 @@ urlpatterns = [
                   path('cliente/<int:pk>/s3', ClienteAWS, name='url_cliente_aws'),
                   path('cliente/<int:pk>/s3/<str:folder>', ClienteFolderAWS, name='url_cliente_folder_aws'),
                   path('s3/<str:nome>', downloadObjectS3, name='url_download_s3'),
-                  path('s3/<str:folder>/<str:nome>', deleteObjectS3, name='url_delete_file_s3'),
 
                   path('cliente/<int:pk>/serie', clienteSerie, name='url_cliente_serie'),
                   path('cliente/<int:pk>/tarefa/', ClienteTarefaList, name='url_cliente_tarefa'),
@@ -68,6 +67,7 @@ urlpatterns = [
                   path('tarefa/<int:pk>/imprimir', TarefaImprimir, name='url_tarefa_imprimir'),
                   path('tarefa/<int:pk>/reopen', TarefaReopen, name='url_tarefa_reopen'),
                   path('tarefa/<int:pk>/anexo', TarefaAnexo, name='url_tarefa_anexo'),
+                  path('tarefa/<int:pk>/anexo/remove=<str:nome>', TarefaRemoveAnexo, name='url_tarefa_anexo_remove'),
                   path('download/<int:pk>', download, name='url_download'),
 
                   path('admin/', admin.site.urls),

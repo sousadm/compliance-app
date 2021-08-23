@@ -54,21 +54,22 @@ Anexo de Tarefa
         <input style="position: absolute; right: 0" type="submit" class="btn btn-danger" value="Enviar arquivo">
     </div>
 
+    {% if lista %}
     <div class="table-responsive">
         <table class="table table-striped table-sm">
-            <thead>
-            <tr style="background-color: silver;">
-                <th>Nome do arquivo</th>
-                <th width="120"></th>
-            </tr>
-            </thead>
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>Nome do arquivo</th>-->
+<!--                <th width="120"></th>-->
+<!--            </tr>-->
+<!--            </thead>-->
             <tbody>
             {% for key in lista %}
             <tr>
                 <td>
                     {{ key.arquivo }}
                 </td>
-                <td>
+                <td width="100" >
                     {% if key.tipo == 'folder' %}
                     <a href="{% url 'url_cliente_folder_aws' cliente.pk key.url %}">
                         <button type="button" class="btn btn-sm" title="abrir">
@@ -92,12 +93,23 @@ Anexo de Tarefa
                     </a>
                     {% endif %}
                     {% endif %}
+
+                    <a href="{% url 'url_tarefa_anexo_remove' tarefa.pk key.url %}">
+                        <button type="button" class="btn btn-sm" title="excluir"
+                                onClick='return confirma("Deseja remover este anexo?")'>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </a>
+
                 </td>
             </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
+    {% else %}
+    <p style="color: red">sem anexos para esta tarefa</p>
+    {% endif %}
 
 </form>
 

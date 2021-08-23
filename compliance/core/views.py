@@ -515,7 +515,7 @@ def ClienteFolderAWS(request, pk, folder):
                                       settings.AWS_STORAGE_BUCKET_NAME,
                                       file_name,
                                       request.content_type)
-                messages.info(request, 'arquivo enviado com sucesso')
+                # messages.info(request, 'arquivo enviado com sucesso')
             except Exception as e:
                 messages.error(request, e)
     else:
@@ -550,16 +550,6 @@ def downloadObjectS3(request, nome):
         messages.error(request, e)
     # pass
     # raise Http404
-
-
-def deleteObjectS3(request, folder, nome):
-    arquivo = urllib.parse.unquote(nome)
-    messages.info(request, arquivo)
-    try:
-        response = s3_delete_file(settings.AWS_STORAGE_BUCKET_NAME, arquivo)
-        return response
-    except Exception as e:
-        messages.error(request, e)
 
 
 @login_required(login_url='login')
@@ -915,12 +905,20 @@ def TarefaAnexo(request, pk):
             return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': tarefa.pk}))
     else:
         form = UploadFileOnlyForm()
-
     lista = get_s3_filename_list(folder)
-
     context['lista'] = lista
     context['form'] = form
     context['tarefa'] = tarefa
     context['cliente'] = cliente
     context['usuario'] = tarefa.user
     return render(request, 'core/cliente_tarefa_anexo.html', context)
+
+
+def TarefaRemoveAnexo(request, pk, nome):
+    try:
+        arquivo = urllib.parse.unquote(nome)
+        response = s3_delete_file(settings.AWS_STORAGE_BUCKET_NAME, arquivo)
+        # messages.success(request, response.HTTPStatusCode)
+        return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': pk}))
+    except Exception as e:
+        messages.error(request, e)
