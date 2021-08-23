@@ -38,23 +38,6 @@
 
             {% csrf_token %}
 
-            <div class="modal" id="box_demanda">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Incluir Observação</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <input autofocus type="text" name="observacao" class="form-control">
-                        </div>
-                        <div class="modal-footer">
-                            <input type="submit" name="btn_observar" value="Aplicar" class="btn btn-danger">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <fieldset {% if bloqueado %} disabled="true" {% endif %}>
 
                 {% if is_valid %}
@@ -97,12 +80,6 @@
                 </div>
                 {% endif %}
 
-                {% if tarefa.status != 'PAUSA' %}
-                <div class="form-group">
-                    <label>Sobre o evento realizado</label>
-                    <input type="text" class="form-control" name="msgevento" value="{{ msgevento }}">
-                </div>
-                {% endif %}
             </fieldset>
 
             {% if tarefa.pk and not tarefa.encerrado_dt and cliente.is_active %}
@@ -125,8 +102,7 @@
                     {% endif %}
 
                     {% if status.pode_encaminhar %}
-                    <button type="button" class="btn btn-warning btn-sm" data-toggle="collapse"
-                            data-target="#encaminhamento">
+                    <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#encaminhamento">
                         <i class="fas fa-file-export"></i>Encaminhar
                     </button>
                     {% endif %}
@@ -144,13 +120,15 @@
                     {% endif %}
 
                     {% if status.pode_pausar %}
-                    <button type="submit" value="btn_pausa" name="btn_pausa" class="btn btn-secondary btn-sm">
+                    <button type="submit" value="btn_pausa" name="btn_pausa" class="btn btn-secondary btn-sm"
+                            onClick='return confirma("Deseja pausar esta tarefa?")'>
                         <i class="fas fa-pause"></i>Pausar
                     </button>
                     {% endif %}
 
                     {% if status.pode_encerrar %}
-                    <button type="submit" value="btn_encerra" name="btn_encerra" class="btn btn-secondary btn-sm">
+                    <button type="submit" value="btn_encerra" name="btn_encerra" class="btn btn-secondary btn-sm"
+                            onClick='return confirma("Deseja encerrar esta tarefa?")'>
                         <i class="fas fa-circle"></i>Encerrar
                     </button>
                     {% endif %}
@@ -167,7 +145,7 @@
 
                     {% if tarefa.pk and not user.is_consulta %}
                     <a href="{% url 'url_tarefa_anexo' tarefa.id %}">
-                        <button disabled type="button" class="btn btn-secondary btn-sm" title="anexos">
+                        <button type="button" class="btn btn-secondary btn-sm" title="anexos">
                             <i class="fas fa-paperclip"></i>Anexo
                         </button>
                     </a>
@@ -185,7 +163,13 @@
             {% endif %}
 
             {% if tarefa.encerrado_dt or not cliente.is_active %}
+
             <div style="text-align: right">
+
+                {% if not tarefa.implantado_dt %}
+                <input type="submit" name="btn_update_incliente" class="btn btn-warning" value="Atualizar no cliente"
+                       onClick='return confirma("Confirma atualização no cliente?")'>
+                {% endif %}
 
                 <a href="{% url 'url_tarefa_imprimir' tarefa.id %}">
                     <button type="button" class="btn btn-secondary btn-sm" title="imprimir">
@@ -206,29 +190,53 @@
             </div>
             {% endif %}
 
-            <div id="encaminhamento" class="collapse">
-                <div class="jumbotron">
-
-                    <h6>Redirecionamento para usuário</h6>
-
-                    <select name="user_encaminha" class="form-control">
-                        {% for u in usuarios %}
-                        <option value="{{u.pk}}">{{u}}</option>
-                        {% endfor %}
-                    </select>
-
-                    <div style="text-align: right">
-                        {% if tarefa.status == 'ANALISE' %}
-                        <button type="submit" value="btn_analise" name="btn_analise" class="btn btn-primary btn-sm">
-                            <i class="fas fa-save"></i> Liberar p/ desenvolvimento
-                        </button>
-                        {% else %}
-                        <button type="submit" value="btn_analise" name="btn_analise" class="btn btn-primary btn-sm">
-                            <i class="fas fa-save"></i> Liberar p/ análise
-                        </button>
-                        {% endif %}
+            <div class="modal" id="encaminhamento">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Encaminhar tarefa</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <select name="user_encaminha" class="form-control">
+                                {% for u in usuarios %}
+                                <option value="{{u.pk}}">{{u}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <div style="text-align: right">
+                                {% if tarefa.status == 'ANALISE' %}
+                                <button type="submit" value="btn_analise" name="btn_analise"
+                                        class="btn btn-danger btn-sm">
+                                    <i class="fas fa-save"></i> Liberar p/ desenvolvimento
+                                </button>
+                                {% else %}
+                                <button type="submit" value="btn_analise" name="btn_analise"
+                                        class="btn btn-danger btn-sm">
+                                    <i class="fas fa-save"></i> Liberar p/ análise
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
 
+            <div class="modal" id="box_demanda">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Incluir Observação</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <input autofocus type="text" name="observacao" class="form-control">
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" name="btn_observar" value="Aplicar" class="btn btn-danger">
+                        </div>
+                    </div>
                 </div>
             </div>
 

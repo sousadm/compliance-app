@@ -157,17 +157,19 @@
         </button>
     </a>
 
+    {% if cliente.pode_lgpd %}
     <a href="{% url 'url_cliente_consentimento' cliente.pk %}">
         <button type="button" class="btn btn-secondary" title="consentimento lgpd">
-             Consentimento
+            Consentimento
         </button>
     </a>
 
     <a href="{% url 'url_cliente_tratamento' cliente.pk %}">
         <button type="button" class="btn btn-secondary" title="tratamento lgpd">
-             Tratamento
+            Tratamento
         </button>
     </a>
+    {% endif %}
 
     {% endif %}
 

@@ -204,6 +204,7 @@ class Tarefa(models.Model):
     updated_at = models.DateTimeField('Modificado em', auto_now=True, null=True)
     iniciado_dt = models.DateTimeField('Inidicado em', null=True)
     encerrado_dt = models.DateTimeField('Encerrado em', null=True)
+    implantado_dt = models.DateTimeField(null=True)
 
     objects = models.Manager()
 

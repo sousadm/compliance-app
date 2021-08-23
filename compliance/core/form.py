@@ -76,6 +76,7 @@ class TarefaForm(ModelForm):
         self.fields['celular'].required = False
         self.fields['email'].required = False
         self.fields['identificador'].required = False
+        # self.fields['solicitante'].disabled = self.instance.status != 'INICIO'
 
 
 class TarefaPausaForm(TarefaForm):

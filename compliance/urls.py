@@ -23,8 +23,8 @@ from compliance.accounts.views import userEdit, userRegister, userList, edit_pas
     atendimentoSAC, atendimentoEditSAC, SAC_avulso, SAC_cliente, clienteSerie, encerramento
 from compliance.core.views import home, ClienteListView, clienteNew, clienteUpdate, \
     ClienteTarefaNew, ClienteTarefaList, ClienteTarefaEdit, ClienteEventoList, MonitorBackupNew, acessos, TarefaLista, \
-    TarefaImprimir, TarefaReopen, TarefaAnexo, TarefaAnexoAdd, download, ClienteAWS, \
-    ClienteFolderAWS, ClienteBackup, ClienteUsuario, downloadObjectS3, deleteObjectS3
+    TarefaImprimir, TarefaReopen, download, ClienteAWS, \
+    ClienteFolderAWS, ClienteBackup, ClienteUsuario, downloadObjectS3, deleteObjectS3, TarefaAnexo
 from compliance.lgpd.views import LgpdConsentimento, LgpdConsultaTitular, LgpdTratamentoId, \
     LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF
 
@@ -68,7 +68,6 @@ urlpatterns = [
                   path('tarefa/<int:pk>/imprimir', TarefaImprimir, name='url_tarefa_imprimir'),
                   path('tarefa/<int:pk>/reopen', TarefaReopen, name='url_tarefa_reopen'),
                   path('tarefa/<int:pk>/anexo', TarefaAnexo, name='url_tarefa_anexo'),
-                  path('tarefa/<int:pk>/anexo/add', TarefaAnexoAdd, name='url_tarefa_anexo_add'),
                   path('download/<int:pk>', download, name='url_download'),
 
                   path('admin/', admin.site.urls),

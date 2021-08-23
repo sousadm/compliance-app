@@ -2,9 +2,11 @@ import os
 import urllib
 from datetime import datetime, date
 from datetime import timedelta
+import compliance.settings as conf
 
 import boto3
 import requests
+from boto.s3.connection import S3Connection
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import PBKDF2PasswordHasher
@@ -21,7 +23,7 @@ from werkzeug.utils import secure_filename
 from compliance import settings
 from compliance.accounts.models import User
 from compliance.accounts.senha import gerar_senha_letras_numeros
-from compliance.aws.form import UploadFileForm
+from compliance.aws.form import UploadFileOnlyForm
 from compliance.aws.views import get_s3_filename_list, get_nome, s3_upload_small_files, s3_delete_file
 from compliance.core.form import ClienteForm, TarefaForm, MonitorForm, TarefaReopenForm, DocumentForm, \
     ClienteConsultaForm, ClienteAddUser
@@ -187,6 +189,7 @@ def TarefaReopen(request, pk):
             tarefa.prioridade = request.POST.get('prioridade')
             tarefa.status = 'PAUSA'
             tarefa.encerrado_dt = None
+            tarefa.implantado_dt = None
             tarefa.save()
 
             addEventoTarefaMsg(request, tarefa, 'reabertura/' + request.POST.get('motivo'))
@@ -273,20 +276,6 @@ def clienteNew(request):
     data['form'] = form
     data['cliente'] = cliente
     return render(request, 'core/cliente_edit.html', data)
-
-
-@login_required(login_url='login')
-def TarefaAnexo(request, pk):
-    context = {}
-    tarefa = Tarefa.objects.get(pk=pk)
-    cliente = Cliente.objects.get(pk=tarefa.cliente.pk)
-
-    context['tarefa'] = tarefa
-    context['cliente'] = cliente
-    context['usuario'] = tarefa.user
-    context['lista'] = tarefa.documentos.all()
-
-    return render(request, 'core/cliente_tarefa_anexo.html', context)
 
 
 @login_required(login_url='login')
@@ -514,36 +503,11 @@ def ClienteListView(request):
 
 
 @login_required(login_url='login')
-def TarefaAnexoAdd(request, pk):
-    context = {}
-    tarefa = Tarefa.objects.get(pk=pk)
-    cliente = Cliente.objects.get(pk=tarefa.cliente.pk)
-    try:
-        if request.POST:
-            form = DocumentForm(request.POST, request.FILES)
-            if form.is_valid():
-                docto = form.save()
-                tarefa.documentos.add(docto)
-                tarefa.save()
-                return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': tarefa.pk}))
-        else:
-            form = DocumentForm()
-    except Exception as e:
-        messages.error(request, e)
-
-    context['form_upload'] = form
-    context['tarefa'] = tarefa
-    context['cliente'] = cliente
-    context['usuario'] = tarefa.user
-    return render(request, 'core/cliente_tarefa_anexo.html', context)
-
-
-@login_required(login_url='login')
 def ClienteFolderAWS(request, pk, folder):
     folder = urllib.parse.unquote(folder)
     cliente = Cliente.objects.get(pk=pk)
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+        form = UploadFileOnlyForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 file_name = folder + secure_filename(request.FILES['file'].name)
@@ -555,36 +519,7 @@ def ClienteFolderAWS(request, pk, folder):
             except Exception as e:
                 messages.error(request, e)
     else:
-        form = UploadFileForm()
-    lista = get_s3_filename_list(folder)
-    context = {
-        'form': form,
-        'folder': folder,
-        'cliente': cliente,
-        'lista': lista,
-        'usuario': request.user
-    }
-    return render(request, 'core/cliente_aws.html', context)
-
-
-@login_required(login_url='login')
-def ClienteAWS(request, pk):
-    cliente = Cliente.objects.get(pk=pk)
-    folder = "clientes/cli-" + cliente.cnpj + '/'
-    if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                file_name = folder + secure_filename(request.FILES['file'].name)
-                s3_upload_small_files(request.FILES['file'],
-                                      settings.AWS_STORAGE_BUCKET_NAME,
-                                      file_name,
-                                      request.content_type)
-                messages.info(request, 'arquivo enviado com sucesso')
-            except Exception as e:
-                messages.error(request, e)
-    else:
-        form = UploadFileForm()
+        form = UploadFileOnlyForm()
     lista = get_s3_filename_list(folder)
     context = {
         'form': form,
@@ -758,12 +693,19 @@ def ClienteTarefaEdit(request, pk):
     usuarios = User.objects.filter(Q(is_des=not request.user.is_des), Q(is_consulta=False)).exclude(pk=request.user.pk)
 
     form = TarefaForm(request.POST or None, instance=tarefa)
+    form_upload = UploadFileOnlyForm(request.POST, request.FILES)
 
     if (request.POST.get('btn_imprimir') or request.POST.get('btn_imprimir')) and tarefa.pk:
         TarefaImprimir(request, tarefa.pk)
 
     if request.method == 'POST':
         try:
+
+            if request.POST.get('btn_update_incliente'):
+                tarefa.implantado_dt = timezone.now()
+                addEventoTarefaMsg(request, tarefa, 'atualização no cliente')
+                tarefa.save()
+                return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
 
             if request.POST.get('btn_observar') and request.POST.get('observacao'):
                 valor = [tarefa.demanda, chr(13),
@@ -775,12 +717,6 @@ def ClienteTarefaEdit(request, pk):
 
             usuario = User.objects.get(pk=request.POST.get('user_encaminha'))
             msgevento = request.POST.get('msgevento')
-            if (not msgevento and
-                    (request.POST.get('btn_analise') \
-                     or request.POST.get('btn_pausa') \
-                     or request.POST.get('btn_encerra') \
-                     or request.POST.get('btn_cancela'))):
-                raise Exception('informe sobre o evento realizado')
 
             if tarefa.pk and tarefa.ultimo_tempo:
                 tempo = TempoDecorrido(tarefa.ultimo_tempo.astimezone(), datetime.now())
@@ -814,7 +750,6 @@ def ClienteTarefaEdit(request, pk):
 
             # pausar a tarefa
             if request.POST.get('btn_pausa') and tarefa.status == 'PRODUCAO':
-                # tempo = TempoDecorrido(tarefa.ultimo_tempo.astimezone(), datetime.now())
                 if tarefa.tempo_produtivo:
                     tarefa.tempo_produtivo = tarefa.tempo_produtivo + tempo
                 else:
@@ -823,13 +758,12 @@ def ClienteTarefaEdit(request, pk):
                 tarefa.ultimo_tempo = timezone.now()
                 tarefa.save()
                 messages.success(request, 'pausa realizada com sucesso')
-                addEventoTarefaMsg(request, tarefa, 'pausa/' + msgevento)
+                addEventoTarefaMsg(request, tarefa, ('pausa/' + msgevento) if msgevento else 'pausa')
                 return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
 
             # encerrar a tarefa
             if (request.POST.get('btn_encerra') or request.POST.get('btn_cancela')) and tarefa.pk:
                 msg = ''
-                # tempo = TempoDecorrido(tarefa.ultimo_tempo.astimezone(), datetime.now())
                 if tarefa.status == 'PRODUCAO':
                     if tarefa.tempo_produtivo:
                         tarefa.tempo_produtivo = tarefa.tempo_produtivo + tempo
@@ -916,8 +850,9 @@ def ClienteTarefaEdit(request, pk):
         context['is_valid'] = False
 
     lista_eventos = TarefaEvento.objects.filter(Q(tarefa=tarefa)).order_by('pk').reverse()
-    bloqueado = tarefa.user and (
-            tarefa.encerrado_dt or not cliente.is_active or request.user != tarefa.user) or request.user.is_consulta
+    bloqueado = (tarefa.user and (
+            tarefa.encerrado_dt or not cliente.is_active or request.user != tarefa.user)) \
+                or request.user.is_consulta or tarefa.status != 'INICIO'
 
     context['form'] = form
     context['demanda'] = tarefa.demanda
@@ -929,5 +864,63 @@ def ClienteTarefaEdit(request, pk):
     context['usuarios'] = usuarios
     context['usuario'] = tarefa.user
     context['status'] = tarefa.getStatusSAC(request.user)
+    context['form_upload'] = form_upload
 
     return render(request, 'core/cliente_tarefa_edit.html', context)
+
+
+@login_required(login_url='login')
+def ClienteAWS(request, pk):
+    cliente = Cliente.objects.get(pk=pk)
+    folder = "clientes/cli-" + cliente.cnpj + '/'
+    if request.method == 'POST':
+        form = UploadFileOnlyForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                file_name = folder + secure_filename(request.FILES['file'].name)
+                s3_upload_small_files(request.FILES['file'],
+                                      settings.AWS_STORAGE_BUCKET_NAME,
+                                      file_name,
+                                      request.content_type)
+                messages.info(request, 'arquivo enviado com sucesso')
+            except Exception as e:
+                messages.error(request, e)
+    else:
+        form = UploadFileOnlyForm()
+    lista = get_s3_filename_list(folder)
+    context = {
+        'form': form,
+        'folder': folder,
+        'cliente': cliente,
+        'lista': lista,
+        'usuario': request.user
+    }
+    return render(request, 'core/cliente_aws.html', context)
+
+
+@login_required(login_url='login')
+def TarefaAnexo(request, pk):
+    context = {}
+    tarefa = Tarefa.objects.get(pk=pk)
+    cliente = Cliente.objects.get(pk=tarefa.cliente.pk)
+    folder = "tarefas/" + str(tarefa.pk) + '/'
+    if request.method == 'POST':
+        form = UploadFileOnlyForm(request.POST, request.FILES)
+        if form.is_valid():
+            file_name = folder + secure_filename(request.FILES['file'].name)
+            s3_upload_small_files(request.FILES['file'],
+                                  settings.AWS_STORAGE_BUCKET_NAME,
+                                  file_name,
+                                  request.content_type)
+            return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': tarefa.pk}))
+    else:
+        form = UploadFileOnlyForm()
+
+    lista = get_s3_filename_list(folder)
+
+    context['lista'] = lista
+    context['form'] = form
+    context['tarefa'] = tarefa
+    context['cliente'] = cliente
+    context['usuario'] = tarefa.user
+    return render(request, 'core/cliente_tarefa_anexo.html', context)

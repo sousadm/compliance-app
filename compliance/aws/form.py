@@ -1,6 +1,9 @@
 from django import forms
 
 
-class UploadFileForm(forms.Form):
-    # title = forms.CharField(max_length=50)
+class UploadFileOnlyForm(forms.Form):
     file = forms.FileField(label='Arquivo', max_length=500)
+
+class UploadFileForm(forms.Form):
+    title = forms.CharField(label='arquivo', max_length=500)
+    file = forms.FileField()
