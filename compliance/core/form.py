@@ -82,3 +82,7 @@ class TarefaForm(ModelForm):
 class TarefaPausaForm(TarefaForm):
     class Meta(TarefaForm.Meta):
         exclude = ('demanda',)
+
+
+class RelatorioForm(forms.Form):
+    phone = forms.CharField(widget=forms.TextInput(attrs={'data-mask': "(00) 0000-0000"}))

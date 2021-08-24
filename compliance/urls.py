@@ -24,7 +24,7 @@ from compliance.accounts.views import userEdit, userRegister, userList, edit_pas
 from compliance.core.views import home, ClienteListView, clienteNew, clienteUpdate, ClienteTarefaNew, \
     ClienteTarefaList, ClienteTarefaEdit, ClienteEventoList, MonitorBackupNew, acessos, TarefaLista, \
     TarefaImprimir, TarefaReopen, download, ClienteAWS, ClienteFolderAWS, ClienteBackup, ClienteUsuario, \
-    downloadObjectS3, TarefaAnexo, TarefaRemoveAnexo
+    downloadObjectS3, TarefaAnexo, TarefaRemoveAnexo, GeradorRelatorio
 from compliance.lgpd.views import LgpdConsentimento, LgpdConsultaTitular, LgpdTratamentoId, \
     LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF
 
@@ -78,6 +78,8 @@ urlpatterns = [
                   path('lgpd/consentimento/<int:pk>', LgpdConsentimento, name='lgpd_consentimento'),
                   path('minha_lgpd', LgpdConsultaTitular, name='minha_lgpd'),
                   path('minha_lgpd/cpf=<str:cpf>', LgpdConsultaTitularCPF, name='lgpd_consulta'),
-                  path('lgpd/tratamento/id=<int:pk>', LgpdTratamentoId, name='lgpd_tratamento_id')
+                  path('lgpd/tratamento/id=<int:pk>', LgpdTratamentoId, name='lgpd_tratamento_id'),
+
+                  path('relatorio/', GeradorRelatorio, name='url_relatorio')
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

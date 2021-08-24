@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %} Tarefa {% endblock %}
+
+{% block content %}
+
+<script src="hhttps://cdnjs.com/libraries/jquery.mask" xmlns="http://www.w3.org/1999/html"></script>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <h1>Relatório de Tarefas</h1>
+    </br>
+
+    <div class="row">
+        <div class="col-12 col-md-3" style="text-align: right">
+            <label>Situação da Tarefa</label>
+        </div>
+        <div class="col-12 col-md-9">
+            <select class="form-control" id="situacao">
+                <option value="0">Não iniciado</option>
+                <option value="1">Em produção</option>
+                <option value="2">Atualizado no cliente</option>
+                <option value="3">Concluída</option>
+                <option value="4">Cancelada</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-3" style="text-align: right">
+            <label>Usuário atual da tarefa</label>
+        </div>
+        <div class="col-12 col-md-9">
+            <select class="form-control" id="usuario">
+                {% for u in user_list %}
+                <option value="{{u.value}}">{{u.label}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-3" style="text-align: right">
+            <label>Módulo ou sistema</label>
+        </div>
+        <div class="col-12 col-md-9">
+            <select class="form-control" id="modulo">
+                {% for m in modulo_lista %}
+                <option value="{{m.value}}"
+                        {%if m.value == modulo %} selected{% endif %}
+                >{{m.label}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-3" style="text-align: right">
+            <label>Empresa cliente</label>
+        </div>
+        <div class="col-12 col-md-9">
+            <input type="text" class="form-control" id="nome">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-3" style="text-align: right">
+            <label>Perído inicial</label>
+        </div>
+        <div class="col-12 col-md-9">
+            <input type="date" id="data_inicial" required>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-3" style="text-align: right">
+            <label>Perído final</label>
+        </div>
+        <div class="col-12 col-md-9">
+            <input type="date" id="data_final" required>
+        </div>
+    </div>
+
+    <input style="float: right" type="submit" class="btn btn-warning" value="Imprimir Relatório">
+
+</form>
+
+{% endblock %}

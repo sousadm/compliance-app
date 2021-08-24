@@ -6,6 +6,7 @@
 <!--{% load crispy_forms_tags %}-->
 
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -13,6 +14,7 @@
 
     <script src="{% static 'js/jquery/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.mask.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.1/umd/popper.min.js"></script>
 
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
@@ -23,6 +25,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title> {% block titulo %} Compliance {% endblock %} </title>
+
+    <script>
+    jQuery(function($){
+        $("#campoData").mask("99/99/9999");
+        $("#campoTelefone").mask("(999) 999-9999");
+        $("#campoSenha").mask("***-****");
+    });
+    </script>
 
     <script>   {% block script %} {% endblock %}
 
@@ -46,8 +56,14 @@
             }, 1);
         }
 
+$(document).ready(function(){
+    $('.date').mask('00/00/0000')
+});
+
+
 
     </script>
+
 
 </head>
 <body>
@@ -96,9 +112,9 @@
                     <li class="nav-item active">
                         <a class="nav-link" href="{% url 'acessos' %}">Acessos</a>
                     </li>
-<!--                    <li class="nav-item active">-->
-<!--                        <a class="nav-link" href="{% url 'url_sac_list' %}">SAC</a>-->
-<!--                    </li>-->
+                    <!--                    <li class="nav-item active">-->
+                    <!--                        <a class="nav-link" href="{% url 'url_sac_list' %}">SAC</a>-->
+                    <!--                    </li>-->
                     {% endif %}
 
                     <li class="nav-item active">

@@ -26,7 +26,7 @@ from compliance.accounts.senha import gerar_senha_letras_numeros
 from compliance.aws.form import UploadFileOnlyForm
 from compliance.aws.views import get_s3_filename_list, get_nome, s3_upload_small_files, s3_delete_file
 from compliance.core.form import ClienteForm, TarefaForm, MonitorForm, TarefaReopenForm, DocumentForm, \
-    ClienteConsultaForm, ClienteAddUser
+    ClienteConsultaForm, ClienteAddUser, RelatorioForm
 from compliance.core.mail import send_mail_template
 from compliance.core.models import Cliente, Tarefa, Evento, TarefaEvento, MODULO_CHOICE, Documento, UserCliente, Backup, \
     CLIENTE_NIVELS
@@ -285,6 +285,18 @@ def download(request, pk):
     response = FileResponse(open(absolute_path, 'rb'), as_attachment=True)
     return response
 
+def get_lista_modulos():
+    modulo_lista = [{"value": "TODOS", "label": "Todos"}, ]
+    for m in MODULO_CHOICE:
+        modulo_lista.append({"value": m[0], "label": m[1]})
+    return modulo_lista
+
+def get_lista_usuarios():
+    lst = User.objects.filter(is_consulta=False).order_by('name')
+    user_list = [{"value": "0", "label": "Todos"}, ]
+    for u in lst:
+        user_list.append({"value": str(u.pk), "label": u.name})
+    return user_list
 
 @login_required(login_url='login')
 def TarefaLista(request):
@@ -296,15 +308,9 @@ def TarefaLista(request):
     filtro_usuario = Q()
     filtro_cliente = Q()
     modulo = 'TODOS'
-    lst = User.objects.filter(is_consulta=False).order_by('name')
 
-    user_list = [{"value": "0", "label": "Todos"}, ]
-    for u in lst:
-        user_list.append({"value": str(u.pk), "label": u.name})
-
-    modulo_lista = [{"value": "TODOS", "label": "Todos"}, ]
-    for m in MODULO_CHOICE:
-        modulo_lista.append({"value": m[0], "label": m[1]})
+    user_list = get_lista_usuarios()
+    modulo_lista = get_lista_modulos()
 
     if request.POST:
         valor = request.POST.get('pesquisa') or ''
@@ -922,3 +928,27 @@ def ClienteListView(request):
     context['nivel'] = nivel
 
     return render(request, 'core/cliente_list.html', context)
+
+
+@login_required(login_url='login')
+def GeradorRelatorio(request):
+    context = {}
+    data = {}
+    modulo_lista = get_lista_modulos()
+    user_list = get_lista_usuarios()
+    url = settings.COMPLIANCE_URL + 'relatorio/'
+
+    data_inicial = request.POST.get('data_inicial') or ''
+    data_final = request.POST.get('data_final') or ''
+
+    usuario = request.POST.get('txt_usuario') or ''
+    response = requests.post(url, data, auth=("assist", "123456"))
+    if response.status_code == 200:
+        return FileResponse(open(response.text, 'rb'), content_type='application/pdf')
+
+    context['txt_usuario'] = usuario
+    context['user_list'] = user_list
+    context['modulo_lista'] = modulo_lista
+    context['data_inicial'] = data_inicial
+    context['data_inicial'] = data_inicial
+    return render(request, 'core/relatorio.html', context)
