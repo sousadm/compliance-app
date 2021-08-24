@@ -450,59 +450,6 @@ def ClienteUsuario(request, pk):
 
 
 @login_required(login_url='login')
-def ClienteListView(request):
-    context = {}
-    valor = ""
-    page = "1"
-    nivel = 'TODOS'
-    filtro_nivel = Q()
-    nivel_lista = [{"value": "TODOS", "label": "Todos"}, ]
-    for m in CLIENTE_NIVELS:
-        nivel_lista.append({"value": m[0], "label": m[1]})
-    if request.POST:
-        valor = request.POST.get('pesquisa') or ''
-        request.session['valor'] = valor
-        nivel = request.POST.get('nivel')
-        request.session['nivel'] = nivel
-    elif request.GET:
-        page = request.GET.get('page') or '1'
-        valor = request.session.get('valor') or ''
-        nivel = request.session.get('nivel')
-
-    if request.user.is_consulta:
-        clientes = []
-        lst = UserCliente.objects.filter(user=request.user)
-        for c in lst:
-            clientes.append(c.cliente.pk)
-        if len(clientes) == 1:
-            return HttpResponseRedirect(reverse('url_cliente_update', kwargs={'pk': clientes[0]}))
-        else:
-            lista = Cliente.objects.filter(pk__in=clientes)
-    else:
-        if nivel != 'TODOS':
-            filtro_nivel = Q(nivel=nivel)
-        lista = Cliente.objects \
-            .filter(Q(Q(nome__icontains=valor) | Q(cnpj__icontains=valor)), filtro_nivel) \
-            .order_by('nome')
-
-    paginator = Paginator(lista, 10)
-    try:
-        users = paginator.page(page)
-    except PageNotAnInteger:
-        users = paginator.page(1)
-    except EmptyPage:
-        users = paginator.page(paginator.num_pages)
-
-    context['lista'] = users
-    context['page'] = page
-    context['pesquisa'] = valor
-    context['nivel_lista'] = nivel_lista
-    context['nivel'] = nivel
-
-    return render(request, 'core/cliente_list.html', context)
-
-
-@login_required(login_url='login')
 def ClienteFolderAWS(request, pk, folder):
     folder = urllib.parse.unquote(folder)
     cliente = Cliente.objects.get(pk=pk)
@@ -922,3 +869,56 @@ def TarefaRemoveAnexo(request, pk, nome):
         return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': pk}))
     except Exception as e:
         messages.error(request, e)
+
+
+@login_required(login_url='login')
+def ClienteListView(request):
+    context = {}
+    valor = ""
+    page = "1"
+    nivel = 'TODOS'
+    filtro_nivel = Q()
+    nivel_lista = [{"value": "TODOS", "label": "Todos"}, ]
+    for m in CLIENTE_NIVELS:
+        nivel_lista.append({"value": m[0], "label": m[1]})
+    if request.POST:
+        valor = request.POST.get('pesquisa') or ''
+        request.session['valor'] = valor
+        nivel = request.POST.get('nivel')
+        request.session['nivel'] = nivel
+    elif request.GET:
+        page = request.GET.get('page') or '1'
+        valor = request.session.get('valor') or ''
+        nivel = request.session.get('nivel')
+
+    if request.user.is_consulta:
+        clientes = []
+        lst = UserCliente.objects.filter(user=request.user)
+        for c in lst:
+            clientes.append(c.cliente.pk)
+        if len(clientes) == 1:
+            return HttpResponseRedirect(reverse('url_cliente_update', kwargs={'pk': clientes[0]}))
+        else:
+            lista = Cliente.objects.filter(pk__in=clientes)
+    else:
+        if nivel != 'TODOS':
+            filtro_nivel = Q(nivel=nivel, is_active=True)
+        lista = Cliente.objects \
+            .filter(Q(Q(nome__icontains=valor) | Q(cnpj__icontains=valor)), filtro_nivel) \
+            .order_by('nome')
+
+    paginator = Paginator(lista, 10)
+    try:
+        users = paginator.page(page)
+    except PageNotAnInteger:
+        users = paginator.page(1)
+    except EmptyPage:
+        users = paginator.page(paginator.num_pages)
+
+    context['lista'] = users
+    context['page'] = page
+    context['pesquisa'] = valor
+    context['nivel_lista'] = nivel_lista
+    context['nivel'] = nivel
+
+    return render(request, 'core/cliente_list.html', context)

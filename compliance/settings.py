@@ -102,13 +102,14 @@ DATABASES = {
     #     'OPTIONS': {
     #         'options': '-c search_path=compliance'
     #     },
-    #     'NAME': 'compliance',
+    #     'NAME': 'assist',
     #     'USER': 'postgres',
     #     'PASSWORD': 'contrate',
     #     'HOST': 'localhost',
     #     'PORT': '5432',
     # }
 
+    # NAO UTILIZAR MAIS
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     #     'OPTIONS': {
