@@ -97,31 +97,6 @@ WSGI_APPLICATION = 'compliance.wsgi.application'
 
 DATABASES = {
 
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'OPTIONS': {
-    #         'options': '-c search_path=compliance'
-    #     },
-    #     'NAME': 'assist',
-    #     'USER': 'postgres',
-    #     'PASSWORD': 'contrate',
-    #     'HOST': 'localhost',
-    #     'PORT': '5432',
-    # }
-
-    # NAO UTILIZAR MAIS
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'OPTIONS': {
-    #         'options': '-c search_path=compliance'
-    #     },
-    #     'NAME': 'compliance',
-    #     'USER': 'postgres',
-    #     'PASSWORD': 'abc123456',
-    #     'HOST': 'seguro.coqwzb4dguta.sa-east-1.rds.amazonaws.com',
-    #     'PORT': '5432',
-    # }
-
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'OPTIONS': {
@@ -129,10 +104,22 @@ DATABASES = {
         },
         'NAME': 'assist',
         'USER': 'postgres',
-        'PASSWORD': 'abc123456',
-        'HOST': 'compliance.cckc3qamx2hw.us-east-1.rds.amazonaws.com',
+        'PASSWORD': 'contrate',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'OPTIONS': {
+    #         'options': '-c search_path=compliance'
+    #     },
+    #     'NAME': 'assist',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'abc123456',
+    #     'HOST': 'compliance.cckc3qamx2hw.us-east-1.rds.amazonaws.com',
+    #     'PORT': '5432',
+    # }
 
 }
 
@@ -212,7 +199,7 @@ else:
 
 STATICFILES_DIRS = ('/opt/venv/lib/python3.8/site-packages/grappelli/static/grappelli/', 'static')
 
-COMPLIANCE_API = 'http://3.224.26.231:8081/'
-# COMPLIANCE_API = 'http://localhost:8081/'
+# COMPLIANCE_API = 'http://3.224.26.231:8081/'
+COMPLIANCE_API = 'http://localhost:8081/'
 COMPLIANCE_URL = COMPLIANCE_API + 'compliance/'
 LGPD_URL = COMPLIANCE_API + 'lgpd/'

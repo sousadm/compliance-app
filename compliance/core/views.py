@@ -1,3 +1,4 @@
+import json
 import os
 import urllib
 from datetime import datetime, date
@@ -930,25 +931,116 @@ def ClienteListView(request):
     return render(request, 'core/cliente_list.html', context)
 
 
+def getListaTarefa(request):
+    filtro_cliente = Q()
+    filtro_periodo = Q()
+    filtro_usuario = Q()
+    filtro_modulo = Q()
+    situacao = request.POST.get('situacao')
+    data_inicial = request.POST.get('data_inicial')
+    data_final = request.POST.get('data_final')
+
+    valor = request.POST.get('nome') or ''
+    if valor.isdigit():
+        filtro_nome = Q(Q(identificador=valor) | Q(cliente__cnpj=valor))
+    else:
+        filtro_nome = Q(Q(resumo__icontains=valor) | Q(cliente__nome__icontains=valor))
+    if situacao == '0':
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final])
+    elif situacao == '1':
+        filtro_periodo = Q(iniciado_dt__range=[data_inicial, data_final])
+    elif situacao == '2':
+        filtro_periodo = Q(implantado_dt__range=[data_inicial, data_final])
+    elif situacao == '3':
+        filtro_periodo = Q(encerrado_dt__range=[data_inicial, data_final])
+
+    if request.POST.get('modulo') != 'TODOS':
+        filtro_modulo = Q(modulo=request.POST.get('modulo'))
+
+    if request.user.is_consulta:
+        clientes = []
+        lst = UserCliente.objects.filter(user=request.user)
+        for c in lst:
+            clientes.append(c.cliente.pk)
+        filtro_cliente = Q(cliente__in=clientes)
+    elif not (request.POST.get('usuario') == '0'):
+        filtro_usuario = Q(user=request.POST.get('usuario'))
+
+    lista = []
+    tarefas = Tarefa.objects.filter(filtro_periodo, filtro_usuario, filtro_modulo, filtro_nome, filtro_cliente) \
+                .exclude(modulo='SAC') \
+                .order_by('identificador')
+    for tar in tarefas:
+        if situacao == '0':
+            data = tar.created_at
+        elif situacao == '1':
+            data = tar.iniciado_dt
+        elif situacao == '2':
+            data = tar.implantado_dt
+        elif situacao == '3':
+            data = tar.encerrado_dt
+        lista.append({
+            "identificador": tar.identificador,
+            "resumo": tar.resumo,
+            "modulo": tar.modulo,
+            "data": data.strftime('%d/%m/%Y'),
+            "nome": tar.cliente.nome
+        })
+
+    return lista
+
+
+def getTituloRelatorio(request):
+    titulo = ''
+    if request.POST.get('situacao') == "0":
+        titulo += ' Não iniciado'
+    elif request.POST.get('situacao') == "1":
+        titulo += ' Em produção'
+    elif request.POST.get('situacao') == "2":
+        titulo += ' Atualizado no cliente'
+    elif request.POST.get('situacao') == "3":
+        titulo += ' Encerrada'
+    titulo += ' Perído '
+    data = datetime.strptime(request.POST.get('data_inicial'), '%Y-%m-%d')
+    titulo += ' de ' + data.strftime('%d/%m/%Y')
+    data = datetime.strptime(request.POST.get('data_final'), '%Y-%m-%d')
+    titulo += ' a ' + data.strftime('%d/%m/%Y')
+    return titulo
+
+
 @login_required(login_url='login')
 def GeradorRelatorio(request):
+    lista = []
     context = {}
-    data = {}
-    modulo_lista = get_lista_modulos()
-    user_list = get_lista_usuarios()
-    url = settings.COMPLIANCE_URL + 'relatorio/'
-
-    data_inicial = request.POST.get('data_inicial') or ''
-    data_final = request.POST.get('data_final') or ''
-
-    usuario = request.POST.get('txt_usuario') or ''
-    response = requests.post(url, data, auth=("assist", "123456"))
-    if response.status_code == 200:
-        return FileResponse(open(response.text, 'rb'), content_type='application/pdf')
-
-    context['txt_usuario'] = usuario
-    context['user_list'] = user_list
-    context['modulo_lista'] = modulo_lista
+    situacao = request.POST.get('situacao') or '2'
+    data = datetime.today().strftime('%Y-%m-%d')
+    data_inicial = request.POST.get('data_inicial') or data
+    data_final = request.POST.get('data_final') or data
+    usuario = request.POST.get('usuario') or ''
+    modulo = request.POST.get('modulo') or ''
+    nome = request.POST.get('nome') or ''
+    page = request.GET.get('page', 1)
+    if request.POST:
+        lista = getListaTarefa(request)
+        if request.POST.get('btn_imprimir'):
+            url = settings.COMPLIANCE_URL + 'lista_tarefa/'
+            data = {
+                "titulo": getTituloRelatorio(request),
+                "lista": lista
+            }
+            response = requests.post(url, json.dumps(data), auth=("assist", "123456"))
+            if response.status_code == 200:
+                return FileResponse(open(response.text, 'rb'), content_type='application/pdf')
+            else:
+                return HttpResponse(response.status_code)
+    context['situacao'] = situacao
+    context['usuario'] = usuario
+    context['modulo'] = modulo
+    context['nome'] = nome
+    context['user_list'] = get_lista_usuarios()
+    context['modulo_lista'] = get_lista_modulos()
     context['data_inicial'] = data_inicial
-    context['data_inicial'] = data_inicial
+    context['data_final'] = data_final
+    context['lista'] = lista
+
     return render(request, 'core/relatorio.html', context)
