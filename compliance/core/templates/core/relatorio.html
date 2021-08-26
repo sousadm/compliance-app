@@ -89,32 +89,32 @@
     </div>
 
     {% if lista %}
-<!--    <div style="margin-top: 10px" class="table-responsive">-->
-<!--        <table class="table table-striped table-sm">-->
-<!--            <thead>-->
-<!--            <tr>-->
-<!--                <th>Número</th>-->
-<!--                <th>Tarefa</th>-->
-<!--                <th>Módulo</th>-->
-<!--                <th>Data</th>-->
-<!--                <th width="30%">Empresa</th>-->
-<!--                <th width="50"></th>-->
-<!--            </tr>-->
-<!--            </thead>-->
-<!--            <tbody>-->
-<!--            {% for tar in lista %}-->
-<!--            <tr>-->
-<!--                <td>{{ tar.identificador }}</td>-->
-<!--                <td>{{ tar.resumo }}</td>-->
-<!--                <td>{{ tar.modulo }}</td>-->
-<!--                <td>{{ tar.data|date:"d/m/Y"}}</td>-->
-<!--                <td>{{ tar.nome }}</td>-->
-<!--            </tr>-->
-<!--            {% endfor %}-->
-<!--            </tbody>-->
-<!--        </table>-->
-<!--        {% include "core/paginacao.html" %}-->
-<!--    </div>-->
+    <div style="margin-top: 10px" class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>Número</th>
+                <th>Tarefa</th>
+                <th>Módulo</th>
+                <th>Data</th>
+                <th width="30%">Empresa</th>
+                <th width="50"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tar in lista %}
+            <tr>
+                <td>{{ tar.identificador }}</td>
+                <td>{{ tar.resumo }}</td>
+                <td>{{ tar.modulo }}</td>
+                <td>{{ tar.data|date:"d/m/Y"}}</td>
+                <td>{{ tar.nome }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% include "core/paginacao.html" %}
+    </div>
     {% else %}
     <p  style="float: right; color: red">sem registros para visualizar</p>
     {% endif %}

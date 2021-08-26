@@ -8,21 +8,32 @@
 
     <div class="jumbotron">
 
-        <h2>LGPD - Consentimento de Dados</h2>
 
+        <div style="text-align: right; margin-top: 10px">
+            <a href="{% url 'url_cliente_update' cliente.id %}">
+                <button type="button" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-user"></i>Cliente
+                </button>
+            </a>
+            {% if consentimentos %}
+            <a href="{% url 'url_cliente_consentimento' cliente.id %}">
+                <input type="button" class="btn btn-secondary" value="Limpar">
+            </a>
+            <input type="submit" value="Enviar solicitação" name="btn_enviar"
+                   class="btn btn-danger"
+                   onClick='return confirma("Confirma o envio da requisição?")'>
+            {% else %}
+            <input type="submit" class="btn btn-danger" name="btn_solicita_consentimento"
+                   value="Solicitar Consentimento">
+            {% endif %}
+        </div>
+        <h2>LGPD - Consentimento de Dados</h2>
         <p>
             {{cliente.nome}}</br>
             CNPJ: {{cliente.cnpj}}
         </p>
 
-
         {% if consentimentos %}
-
-        <input style="float: right; margin:2px" type="submit" value="Enviar" name="btn_enviar" class="btn btn-danger"
-               onClick='return confirma("Confirma o envio da requisição?")'>
-        <a href="{% url 'url_cliente_consentimento' cliente.id %}">
-            <input style="float: right; margin:2px" type="button" class="btn btn-secondary" value="Limpar">
-        </a>
 
         <div class="row">
             <div class="col-12 col-md-4 form-group">
@@ -57,12 +68,9 @@
 
         {% else %}
 
-        <input style="float: right" type="submit" class="btn btn-danger" name="btn_solicita_consentimento"
-               value="Solicitar Consentimento">
-
         {% if lista %}
 
-        <div class="table-responsive" style="margin-top: 5px">
+        <div class="table-responsive" style="margin-top: 15px">
             <table class="table table-striped">
                 <tr>
                     <th width="150">Incluido em</th>
@@ -82,7 +90,10 @@
                     <td>{{ n.cpf }}</td>
                     <td>{{ n.nome }}</td>
                     <td>
-
+                        <button type="button" title="visualizar dados"
+                                onclick="window.open('{% url 'lgpd_dados_id' n.pk %}','popup','width=800,height=600'); return false;">
+                            <i class="fas fa-address-book"></i>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}

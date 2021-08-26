@@ -5,10 +5,9 @@ import json
 import requests
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Max, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.urls import reverse
 from django.utils import timezone
@@ -78,95 +77,6 @@ def get_tratamentos(request):
     if request.POST.get('finalidade_3'):
         tratamentos.append(request.POST.get('finalidade_3'))
     return tratamentos
-
-
-def LgpdTratamentoId(request, pk):
-    context = {}
-    lista = lista_2
-    consentimento = Consentimento.objects.get(pk=pk)
-    empresa = Cliente.objects.get(pk=consentimento.cliente.pk)
-    selecionado = request.POST.get('opcao') or ''
-    hashcode = ''
-    titular = {
-        'nome': request.POST.get('nome') or '',
-        'cpf': request.POST.get('cpf') or ''
-    }
-
-    opcao = ''
-    opcao_id = request.POST.get('opcao_id') or 'II'
-    for n in lista:
-        if selecionado == n['id']:
-            opcao_id = n['id']
-            opcao = n['descricao']
-            break
-
-    if request.method == 'POST':
-        tratamento = Tratamento()
-        tratamento.consentimento = consentimento
-        tratamento.email = request.POST.get('email')
-        tratamento.celular = request.POST.get('celular') or ''
-        tratamento.protocolo = request.POST.get('protocolo')
-        hashcode = request.POST.get('hashcode') or ''
-        if request.POST.get('btn_solicitar'):
-            url = settings.LGPD_URL + 'codigo_autorizacao'
-            dados = {
-                "email": request.POST.get('email'),
-                "nome": request.POST.get('nome'),
-                "assunto": "LGPD Código Autorização"
-            }
-            response = requests.post(url, json.dumps(dados), auth=("assist", "123456"))
-            if response.status_code == 200:
-                hashcode = response.text
-            else:
-                messages.error(request, response.text)
-
-        if request.POST.get('btn_gravar'):
-            prova = hashlib.md5(bytes(request.POST.get('protocolo'), 'utf-8')).hexdigest()
-            if prova == hashcode:
-                tratamento.opcao = opcao
-                tratamento.save()
-                DefineConsentimentoEvento(empresa, consentimento,
-                                          titular.get('nome') + '/' +
-                                          titular.get('cpf') + '/' + tratamento.email + ' solicita: ' + opcao)
-
-                url = settings.LGPD_URL + 'sinaliza_tratamento/' + str(tratamento.pk)
-                response = requests.get(url, auth=("assist", "123456"))
-                if response.status_code == 200:
-                    messages.success(request, 'Solicitação enviada com sucesso')
-
-                return HttpResponseRedirect(reverse('lgpd_consulta', kwargs={'cpf': consentimento.cpf}))
-            else:
-                messages.error(request, 'código incorreto')
-    else:
-        try:
-            lista = lista_2
-            url = settings.LGPD_URL + 'cnpj=' + str(consentimento.cliente.cnpj) + '/consentimento/' + str(pk)
-            response = requests.get(url, auth=("assist", "123456"))
-            if response.status_code == 200:
-                obj = json.loads(response.text)
-                tratamento = Tratamento()
-                tratamento.email = obj['email'] or ''
-                tratamento.celular = obj['celular'] or ''
-                titular = {
-                    'nome': obj['nome'],
-                    'cpf': obj['cpf']
-                }
-        except Exception as e:
-            messages.error(request, e)
-
-    if titular.get('cpf'):
-        tratamentos = Tratamento.objects.filter(consentimento__cpf=titular.get('cpf')).order_by('id')
-    else:
-        tratamentos = Tratamento.objects.filter(consentimento=consentimento).order_by('id')
-
-    context['empresa'] = empresa
-    context['opcao_id'] = opcao_id
-    context['lista'] = lista
-    context['hashcode'] = hashcode
-    context['titular'] = titular
-    context['tratamento'] = tratamento
-    context['tratamentos'] = tratamentos
-    return render(request, 'lgpd/tratamento.html', context)
 
 
 def tratar_dados_obj(request, obj):
@@ -330,27 +240,10 @@ def LgpdControladorConsentimento(request, pk):
     return render(request, 'lgpd/controlador_consentimento.html', context)
 
 
-@login_required(login_url='login')
-def LgpdControladorTratamento(request, pk):
-    context = {}
-    try:
-        cliente = Cliente.objects.get(pk=pk)
-        lista = Tratamento.objects.filter(consentimento__cliente=cliente).order_by('id').reverse()
-
-
-    except Exception as e:
-        messages.error(request, e)
-
-    context['cliente'] = cliente
-    context['lista'] = lista
-
-    return render(request, 'lgpd/controlador_tratamento.html', context)
-
-
 def LgpdConsultaTitularCPF(request, cpf):
     try:
         lista = Consentimento.objects \
-                .filter(cpf=cpf, autorizado_dt__isnull=False, revogacao_dt__isnull=True)
+            .filter(cpf=cpf, autorizado_dt__isnull=False, revogacao_dt__isnull=True)
     except Exception as e:
         messages.error(request, e)
     context = {
@@ -366,7 +259,7 @@ def LgpdConsultaTitular(request):
         cpf = request.POST.get('cpf') or ''
         if request.POST and cpf:
             lista = Consentimento.objects \
-                    .filter(cpf=cpf, autorizado_dt__isnull=False, revogacao_dt__isnull=True)
+                .filter(cpf=cpf, autorizado_dt__isnull=False, revogacao_dt__isnull=True)
     except Exception as e:
         messages.error(request, e)
     context = {
@@ -376,3 +269,131 @@ def LgpdConsultaTitular(request):
     }
 
     return render(request, 'lgpd/consulta.html', context)
+
+
+@login_required(login_url='login')
+def LgpdControladorTratamento(request, pk):
+    context = {}
+    try:
+        cliente = Cliente.objects.get(pk=pk)
+        lista = Tratamento.objects.filter(consentimento__cliente=cliente).order_by('id').reverse()
+
+    except Exception as e:
+        messages.error(request, e)
+
+    context['cliente'] = cliente
+    context['lista'] = lista
+
+    return render(request, 'lgpd/controlador_tratamento.html', context)
+
+
+@login_required(login_url='login')
+def LgpdTratamentoDados(request, pk):
+    obj = {}
+    context = {}
+    try:
+        consentimento = Consentimento.objects.get(pk=pk)
+        url = settings.LGPD_URL + 'cnpj=' + str(consentimento.cliente.cnpj) + '/consentimento/' + str(pk)
+        response = requests.get(url, auth=("assist", "123456"))
+        if response.status_code == 200:
+            obj = json.loads(response.text)
+
+        cliente = Cliente.objects.get(pk=pk)
+
+    except Exception as e:
+        messages.error(request, e)
+    context['obj'] = obj
+    context['consentimento'] = consentimento
+    context['cliente'] = cliente
+
+    return render(request, 'lgpd/tratamento_dados.html', context)
+
+
+def LgpdTratamentoId(request, pk):
+    context = {}
+    lista = lista_2
+    consentimento = Consentimento.objects.get(pk=pk)
+    empresa = Cliente.objects.get(pk=consentimento.cliente.pk)
+    selecionado = request.POST.get('opcao') or ''
+    hashcode = ''
+    titular = {
+        'nome': request.POST.get('nome') or '',
+        'cpf': request.POST.get('cpf') or ''
+    }
+
+    opcao = ''
+    opcao_id = request.POST.get('opcao_id') or 'II'
+    for n in lista:
+        if selecionado == n['id']:
+            opcao_id = n['id']
+            opcao = n['descricao']
+            break
+
+    if request.method == 'POST':
+        tratamento = Tratamento()
+        tratamento.consentimento = consentimento
+        tratamento.email = request.POST.get('email')
+        tratamento.celular = request.POST.get('celular') or ''
+        tratamento.protocolo = request.POST.get('protocolo')
+        hashcode = request.POST.get('hashcode') or ''
+        if request.POST.get('btn_solicitar'):
+            url = settings.LGPD_URL + 'codigo_autorizacao'
+            dados = {
+                "email": request.POST.get('email'),
+                "nome": request.POST.get('nome'),
+                "assunto": "LGPD Código Autorização"
+            }
+            response = requests.post(url, json.dumps(dados), auth=("assist", "123456"))
+            if response.status_code == 200:
+                hashcode = response.text
+            else:
+                messages.error(request, response.text)
+
+        if request.POST.get('btn_gravar'):
+            prova = hashlib.md5(bytes(request.POST.get('protocolo'), 'utf-8')).hexdigest()
+            if prova == hashcode:
+                tratamento.opcao = opcao
+                tratamento.prazo_dt = datetime.today() + timedelta(days=15)
+                tratamento.save()
+                DefineConsentimentoEvento(empresa, consentimento,
+                                          titular.get('nome') + '/' +
+                                          titular.get('cpf') + '/' + tratamento.email + ' solicita: ' + opcao)
+
+                url = settings.LGPD_URL + 'sinaliza_tratamento/' + str(tratamento.pk)
+                response = requests.get(url, auth=("assist", "123456"))
+                if response.status_code == 200:
+                    messages.success(request, 'Solicitação enviada com sucesso')
+
+                return HttpResponseRedirect(reverse('lgpd_consulta', kwargs={'cpf': consentimento.cpf}))
+            else:
+                messages.error(request, 'código incorreto')
+    else:
+        try:
+            lista = lista_2
+            url = settings.LGPD_URL + 'cnpj=' + str(consentimento.cliente.cnpj) + '/consentimento/' + str(pk)
+            response = requests.get(url, auth=("assist", "123456"))
+            if response.status_code == 200:
+                obj = json.loads(response.text)
+                tratamento = Tratamento()
+                tratamento.email = obj['email'] or ''
+                tratamento.celular = obj['celular'] or ''
+                titular = {
+                    'nome': obj['nome'],
+                    'cpf': obj['cpf']
+                }
+        except Exception as e:
+            messages.error(request, e)
+
+    if titular.get('cpf'):
+        tratamentos = Tratamento.objects.filter(consentimento__cpf=titular.get('cpf')).order_by('id')
+    else:
+        tratamentos = Tratamento.objects.filter(consentimento=consentimento).order_by('id')
+
+    context['empresa'] = empresa
+    context['opcao_id'] = opcao_id
+    context['lista'] = lista
+    context['hashcode'] = hashcode
+    context['titular'] = titular
+    context['tratamento'] = tratamento
+    context['tratamentos'] = tratamentos
+    return render(request, 'lgpd/tratamento.html', context)

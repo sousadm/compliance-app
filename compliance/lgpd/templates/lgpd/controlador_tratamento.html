@@ -8,6 +8,14 @@
 
     <div class="jumbotron">
 
+        <div style="text-align: right; margin-top: 10px">
+            <a href="{% url 'url_cliente_update' cliente.id %}">
+                <button type="button" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-user"></i>Cliente
+                </button>
+            </a>
+        </div>
+
         <h2>LGPD - Tratamento de Dados</h2>
 
         <p>
@@ -24,6 +32,7 @@
                     <th>E-mail</th>
                     <th>Protocolo</th>
                     <th>Opção de tratamento</th>
+                    <th></th>
                 </tr>
                 {% for n in lista %}
                 <tr>
@@ -32,6 +41,12 @@
                     <td>{{ n.email }}</td>
                     <td>{{ n.protocolo }}</td>
                     <td>{{ n.opcao }}</td>
+                    <td>
+                        <button type="button" title="visualizar dados"
+                                onclick="window.open('{% url 'lgpd_dados_id' n.consentimento.pk %}','popup','width=800,height=600'); return false;">
+                            <i class="fas fa-address-book"></i>
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
             </table>

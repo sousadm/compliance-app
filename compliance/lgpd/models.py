@@ -43,6 +43,8 @@ class Tratamento(models.Model):
     protocolo = models.CharField(max_length=10, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+    prazo_dt = models.DateTimeField(null=True)
+    encerramento_dt = models.DateTimeField(null=True)
     consentimento = models.ForeignKey(Consentimento, models.DO_NOTHING, blank=True, null=True)
 
     objects = models.Manager()

@@ -26,7 +26,7 @@ from compliance.core.views import home, ClienteListView, clienteNew, clienteUpda
     TarefaImprimir, TarefaReopen, download, ClienteAWS, ClienteFolderAWS, ClienteBackup, ClienteUsuario, \
     downloadObjectS3, TarefaAnexo, TarefaRemoveAnexo, GeradorRelatorio
 from compliance.lgpd.views import LgpdConsentimento, LgpdConsultaTitular, LgpdTratamentoId, \
-    LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF
+    LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF, LgpdTratamentoDados
 
 urlpatterns = [
                   path('grappelli/', include('grappelli.urls')),
@@ -56,20 +56,20 @@ urlpatterns = [
                   path('cliente/<int:pk>/backup=<str:arquivo>', ClienteBackup, name='url_cliente_backup'),
                   path('cliente/<int:pk>/s3', ClienteAWS, name='url_cliente_aws'),
                   path('cliente/<int:pk>/s3/<str:folder>', ClienteFolderAWS, name='url_cliente_folder_aws'),
-                  path('s3/<str:nome>', downloadObjectS3, name='url_download_s3'),
-
                   path('cliente/<int:pk>/serie', clienteSerie, name='url_cliente_serie'),
                   path('cliente/<int:pk>/tarefa/', ClienteTarefaList, name='url_cliente_tarefa'),
                   path('cliente/<int:pk>/tarefa/add/', ClienteTarefaNew, name='url_cliente_tarefa_new'),
                   path('cliente/<int:pk>/evento/', ClienteEventoList, name='url_cliente_evento'),
+
                   path('tarefa/', TarefaLista, name='url_tarefa_list'),
                   path('tarefa/<int:pk>/', ClienteTarefaEdit, name='url_cliente_tarefa_edit'),
                   path('tarefa/<int:pk>/imprimir', TarefaImprimir, name='url_tarefa_imprimir'),
                   path('tarefa/<int:pk>/reopen', TarefaReopen, name='url_tarefa_reopen'),
                   path('tarefa/<int:pk>/anexo', TarefaAnexo, name='url_tarefa_anexo'),
                   path('tarefa/<int:pk>/anexo/remove=<str:nome>', TarefaRemoveAnexo, name='url_tarefa_anexo_remove'),
-                  path('download/<int:pk>', download, name='url_download'),
 
+                  path('download/<int:pk>', download, name='url_download'),
+                  path('s3/<str:nome>', downloadObjectS3, name='url_download_s3'),
                   path('admin/', admin.site.urls),
                   path('monitor/', MonitorBackupNew, name='monitor'),
                   path('', home, name='home'),
@@ -79,6 +79,7 @@ urlpatterns = [
                   path('minha_lgpd', LgpdConsultaTitular, name='minha_lgpd'),
                   path('minha_lgpd/cpf=<str:cpf>', LgpdConsultaTitularCPF, name='lgpd_consulta'),
                   path('lgpd/tratamento/id=<int:pk>', LgpdTratamentoId, name='lgpd_tratamento_id'),
+                  path('lgpd/dados/id=<int:pk>', LgpdTratamentoDados, name='lgpd_dados_id'),
 
                   path('relatorio/', GeradorRelatorio, name='url_relatorio')
 

@@ -12,7 +12,7 @@
         <h2>LGPD - Consentimento de Dados</h2>
 
         <p>
-            Conforme a Lei Geral de Proteção de Dados (DLG), número
+            Conforme a Lei Geral de Proteção de Dados (LGPD), número
             <a href="http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank">13.709</a>
             de 14 de agosto de 2018,
             que promove a proteção dos dados pessoais de pessoas naturais que estão sob posse de pessoas físicas e
@@ -176,9 +176,9 @@
                     <div class="input-group-append" style="margin-left: 15px; !important;">
                         <span style='position:absolute; bottom:0px;'>Emissão</span>
                         <input required type="date" name="ident_emissao" required id="id_vencimento"
-                               value="{{ ident_emissao }}" style="margin-left:80px" class="form-control">
-                        {% endif %}
+                               value="{{ obj.ident_emissao }}" style="margin-left:80px" class="form-control">
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -233,6 +233,7 @@
             </div>
         </div>
         {% endif %}
+
 
         <div class="row">
             <div class="col-12 col-md-3">

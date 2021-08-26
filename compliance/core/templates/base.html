@@ -26,12 +26,23 @@
 
     <title> {% block titulo %} Compliance {% endblock %} </title>
 
+    <script language=javascript type="text/javascript">
+
+function abrirJanela(pagina, largura, altura) {
+    var esquerda = (screen.width - largura)/2;
+    var topo = (screen.height - altura)/2;
+    minhaJanela = window.open('https://127.0.0.1:8000/' + pagina,'','height=' + altura + ', width=' + largura + ', top=' + topo + ', left=' + esquerda);
+}
+
+    </script>
+
     <script>
     jQuery(function($){
         $("#campoData").mask("99/99/9999");
         $("#campoTelefone").mask("(999) 999-9999");
         $("#campoSenha").mask("***-****");
     });
+
     </script>
 
     <script>   {% block script %} {% endblock %}
@@ -59,6 +70,7 @@
 $(document).ready(function(){
     $('.date').mask('00/00/0000')
 });
+
 
 
 
