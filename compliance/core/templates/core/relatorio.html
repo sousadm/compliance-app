@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<form method="post" xmlns="http://www.w3.org/1999/html">
+<form method="POST" xmlns="http://www.w3.org/1999/html">
 
     {% csrf_token %}
 
@@ -15,6 +15,7 @@
     <div style="text-align: right; margin-top: -20px">
         <input type="submit" class="btn btn-warning" value="Filtrar dados">
         <input formtarget="_blank" {% if not lista %} disabled {% endif %} type="submit" class="btn btn-warning" value="Imprimir" name="btn_imprimir">
+<!--        <input formtarget="_blank" type="submit" class="btn btn-warning" value="Imprimir" name="btn_imprimir">-->
     </div>
     </br>
     <div class="row">
@@ -88,32 +89,32 @@
     </div>
 
     {% if lista %}
-    <div style="margin-top: 10px" class="table-responsive">
-        <table class="table table-striped table-sm">
-            <thead>
-            <tr>
-                <th>Número</th>
-                <th>Tarefa</th>
-                <th>Módulo</th>
-                <th>Data</th>
-                <th width="30%">Empresa</th>
-                <th width="50"></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for tar in lista %}
-            <tr>
-                <td>{{ tar.identificador }}</td>
-                <td>{{ tar.resumo }}</td>
-                <td>{{ tar.modulo }}</td>
-                <td>{{ tar.data|date:"d/m/Y"}}</td>
-                <td>{{ tar.nome }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {% include "core/paginacao.html" %}
-    </div>
+<!--    <div style="margin-top: 10px" class="table-responsive">-->
+<!--        <table class="table table-striped table-sm">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>Número</th>-->
+<!--                <th>Tarefa</th>-->
+<!--                <th>Módulo</th>-->
+<!--                <th>Data</th>-->
+<!--                <th width="30%">Empresa</th>-->
+<!--                <th width="50"></th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            {% for tar in lista %}-->
+<!--            <tr>-->
+<!--                <td>{{ tar.identificador }}</td>-->
+<!--                <td>{{ tar.resumo }}</td>-->
+<!--                <td>{{ tar.modulo }}</td>-->
+<!--                <td>{{ tar.data|date:"d/m/Y"}}</td>-->
+<!--                <td>{{ tar.nome }}</td>-->
+<!--            </tr>-->
+<!--            {% endfor %}-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--        {% include "core/paginacao.html" %}-->
+<!--    </div>-->
     {% else %}
     <p  style="float: right; color: red">sem registros para visualizar</p>
     {% endif %}

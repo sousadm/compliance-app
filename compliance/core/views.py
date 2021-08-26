@@ -1019,7 +1019,6 @@ def GeradorRelatorio(request):
     usuario = request.POST.get('usuario') or ''
     modulo = request.POST.get('modulo') or ''
     nome = request.POST.get('nome') or ''
-    page = request.GET.get('page', 1)
     if request.POST:
         lista = getListaTarefa(request)
         if request.POST.get('btn_imprimir'):
