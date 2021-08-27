@@ -25,16 +25,6 @@ class Consentimento(models.Model):
         db_table = 'consentimento'
 
 
-class ConsentimentoEvento(models.Model):
-    consentimento = models.ForeignKey(Consentimento, on_delete=models.CASCADE)
-    evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
-
-    objects = models.Manager()
-
-    class Meta:
-        db_table = 'consentimento_evento'
-
-
 class Tratamento(models.Model):
     id = models.BigAutoField(primary_key=True)
     celular = models.CharField(max_length=20, blank=True, null=True)
@@ -52,3 +42,25 @@ class Tratamento(models.Model):
     class Meta:
         managed = False
         db_table = 'tratamento'
+
+
+class TratamentoEvento(models.Model):
+    tratamento = models.ForeignKey(Tratamento, models.DO_NOTHING, blank=True, null=True)
+    evento = models.ForeignKey(Evento, models.DO_NOTHING, blank=True, null=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        managed = False
+        db_table = 'tratamento_evento'
+
+
+class ConsentimentoEvento(models.Model):
+    consentimento = models.ForeignKey(Consentimento, models.DO_NOTHING, blank=True, null=True)
+    evento = models.ForeignKey(Evento, models.DO_NOTHING, blank=True, null=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        managed = False
+        db_table = 'consentimento_evento'

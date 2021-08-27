@@ -7,49 +7,81 @@
     {% csrf_token %}
 
     <div style="text-align: right; margin-top: 10px">
-        <a href="{% url 'url_cliente_update' cliente.id %}">
-            <button type="button" class="btn btn-secondary btn-sm">
-                <i class="fas fa-user"></i>Cliente
+        <a href="{% url 'url_cliente_tratamento' cliente.pk %}">
+            <button type="button" class="btn btn-secondary" title="tratamento lgpd">
+                Tratamento
             </button>
         </a>
-        <input type="submit" value="Enviar Resposta" name="btn_enviar"
-               class="btn btn-danger"
-               onClick='return confirma("Confirma o envio de resposta?")'>
+        {% if not tratamento.encerramento_dt%}
+        <input type="submit" value="Controle" name="btn_tratativa"
+               class="btn btn-warning" title="registra informações de controle"
+               onClick='return confirma("Confirma o envio de tratativa?")'>
+        <input type="submit" value="Encerramento"
+               name="btn_encerramento"
+               class="btn btn-danger" title="registra informações para encerramento"
+               onClick='return confirma("Confirma o encerramento?")'>
+        {% else %}
+        <input type="submit" value="Enviar e-mail" name="btn_email"
+               class="btn btn-danger" title="envia histórico para e-mail de titular"
+               onClick='return confirma("Confirma o envio de e-mail?")'>
+        {% endif %}
     </div>
 
     <h2>LGPD - Resposta a Titular</h2>
 
     <div class="row">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-4">
             <label>Nome do Controlador</label>
             <input disabled type="text" class="form-control" value="{{tratamento.consentimento.cliente.nome}}">
         </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-2">
             <label>CNPJ do Controlador</label>
             <input disabled type="text" class="form-control" value="{{tratamento.consentimento.cliente.cnpj}}">
+        </div>
+        <div class="col-12 col-md-6">
+            <label>Quem solicitou</label>
+            <input disabled type="text" class="form-control" value="{{tratamento.consentimento.nome}}">
         </div>
     </div>
     <div class="row">
         <div class="col-12 col-md-4">
-            <label>Quem solicitou</label>
-            <input disabled type="text" class="form-control" value="{{tratamento.consentimento.nome}}">
+            <label>E-mail de origem</label>
+            <input disabled type="text" class="form-control" value="{{tratamento.email}}">
         </div>
-        <div class="col-12 col-md-2">
-            <label>CPF</label>
-            <input disabled type="text" class="form-control" value="{{tratamento.consentimento.cpf}}">
-        </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-8">
             <label>Opção de tratamento</label>
             <input disabled type="text" class="form-control" value="{{tratamento.opcao}}">
         </div>
     </div>
 
+    {% if not tratamento.encerramento_dt%}
     <div class="row">
         <div class="col-12">
             <label>Conteúdo da resposta</label>
-            <textarea class="form-control" rows="5" id="comment"></textarea>
+            <textarea required class="form-control" rows="2" maxlength="500" name="txt_conteudo"></textarea>
         </div>
     </div>
+    {% endif %}
+
+    {% if lista %}
+    <div class="table-responsive" style="margin-top: 20px">
+        <table class="table table-striped">
+            <tr>
+                <th width="150">Incluido em</th>
+                <th>Conteudo da resposta</th>
+            </tr>
+            {% for n in lista %}
+            <tr>
+                <td>{{ n.evento.created_at|date:'d/m/Y H:i' }}</td>
+                <td>{{ n.evento.descricao }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    {% else %}
+    <p style="color: red">sem itens para visualização</p>
+    {% endif %}
 
 </form>
 

@@ -14,8 +14,9 @@ from django.utils import timezone
 from validate_docbr import CPF
 
 from compliance import settings
+from compliance.core.mail import send_mail_template
 from compliance.core.models import Cliente, Evento
-from compliance.lgpd.models import Consentimento, ConsentimentoEvento, Tratamento
+from compliance.lgpd.models import Consentimento, ConsentimentoEvento, Tratamento, TratamentoEvento
 
 lista_1 = [
     {"id": "I", "descricao": "I – confirmação da existência de tratamento"}
@@ -399,19 +400,69 @@ def LgpdTratamentoId(request, pk):
     return render(request, 'lgpd/tratamento.html', context)
 
 
+def addEventoTratamentoMsg(request, tratamento, msg):
+    tratamento.updated_at = datetime.now()
+    tratamento.save()
+
+    evento = Evento()
+    evento.modulo = 'LGPD'
+    evento.descricao = msg
+    evento.user = request.user
+    evento.cliente = tratamento.consentimento.cliente
+    evento.save()
+
+    trata_evento = TratamentoEvento()
+    trata_evento.tratamento = tratamento
+    trata_evento.evento = evento
+    trata_evento.save()
 
 
 @login_required(login_url='login')
 def LgpdResposta(request, pk):
-    obj = {}
     context = {}
     try:
         tratamento = Tratamento.objects.get(pk=pk)
+        if request.POST.get('btn_tratativa') or request.POST.get('btn_encerramento'):
+            if request.POST.get('btn_encerramento'):
+                tratamento.encerramento_dt = datetime.now()
+            addEventoTratamentoMsg(request, tratamento, request.POST.get('txt_conteudo'))
+
+            return HttpResponseRedirect(reverse('url_lgpd_resposta', kwargs={'pk': tratamento.pk}))
+
+        if request.POST.get('btn_email'):
+            addEventoTratamentoMsg(request, tratamento, 'envio de histórico para e-mail de titular')
+            lista = TratamentoEvento.objects.filter(tratamento=tratamento).order_by('id')
+            lstMsg = []
+            for te in lista:
+                lstMsg.append(te.evento.created_at.strftime('%d/%m/%Y')+' '+te.evento.descricao+"\n")
+            send_mail(tratamento, "".join(lstMsg))
+            messages.success(request, 'enviado com sucesso')
 
     except Exception as e:
         messages.error(request, e)
 
+    lista = TratamentoEvento.objects.filter(tratamento=tratamento).order_by('id')
     context['cliente'] = tratamento.consentimento.cliente
     context['tratamento'] = tratamento
+    context['lista'] = lista
 
     return render(request, 'lgpd/resposta.html', context)
+
+
+def send_mail(tratamento, mensagem):
+    subject = 'Histórico de tratativa'
+    context = {
+        'nome': tratamento.consentimento.nome,
+        'email': tratamento.email,
+        'mensagem': mensagem
+    }
+    template_name = 'lgpd/email_resposta_titular.html'
+    send_mail_template(
+        subject,
+        template_name,
+        context,
+        [tratamento.email]
+    )
+
+
+# tratamento.consentimento.cliente.email
