@@ -199,7 +199,8 @@ else:
 
 STATICFILES_DIRS = ('/opt/venv/lib/python3.8/site-packages/grappelli/static/grappelli/', 'static')
 
-# COMPLIANCE_API = 'http://3.224.26.231:8081/'
-COMPLIANCE_API = 'http://localhost:8081/'
+COMPLIANCE_API = 'http://3.224.26.231:8081/'
+# COMPLIANCE_API = 'http://localhost:8081/'
 COMPLIANCE_URL = COMPLIANCE_API + 'compliance/'
 LGPD_URL = COMPLIANCE_API + 'lgpd/'
+ 

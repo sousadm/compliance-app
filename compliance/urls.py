@@ -26,7 +26,7 @@ from compliance.core.views import home, ClienteListView, clienteNew, clienteUpda
     TarefaImprimir, TarefaReopen, download, ClienteAWS, ClienteFolderAWS, ClienteBackup, ClienteUsuario, \
     downloadObjectS3, TarefaAnexo, TarefaRemoveAnexo, GeradorRelatorio
 from compliance.lgpd.views import LgpdConsentimento, LgpdConsultaTitular, LgpdTratamentoId, \
-    LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF, LgpdTratamentoDados
+    LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF, LgpdTratamentoDados, LgpdResposta
 
 urlpatterns = [
                   path('grappelli/', include('grappelli.urls')),
@@ -80,6 +80,7 @@ urlpatterns = [
                   path('minha_lgpd/cpf=<str:cpf>', LgpdConsultaTitularCPF, name='lgpd_consulta'),
                   path('lgpd/tratamento/id=<int:pk>', LgpdTratamentoId, name='lgpd_tratamento_id'),
                   path('lgpd/dados/id=<int:pk>', LgpdTratamentoDados, name='lgpd_dados_id'),
+                  path('lgpd/resposta/id=<int:pk>', LgpdResposta, name='url_lgpd_resposta'),
 
                   path('relatorio/', GeradorRelatorio, name='url_relatorio')
 

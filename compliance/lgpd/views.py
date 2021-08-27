@@ -397,3 +397,21 @@ def LgpdTratamentoId(request, pk):
     context['tratamento'] = tratamento
     context['tratamentos'] = tratamentos
     return render(request, 'lgpd/tratamento.html', context)
+
+
+
+
+@login_required(login_url='login')
+def LgpdResposta(request, pk):
+    obj = {}
+    context = {}
+    try:
+        tratamento = Tratamento.objects.get(pk=pk)
+
+    except Exception as e:
+        messages.error(request, e)
+
+    context['cliente'] = tratamento.consentimento.cliente
+    context['tratamento'] = tratamento
+
+    return render(request, 'lgpd/resposta.html', context)

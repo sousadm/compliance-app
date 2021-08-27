@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div style="text-align: right; margin-top: 10px">
+        <a href="{% url 'url_cliente_update' cliente.id %}">
+            <button type="button" class="btn btn-secondary btn-sm">
+                <i class="fas fa-user"></i>Cliente
+            </button>
+        </a>
+        <input type="submit" value="Enviar Resposta" name="btn_enviar"
+               class="btn btn-danger"
+               onClick='return confirma("Confirma o envio de resposta?")'>
+    </div>
+
+    <h2>LGPD - Resposta a Titular</h2>
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <label>Nome do Controlador</label>
+            <input disabled type="text" class="form-control" value="{{tratamento.consentimento.cliente.nome}}">
+        </div>
+        <div class="col-12 col-md-6">
+            <label>CNPJ do Controlador</label>
+            <input disabled type="text" class="form-control" value="{{tratamento.consentimento.cliente.cnpj}}">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <label>Quem solicitou</label>
+            <input disabled type="text" class="form-control" value="{{tratamento.consentimento.nome}}">
+        </div>
+        <div class="col-12 col-md-2">
+            <label>CPF</label>
+            <input disabled type="text" class="form-control" value="{{tratamento.consentimento.cpf}}">
+        </div>
+        <div class="col-12 col-md-6">
+            <label>Opção de tratamento</label>
+            <input disabled type="text" class="form-control" value="{{tratamento.opcao}}">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <label>Conteúdo da resposta</label>
+            <textarea class="form-control" rows="5" id="comment"></textarea>
+        </div>
+    </div>
+
+</form>
+
+{% endblock %}

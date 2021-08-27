@@ -6,57 +6,62 @@
 
     {% csrf_token %}
 
-    <div class="jumbotron">
-
-        <div style="text-align: right; margin-top: 10px">
-            <a href="{% url 'url_cliente_update' cliente.id %}">
-                <button type="button" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-user"></i>Cliente
-                </button>
-            </a>
-        </div>
-
-        <h2>LGPD - Tratamento de Dados</h2>
-
-        <p>
-            {{cliente.nome}}</br>
-            CNPJ: {{cliente.cnpj}}
-        </p>
-
-        {% if lista %}
-        <div class="table-responsive" style="margin-top: 5px">
-            <table class="table table-striped">
-                <tr>
-                    <th>Incluido em</th>
-                    <th>Nome</th>
-                    <th>E-mail</th>
-                    <th>Protocolo</th>
-                    <th>Opção de tratamento</th>
-                    <th></th>
-                </tr>
-                {% for n in lista %}
-                <tr>
-                    <td>{{ n.created_at|date:'d/m/Y H:i' }}</td>
-                    <td>{{ n.consentimento.nome }}</td>
-                    <td>{{ n.email }}</td>
-                    <td>{{ n.protocolo }}</td>
-                    <td>{{ n.opcao }}</td>
-                    <td>
-                        <button type="button" title="visualizar dados"
-                                onclick="window.open('{% url 'lgpd_dados_id' n.consentimento.pk %}','popup','width=800,height=600'); return false;">
-                            <i class="fas fa-address-book"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-
-        {% else %}
-        <p style="color: red">Não foram identificados solicitações de tratamento</p>
-        {% endif %}
-
+    <div style="text-align: right; margin-top: 10px">
+        <a href="{% url 'url_cliente_update' cliente.id %}">
+            <button type="button" class="btn btn-secondary btn-sm">
+                <i class="fas fa-user"></i>Cliente
+            </button>
+        </a>
     </div>
+
+    <h2>LGPD - Tratamento de Dados</h2>
+
+    <p>
+        {{cliente.nome}}</br>
+        CNPJ: {{cliente.cnpj}}
+    </p>
+
+    {% if lista %}
+    <div class="table-responsive" style="margin-top: 5px">
+        <table class="table table-striped">
+            <tr>
+                <th>Incluido em</th>
+                <th>Prazo</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Protocolo</th>
+                <th>Opção de tratamento</th>
+                <th width="100"></th>
+            </tr>
+            {% for n in lista %}
+            <tr>
+                <td>{{ n.created_at|date:'d/m/Y H:i' }}</td>
+                <td>{{ n.prazo_dt|date:'d/m/Y' }}</td>
+                <td>{{ n.consentimento.nome }}</td>
+                <td>{{ n.email }}</td>
+                <td>{{ n.protocolo }}</td>
+                <td>{{ n.opcao }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm" title="visualizar dados"
+                            onclick="window.open('{% url 'lgpd_dados_id' n.consentimento.pk %}','popup','width=800,height=600'); return false;">
+                        <i class="fas fa-address-book"></i>
+                    </button>
+
+                    <a href="{% url 'url_lgpd_resposta' n.pk %}">
+                        <button type="button" class="btn btn-sm" title="resposta à solicitação">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
+
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    {% else %}
+    <p style="color: red">Não foram identificados solicitações de tratamento</p>
+    {% endif %}
 
 </form>
 

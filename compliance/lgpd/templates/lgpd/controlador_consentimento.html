@@ -6,106 +6,112 @@
 
     {% csrf_token %}
 
-    <div class="jumbotron">
-
-
-        <div style="text-align: right; margin-top: 10px">
-            <a href="{% url 'url_cliente_update' cliente.id %}">
-                <button type="button" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-user"></i>Cliente
-                </button>
-            </a>
-            {% if consentimentos %}
-            <a href="{% url 'url_cliente_consentimento' cliente.id %}">
-                <input type="button" class="btn btn-secondary" value="Limpar">
-            </a>
-            <input type="submit" value="Enviar solicitação" name="btn_enviar"
-                   class="btn btn-danger"
-                   onClick='return confirma("Confirma o envio da requisição?")'>
-            {% else %}
-            <input type="submit" class="btn btn-danger" name="btn_solicita_consentimento"
-                   value="Solicitar Consentimento">
-            {% endif %}
-        </div>
-        <h2>LGPD - Consentimento de Dados</h2>
-        <p>
-            {{cliente.nome}}</br>
-            CNPJ: {{cliente.cnpj}}
-        </p>
-
+    <div style="text-align: right; margin-top: 10px">
+        <a href="{% url 'url_cliente_update' cliente.id %}">
+            <button type="button" class="btn btn-secondary btn-sm">
+                <i class="fas fa-user"></i>Cliente
+            </button>
+        </a>
         {% if consentimentos %}
+        <a href="{% url 'url_cliente_consentimento' cliente.id %}">
+            <input type="button" class="btn btn-secondary" value="Limpar">
+        </a>
+        <input type="submit" value="Enviar solicitação" name="btn_enviar"
+               class="btn btn-danger"
+               onClick='return confirma("Confirma o envio da requisição?")'>
+        {% else %}
 
-        <div class="row">
-            <div class="col-12 col-md-4 form-group">
-                <label>Nome completo</label>
-                <input value="{{ nome }}" required autofocus type="text" name="nome" class="form-control">
-
-                <label>E-mail</label>
-                <input value="{{ email }}" required type="email" name="email" class="form-control">
-
-                <label>CPF</label>
-                <input value="{{ cpf }}" required type="text" name="cpf" maxlength="11" minlength="11"
-                       class="form-control">
-
-            </div>
-            <div class="col-12 col-md-8 form-group">
-                <h5>Itens de Consentimento</h5>
-                {% for c in consentimentos %}
-                <div>
-                    <input type="checkbox" id="{{c.tipo}}" name="{{c.tipo}}">
-                    <label for="{{c.tipo}}">{{c.valor}}</label>
-                </div>
-                {% endfor %}
+        <div class="btn-group">
+            <input type="submit" class="btn btn-danger" value="Solicitar Consentimento"
+                   name="btn_solicita_consentimento">
+            <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split"
+                    data-toggle="dropdown">
+                <span class="caret"></span>
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#">Tablet</a>
             </div>
         </div>
 
-        <input value="{{ finalidade_1 }}" required type="text" name="finalidade_1"
-               placeholder="finalidade de tratamento" class="form-control">
-        <input value="{{ finalidade_2 }}" type="text" name="finalidade_2" placeholder="finalidade de tratamento"
-               class="form-control">
-        <input value="{{ finalidade_3 }}" type="text" name="finalidade_3" placeholder="finalidade de tratamento"
-               class="form-control">
-
-        {% else %}
-
-        {% if lista %}
-
-        <div class="table-responsive" style="margin-top: 15px">
-            <table class="table table-striped">
-                <tr>
-                    <th width="150">Incluido em</th>
-                    <th width="150">Atualizado em</th>
-                    <th width="150">Autorizado em</th>
-                    <th width="150">Revogado em</th>
-                    <th>CPF</th>
-                    <th>Nome</th>
-                    <th></th>
-                </tr>
-                {% for n in lista %}
-                <tr>
-                    <td>{{ n.created_dt|date:'d/m/Y H:i' }}</td>
-                    <td>{{ n.updated_dt|date:'d/m/Y H:i' }}</td>
-                    <td>{{ n.autorizado_dt|date:'d/m/Y H:i' }}</td>
-                    <td>{{ n.revogacao_dt|date:'d/m/Y H:i' }}</td>
-                    <td>{{ n.cpf }}</td>
-                    <td>{{ n.nome }}</td>
-                    <td>
-                        <button type="button" title="visualizar dados"
-                                onclick="window.open('{% url 'lgpd_dados_id' n.pk %}','popup','width=800,height=600'); return false;">
-                            <i class="fas fa-address-book"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-        {% else %}
-        <p style="color: red">Não foram identificados registros em seu controle</p>
         {% endif %}
-
-        {% endif %}
-
     </div>
+    <h2>LGPD - Consentimento de Dados</h2>
+    <p>
+        {{cliente.nome}}</br>
+        CNPJ: {{cliente.cnpj}}
+    </p>
+
+    {% if consentimentos %}
+
+    <div class="row">
+        <div class="col-12 col-md-4 form-group">
+            <label>Nome completo</label>
+            <input value="{{ nome }}" required autofocus type="text" name="nome" class="form-control">
+
+            <label>E-mail</label>
+            <input value="{{ email }}" required type="email" name="email" class="form-control">
+
+            <label>CPF</label>
+            <input value="{{ cpf }}" required type="text" name="cpf" maxlength="11" minlength="11"
+                   class="form-control">
+
+        </div>
+        <div class="col-12 col-md-8 form-group">
+            <h5>Itens de Consentimento</h5>
+            {% for c in consentimentos %}
+            <div>
+                <input type="checkbox" id="{{c.tipo}}" name="{{c.tipo}}">
+                <label for="{{c.tipo}}">{{c.valor}}</label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <input value="{{ finalidade_1 }}" required type="text" name="finalidade_1"
+           placeholder="finalidade de tratamento" class="form-control">
+    <input value="{{ finalidade_2 }}" type="text" name="finalidade_2" placeholder="finalidade de tratamento"
+           class="form-control">
+    <input value="{{ finalidade_3 }}" type="text" name="finalidade_3" placeholder="finalidade de tratamento"
+           class="form-control">
+
+    {% else %}
+
+    {% if lista %}
+
+    <div class="table-responsive" style="margin-top: 15px">
+        <table class="table table-striped">
+            <tr>
+                <th width="150">Incluido em</th>
+                <th width="150">Atualizado em</th>
+                <th width="150">Autorizado em</th>
+                <th width="150">Revogado em</th>
+                <th>CPF</th>
+                <th>Nome</th>
+                <th></th>
+            </tr>
+            {% for n in lista %}
+            <tr>
+                <td>{{ n.created_dt|date:'d/m/Y H:i' }}</td>
+                <td>{{ n.updated_dt|date:'d/m/Y H:i' }}</td>
+                <td>{{ n.autorizado_dt|date:'d/m/Y H:i' }}</td>
+                <td>{{ n.revogacao_dt|date:'d/m/Y H:i' }}</td>
+                <td>{{ n.cpf }}</td>
+                <td>{{ n.nome }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm" title="visualizar dados"
+                            onclick="window.open('{% url 'lgpd_dados_id' n.pk %}','popup','width=800,height=600'); return false;">
+                        <i class="fas fa-address-book"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <p style="color: red">Não foram identificados registros em seu controle</p>
+    {% endif %}
+
+    {% endif %}
 
     <!--    <input type="hidden" name="consentimentos" value="{{ consentimentos }}">-->
 
