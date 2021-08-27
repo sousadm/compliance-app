@@ -430,7 +430,7 @@ def LgpdResposta(request, pk):
             return HttpResponseRedirect(reverse('url_lgpd_resposta', kwargs={'pk': tratamento.pk}))
 
         if request.POST.get('btn_email'):
-            addEventoTratamentoMsg(request, tratamento, 'envio de histórico para e-mail de titular')
+            # addEventoTratamentoMsg(request, tratamento, 'envio de histórico para e-mail de titular')
             lista = TratamentoEvento.objects.filter(tratamento=tratamento).order_by('id')
             lstMsg = []
             for te in lista:
@@ -452,8 +452,7 @@ def LgpdResposta(request, pk):
 def send_mail(tratamento, mensagem):
     subject = 'Histórico de tratativa'
     context = {
-        'nome': tratamento.consentimento.nome,
-        'email': tratamento.email,
+        'tratamento': tratamento,
         'mensagem': mensagem
     }
     template_name = 'lgpd/email_resposta_titular.html'
