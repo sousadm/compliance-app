@@ -5,7 +5,7 @@ import json
 import requests
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from datetime import datetime, timedelta
 
@@ -16,6 +16,7 @@ from validate_docbr import CPF
 from compliance import settings
 from compliance.core.mail import send_mail_template
 from compliance.core.models import Cliente, Evento
+from compliance.core.report import render_to_pdf
 from compliance.lgpd.models import Consentimento, ConsentimentoEvento, Tratamento, TratamentoEvento
 
 lista_1 = [
@@ -171,74 +172,6 @@ def LgpdConsentimento(request, pk):
         messages.error(request, e)
 
     return render(request, 'lgpd/consentimento.html', context)
-
-
-@login_required(login_url='login')
-def LgpdControladorConsentimento(request, pk):
-    context = {}
-    try:
-        cliente = Cliente.objects.get(pk=pk)
-        lista_consentimento = Consentimento.objects.filter(cliente=cliente).order_by('id').reverse()
-        nome = request.POST.get('nome') or ''
-        email = request.POST.get('email') or ''
-        cpf = request.POST.get('cpf') or ''
-        finalidade_1 = request.POST.get('finalidade_1') or ''
-        finalidade_2 = request.POST.get('finalidade_2') or ''
-        finalidade_3 = request.POST.get('finalidade_3') or ''
-        consentimentos = request.POST.get('consentimentos') or ''
-
-        if request.POST.get('btn_solicita_consentimento'):
-            url = settings.LGPD_URL + 'lista_finalidade'
-            response = requests.get(url, auth=("assist", "123456"))
-            if response.status_code == 200:
-                consentimentos = response.json()
-                request.session['consentimentos'] = consentimentos
-
-        if request.POST.get('btn_enviar'):
-            lista_consentimentos = []
-            valor = request.session.get('consentimentos')
-            for c in valor:
-                if request.POST.get(c.get('tipo')):
-                    lista_consentimentos.append(c.get('tipo'))
-            if not lista_consentimentos:
-                consentimentos = request.session.get('consentimentos')
-                raise Exception('selecione pelo menos um consentimento')
-
-            solicitacao = {
-                "operador": {
-                    "nome": "Administrador",
-                    "email": cliente.email
-                },
-                "tratamentos": get_tratamentos(request),
-                "consentimentos": lista_consentimentos,
-                "titulares": [
-                    {
-                        "nome": nome,
-                        "cpf": cpf,
-                        "email": email
-                    }
-                ]
-            }
-            url = settings.LGPD_URL + 'cnpj=' + cliente.cnpj + '/consentimento'
-            response = requests.post(url, json.dumps(solicitacao), auth=("assist", "123456"))
-            if response.status_code == 200:
-                messages.success(request, 'sucesso na solicitação')
-                request.session['consentimentos'] = None
-
-    except Exception as e:
-        messages.error(request, e)
-
-    context['consentimentos'] = consentimentos
-    context['cliente'] = cliente
-    context['lista'] = lista_consentimento
-    context['nome'] = nome
-    context['cpf'] = cpf
-    context['email'] = email
-    context['finalidade_1'] = finalidade_1
-    context['finalidade_2'] = finalidade_2
-    context['finalidade_3'] = finalidade_3
-
-    return render(request, 'lgpd/controlador_consentimento.html', context)
 
 
 def LgpdConsultaTitularCPF(request, cpf):
@@ -434,7 +367,7 @@ def LgpdResposta(request, pk):
             lista = TratamentoEvento.objects.filter(tratamento=tratamento).order_by('id')
             lstMsg = []
             for te in lista:
-                lstMsg.append(te.evento.created_at.strftime('%d/%m/%Y')+' '+te.evento.descricao+"\n")
+                lstMsg.append(te.evento.created_at.strftime('%d/%m/%Y') + ' ' + te.evento.descricao + "\n")
             send_mail(tratamento, "".join(lstMsg))
             messages.success(request, 'enviado com sucesso')
 
@@ -463,5 +396,91 @@ def send_mail(tratamento, mensagem):
         [tratamento.email]
     )
 
+@login_required(login_url='login')
+def LgpdControladorConsentimento(request, pk):
+    context = {}
+    try:
+        cliente = Cliente.objects.get(pk=pk)
+        lista_consentimento = Consentimento.objects.filter(cliente=cliente).order_by('id').reverse()
+        nome = request.POST.get('nome') or 'Francisco Sousa'
+        email = request.POST.get('email') or 'sousa.fco@hotmail.com'
+        cpf = request.POST.get('cpf') or '41193148391'
+        identidade = request.POST.get('identidade') or '982848 SSP/PI'
+        nacionalidade = request.POST.get('nacionalidade') or 'Brasileiro'
+        estadocivil = request.POST.get('estadocivil') or 'Casado'
 
-# tratamento.consentimento.cliente.email
+        finalidade_1 = request.POST.get('finalidade_1') or 'teste 1'
+        finalidade_2 = request.POST.get('finalidade_2') or 'teste 2'
+        finalidade_3 = request.POST.get('finalidade_3') or ''
+        consentimentos = request.POST.get('consentimentos') or ''
+        formulario = True if request.POST.get('btn_formulario') else False
+
+        if request.POST.get('btn_solicita_consentimento') or request.POST.get('btn_formulario'):
+            url = settings.LGPD_URL + 'lista_finalidade'
+            response = requests.get(url, auth=("assist", "123456"))
+            if response.status_code == 200:
+                consentimentos = response.json()
+                request.session['consentimentos'] = consentimentos
+
+        if request.POST.get('btn_imprmir'):
+            data = {
+                'controlador_nome': cliente.nome,
+                'controlador_endereco': cliente.endereco_completo,
+                'nome': nome,
+                'identidade': identidade,
+                'cpf': cpf,
+                'nacionalidade': nacionalidade,
+                'estadocivil': estadocivil,
+            }
+            pdf = render_to_pdf('lgpd/termo_consentimento.html', data)
+            return HttpResponse(pdf, content_type='application/pdf')
+
+        if request.POST.get('btn_enviar'):
+            lista_consentimentos = []
+            valor = request.session.get('consentimentos')
+            for c in valor:
+                if request.POST.get(c.get('tipo')):
+                    lista_consentimentos.append(c.get('tipo'))
+            if not lista_consentimentos:
+                consentimentos = request.session.get('consentimentos')
+                raise Exception('selecione pelo menos um consentimento')
+
+            solicitacao = {
+                "operador": {
+                    "nome": "Administrador",
+                    "email": cliente.email
+                },
+                "tratamentos": get_tratamentos(request),
+                "consentimentos": lista_consentimentos,
+                "titulares": [
+                    {
+                        "nome": nome,
+                        "cpf": cpf,
+                        "email": email
+                    }
+                ]
+            }
+            url = settings.LGPD_URL + 'cnpj=' + cliente.cnpj + '/consentimento'
+            response = requests.post(url, json.dumps(solicitacao), auth=("assist", "123456"))
+            if response.status_code == 200:
+                messages.success(request, 'sucesso na solicitação')
+                request.session['consentimentos'] = None
+
+    except Exception as e:
+        messages.error(request, e)
+
+    context['consentimentos'] = consentimentos
+    context['cliente'] = cliente
+    context['lista'] = lista_consentimento
+    context['nome'] = nome
+    context['cpf'] = cpf
+    context['email'] = email
+    context['identidade'] = identidade
+    context['nacionalidade'] = nacionalidade
+    context['estadocivil'] = estadocivil
+    context['finalidade_1'] = finalidade_1
+    context['finalidade_2'] = finalidade_2
+    context['finalidade_3'] = finalidade_3
+    context['formulario'] = formulario
+
+    return render(request, 'lgpd/controlador_consentimento.html', context)

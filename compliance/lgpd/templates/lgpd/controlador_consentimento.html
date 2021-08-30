@@ -16,23 +16,21 @@
         <a href="{% url 'url_cliente_consentimento' cliente.id %}">
             <input type="button" class="btn btn-secondary" value="Limpar">
         </a>
+        {% if formulario %}
+        <input formtarget="_blank" type="submit" value="Imprimir ficha" name="btn_imprmir"
+               class="btn btn-secondary">
+        <input type="submit" value="Anexar documento" name="btn_anexar"
+               class="btn btn-danger">
+        {% else %}
         <input type="submit" value="Enviar solicitação" name="btn_enviar"
                class="btn btn-danger"
                onClick='return confirma("Confirma o envio da requisição?")'>
+        {% endif %}
         {% else %}
-
-        <div class="btn-group">
-            <input type="submit" class="btn btn-danger" value="Solicitar Consentimento"
-                   name="btn_solicita_consentimento">
-            <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split"
-                    data-toggle="dropdown">
-                <span class="caret"></span>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">Tablet</a>
-            </div>
-        </div>
-
+        <input type="submit" class="btn btn-danger" value="Solicitar Consentimento"
+               name="btn_solicita_consentimento">
+        <input type="submit" value="Formulário" name="btn_formulario"
+               class="btn btn-success" title="formulário manual">
         {% endif %}
     </div>
     <h2>LGPD - Consentimento de Dados</h2>
@@ -46,14 +44,26 @@
     <div class="row">
         <div class="col-12 col-md-4 form-group">
             <label>Nome completo</label>
-            <input value="{{ nome }}" required autofocus type="text" name="nome" class="form-control">
-
-            <label>E-mail</label>
-            <input value="{{ email }}" required type="email" name="email" class="form-control">
+            <input value="{{nome}}" required autofocus type="text" name="nome" class="form-control">
 
             <label>CPF</label>
-            <input value="{{ cpf }}" required type="text" name="cpf" maxlength="11" minlength="11"
+            <input value="{{cpf}}" required type="text" name="cpf" maxlength="11" minlength="11"
                    class="form-control">
+
+            {% if formulario %}
+            <label>Identidade</label>
+            <input value="{{ identidade }}" required type="text" name="identidade" class="form-control">
+
+            <label>Nacionalidade</label>
+            <input value="{{ nacionalidade }}" required type="text" name="nacionalidade" class="form-control">
+
+            <label>Estado civil</label>
+            <input value="{{ estadocivil }}" required type="text" name="estadocivil" class="form-control">
+
+            {% else %}
+            <label>E-mail</label>
+            <input value="{{ email }}" required type="email" name="email" class="form-control">
+            {% endif %}
 
         </div>
         <div class="col-12 col-md-8 form-group">
