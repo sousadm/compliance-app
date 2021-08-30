@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="br" xmlns="http://www.w3.org/1999/html">
+<html lang="br" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>Termo</title>
@@ -17,6 +17,7 @@
                 text-align: center;
                 font-size: 20px;
             }
+
     </style>
 </head>
 <body>
@@ -24,9 +25,8 @@
 <h3 class="titulo">TERMO DE CONSENTIMENTO PARA TRATAMENTO DE DADOS PESSOAIS</h3>
 
 <p class="pgrid">
-    <b>{{controlador_nome}}</b>, com sede {{controlador_endereco}}, CEP {controlador.cep} em
-    {controlador.cidade}/{controlador.uf},
-    com Cadastro Nacional de Pessoa Jurídica (CNPJ), nº {controlador.cnpj}, doravante denominada <b>CONTROLADORA</b>.
+    <b>{{controlador_nome}}</b>, com sede {{controlador_endereco}}, com Cadastro Nacional de Pessoa Jurídica (CNPJ), nº
+    {{controlador_cnpj}}, doravante denominada <b>CONTROLADORA</b>.
 </p>
 
 <p class="pgrid">
@@ -55,14 +55,12 @@
 <h3>PARÁGRAFO SEGUNDO - DADOS PESSOAIS</h3>
 
 <p style="text-align: justify">Poderão ser tratados mediante anuência expressa do titular/ responsável os seguintes
-    dados pessoais, pelo(a) controlador(a):</p>
-{lista_tratamento}
+    dados pessoais, pelo(a) controlador(a): {{lista_tratamento}}.</p>
 
 <h3>PARÁGRAFO TERCEIRO - FINALIDADE DO TRATAMENTO</h3>
 
 <p style="text-align: justify">Em atendimento ao artigo 8º §4 este termo guarda finalidade determinada, sendo que os
-    dados serão utilizados especificamente para fins de:</p>
-{lista_finalidade
+    dados serão utilizados especificamente para fins de: {{lista_finalidade}}</p>
 
 <h3>PARÁGRAFO QUARTO - SEGURANÇA DOS DADOS</h3>
 
@@ -70,7 +68,23 @@
     administrativas aptas a proteger os dados pessoais de acessos não autorizados e de situações acidentais ou ilícitas
     de destruição, perda, alteração, comunicação ou qualquer forma de tratamento inadequado ou ilícito.</p>
 
-<p>{controlador.local}, {datahora|date:'d "de" M "de" Y'}</p>
+{% if lista_tratamento %}
+
+<p>{{controlador_local}}, {{datahora}}</p>
+
+</br>
+___________________________________________
+<p> CONTROLADORA </p>
+</br>
+___________________________________________
+<p> TITULAR </p>
+
+{% else %}
+
+<span style="font-size: 20px; color: red">Documento Inválido</span>
+<p style="color: red">Preencha corretamente os itens de consentimento</p>
+
+{% endif %}
 
 </body>
 </html>

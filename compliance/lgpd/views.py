@@ -10,12 +10,15 @@ from django.shortcuts import render
 from datetime import datetime, timedelta
 
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, dateformat, formats
 from validate_docbr import CPF
+from werkzeug.utils import secure_filename
 
 from compliance import settings
+from compliance.aws.form import UploadFileOnlyForm
+from compliance.aws.views import s3_upload_small_files
 from compliance.core.mail import send_mail_template
-from compliance.core.models import Cliente, Evento
+from compliance.core.models import Cliente, Evento, Documento
 from compliance.core.report import render_to_pdf
 from compliance.lgpd.models import Consentimento, ConsentimentoEvento, Tratamento, TratamentoEvento
 
@@ -32,6 +35,35 @@ lista_2 = [
     {"id": "VIII", "descricao": "VIII – informação sobre consentimento e consequências da negativa"},
     {"id": "IX", "descricao": "IX - revogação do consentimento"}
 ]
+
+
+def get_data_impressao(request, cliente):
+    lista_finalidade = []
+    if request.POST.get('finalidade_1'):
+        lista_finalidade.append(request.POST.get('finalidade_1'))
+    if request.POST.get('finalidade_2'):
+        lista_finalidade.append(request.POST.get('finalidade_2'))
+    if request.POST.get('finalidade_3'):
+        lista_finalidade.append(request.POST.get('finalidade_3'))
+    lista_tratamento = []
+    valor = request.session.get('consentimentos')
+    for c in valor:
+        if request.POST.get(c.get('tipo')):
+            lista_tratamento.append(c.get('valor'))
+    return {
+        'datahora': dateformat.format(datetime.now(), formats.get_format('DATE_FORMAT')),
+        'controlador_local': cliente.cidade,
+        'controlador_nome': cliente.nome,
+        'controlador_endereco': cliente.endereco_completo,
+        'controlador_cnpj': cliente.cnpj,
+        'nome': request.POST.get('nome'),
+        'identidade': request.POST.get('identidade'),
+        'cpf': request.POST.get('cpf'),
+        'nacionalidade': request.POST.get('nacionalidade'),
+        'estadocivil': request.POST.get('estadocivil'),
+        'lista_tratamento': ", ".join(lista_tratamento),
+        'lista_finalidade': ", ".join(lista_finalidade),
+    }
 
 
 def tratar_requisicao(obj, request, autorizador):
@@ -396,6 +428,7 @@ def send_mail(tratamento, mensagem):
         [tratamento.email]
     )
 
+
 @login_required(login_url='login')
 def LgpdControladorConsentimento(request, pk):
     context = {}
@@ -413,7 +446,11 @@ def LgpdControladorConsentimento(request, pk):
         finalidade_2 = request.POST.get('finalidade_2') or 'teste 2'
         finalidade_3 = request.POST.get('finalidade_3') or ''
         consentimentos = request.POST.get('consentimentos') or ''
-        formulario = True if request.POST.get('btn_formulario') else False
+        anexo = True if request.POST.get('btn_enviar_ficha') else False
+        if anexo or request.POST.get('btn_formulario'):
+            formulario = True
+        else:
+            formulario = False
 
         if request.POST.get('btn_solicita_consentimento') or request.POST.get('btn_formulario'):
             url = settings.LGPD_URL + 'lista_finalidade'
@@ -423,16 +460,7 @@ def LgpdControladorConsentimento(request, pk):
                 request.session['consentimentos'] = consentimentos
 
         if request.POST.get('btn_imprmir'):
-            data = {
-                'controlador_nome': cliente.nome,
-                'controlador_endereco': cliente.endereco_completo,
-                'nome': nome,
-                'identidade': identidade,
-                'cpf': cpf,
-                'nacionalidade': nacionalidade,
-                'estadocivil': estadocivil,
-            }
-            pdf = render_to_pdf('lgpd/termo_consentimento.html', data)
+            pdf = render_to_pdf('lgpd/termo_consentimento.html', get_data_impressao(request, cliente))
             return HttpResponse(pdf, content_type='application/pdf')
 
         if request.POST.get('btn_enviar'):
@@ -466,9 +494,33 @@ def LgpdControladorConsentimento(request, pk):
                 messages.success(request, 'sucesso na solicitação')
                 request.session['consentimentos'] = None
 
+        if request.POST.get('btn_anexar'):
+            folder = "clientes/cli-" + str(cliente.cnpj) + "/consentimentos/"
+            form = UploadFileOnlyForm(request.POST, request.FILES)
+            if form.is_valid():
+                file_name = folder + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + secure_filename(request.FILES['file'].name)
+                s3_upload_small_files(request.FILES['file'],
+                                      settings.AWS_STORAGE_BUCKET_NAME,
+                                      file_name,
+                                      request.content_type)
+                print(file_name)
+                # consentimento = Consentimento()
+                # consentimento.cpf = cpf
+                # consentimento.nome = nome
+                # consentimento.cliente = cliente
+                # consentimento.autorizado_dt = datetime.now()
+                # consentimento.arquivo = file_name
+                # consentimento.save()
+
+                return HttpResponseRedirect(reverse('url_cliente_consentimento', kwargs={'pk': cliente.pk}))
+        else:
+            form = UploadFileOnlyForm()
+
     except Exception as e:
         messages.error(request, e)
 
+    context['form'] = form
+    context['anexo'] = anexo
     context['consentimentos'] = consentimentos
     context['cliente'] = cliente
     context['lista'] = lista_consentimento
@@ -484,3 +536,9 @@ def LgpdControladorConsentimento(request, pk):
     context['formulario'] = formulario
 
     return render(request, 'lgpd/controlador_consentimento.html', context)
+
+
+@login_required(login_url='login')
+def LgpdControladorConsentimentoAnexo(request, data):
+    context = {}
+    pass

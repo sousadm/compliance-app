@@ -19,8 +19,8 @@
         {% if formulario %}
         <input formtarget="_blank" type="submit" value="Imprimir ficha" name="btn_imprmir"
                class="btn btn-secondary">
-        <input type="submit" value="Anexar documento" name="btn_anexar"
-               class="btn btn-danger">
+        <input type="submit" value="Enviar ficha" name="btn_enviar_ficha"
+               class="btn btn-info">
         {% else %}
         <input type="submit" value="Enviar solicitação" name="btn_enviar"
                class="btn btn-danger"
@@ -83,6 +83,15 @@
            class="form-control">
     <input value="{{ finalidade_3 }}" type="text" name="finalidade_3" placeholder="finalidade de tratamento"
            class="form-control">
+
+    {% if anexo %}
+    </br>
+    <div class="input-group mb-3">
+        {{ form.file }}
+        <input style="position: absolute; right: 0" type="submit" value="Anexar documento" name="btn_anexar"
+               class="btn btn-danger">
+    </div>
+    {% endif %}
 
     {% else %}
 

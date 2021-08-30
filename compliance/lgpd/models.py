@@ -9,6 +9,7 @@ class Consentimento(models.Model):
     autorizado_dt = models.DateTimeField(blank=True, null=True)
     cpf = models.CharField(max_length=11, blank=True, null=True)
     nome = models.CharField(max_length=100, blank=True, null=True)
+    arquivo = models.CharField(max_length=250, blank=True, null=True)
     created_dt = models.DateTimeField(blank=True, null=True)
     documento = models.TextField(blank=True, null=True)
     hashcode = models.CharField(max_length=32, blank=True, null=True)
@@ -17,6 +18,7 @@ class Consentimento(models.Model):
     cliente = models.ForeignKey(Cliente, models.DO_NOTHING, blank=True, null=True)
     anonimizacao_dt = models.DateTimeField(blank=True, null=True)
     autorizador = models.CharField(max_length=32, blank=True, null=True)
+    arquivo = models.TextField(blank=True, null=True)
 
     objects = models.Manager()
 

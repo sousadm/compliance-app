@@ -118,7 +118,8 @@ class Cliente(models.Model):
 
     @property
     def endereco_completo(self):
-        return self.logradouro + ', ' + str(self.numero)
+        return self.logradouro + ', ' + str(
+            self.numero) + " " + self.bairro + ", CEP-" + self.cep + " em " + self.cidade + "/" + self.uf
 
     @property
     def cor(self):
@@ -216,11 +217,11 @@ class Tarefa(models.Model):
     def getStatusSAC(self, user):
         return {
             'pode_salvar': (
-                                       not self.pk or not self.user or self.user == user) and self.status == 'INICIO' and not self.encerrado_dt,
+                                   not self.pk or not self.user or self.user == user) and self.status == 'INICIO' and not self.encerrado_dt,
             'pode_observar': self.pk and self.user == user and not self.encerrado_dt and self.iniciado_dt,
             'pode_encaminhar': self.user == user and self.pk and not self.encerrado_dt and self.status != 'PAUSA' and self.iniciado_dt,
             'pode_iniciar': (
-                                        self.user == user or user.is_des) and self.pk and not self.encerrado_dt and not self.iniciado_dt,
+                                    self.user == user or user.is_des) and self.pk and not self.encerrado_dt and not self.iniciado_dt,
             'pode_reiniciar': self.user == user and self.pk and not self.encerrado_dt and self.status == 'PAUSA',
             'pode_encerrar': self.user == user and self.pk and not self.encerrado_dt and self.iniciado_dt and not self.status == 'PAUSA',
             'pode_pausar': self.user == user and self.pk and self.status != 'PAUSA',
