@@ -951,7 +951,7 @@ def getListaTarefa(request):
     elif situacao == '1': #não iniciado
         filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True, iniciado_dt__isnull=True)
     elif situacao == '2': #em produção
-        filtro_periodo = Q(iniciado_dt__range=[data_inicial, data_final], encerrado_dt__isnull=True)
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True, iniciado_dt__isnull=False)
     elif situacao == '3': #atualizado no cliente
         filtro_periodo = Q(implantado_dt__range=[data_inicial, data_final])
     elif situacao == '4': #encerrada
@@ -1003,7 +1003,7 @@ def getTituloRelatorio(request):
         titulo += ' Atualizado no cliente'
     elif request.POST.get('situacao') == "3":
         titulo += ' Encerrada'
-    titulo += ' Perído '
+    titulo += ' Período '
     data = datetime.strptime(request.POST.get('data_inicial'), '%Y-%m-%d')
     titulo += ' de ' + data.strftime('%d/%m/%Y')
     data = datetime.strptime(request.POST.get('data_final'), '%Y-%m-%d')

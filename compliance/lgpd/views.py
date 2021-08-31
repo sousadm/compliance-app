@@ -433,6 +433,7 @@ def send_mail(tratamento, mensagem):
 def LgpdControladorConsentimento(request, pk):
     context = {}
     try:
+        form = UploadFileOnlyForm()
         cliente = Cliente.objects.get(pk=pk)
         lista_consentimento = Consentimento.objects.filter(cliente=cliente).order_by('id').reverse()
         nome = request.POST.get('nome') or 'Francisco Sousa'
@@ -446,12 +447,37 @@ def LgpdControladorConsentimento(request, pk):
         finalidade_2 = request.POST.get('finalidade_2') or 'teste 2'
         finalidade_3 = request.POST.get('finalidade_3') or ''
         consentimentos = request.POST.get('consentimentos') or ''
+
         if request.POST.get('btn_enviar_ficha'):
             modo = 'ANEXO'
         elif request.POST.get('btn_formulario'):
             modo = 'FICHA'
         else:
             modo = 'LISTA'
+
+        if request.POST.get('btn_anexar'):
+            modo = 'ANEXO'
+            folder = "clientes/cli-" + str(cliente.cnpj) + "/consentimentos/"
+            form = UploadFileOnlyForm(request.POST, request.FILES)
+            messages.info(request, request.FILES['file'].name)
+            if form.is_valid():
+                file_name = folder + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + secure_filename(
+                    request.FILES['file'].name)
+                s3_upload_small_files(request.FILES['file'],
+                                      settings.AWS_STORAGE_BUCKET_NAME,
+                                      file_name,
+                                      request.content_type)
+                messages.info(request, file_name)
+                # consentimento = Consentimento()
+                # consentimento.cpf = cpf
+                # consentimento.nome = nome
+                # consentimento.cliente = cliente
+                # consentimento.autorizado_dt = datetime.now()
+                # consentimento.arquivo = file_name
+                # consentimento.save()
+
+                # return HttpResponseRedirect(reverse('url_cliente_consentimento', kwargs={'pk': cliente.pk}))
+                pass
 
         if request.method == 'POST':
             url = settings.LGPD_URL + 'lista_finalidade'
@@ -494,29 +520,6 @@ def LgpdControladorConsentimento(request, pk):
             if response.status_code == 200:
                 messages.success(request, 'sucesso na solicitação')
                 request.session['consentimentos'] = None
-
-        if request.POST.get('btn_anexar'):
-            folder = "clientes/cli-" + str(cliente.cnpj) + "/consentimentos/"
-            form = UploadFileOnlyForm(request.POST, request.FILES)
-            if form.is_valid():
-                file_name = folder + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + secure_filename(
-                    request.FILES['file'].name)
-                s3_upload_small_files(request.FILES['file'],
-                                      settings.AWS_STORAGE_BUCKET_NAME,
-                                      file_name,
-                                      request.content_type)
-                print(file_name)
-                # consentimento = Consentimento()
-                # consentimento.cpf = cpf
-                # consentimento.nome = nome
-                # consentimento.cliente = cliente
-                # consentimento.autorizado_dt = datetime.now()
-                # consentimento.arquivo = file_name
-                # consentimento.save()
-
-                return HttpResponseRedirect(reverse('url_cliente_consentimento', kwargs={'pk': cliente.pk}))
-        else:
-            form = UploadFileOnlyForm()
 
     except Exception as e:
         messages.error(request, e)

@@ -22,7 +22,9 @@
                class="btn btn-secondary">
         <input type="submit" value="Enviar ficha" name="btn_enviar_ficha"
                class="btn btn-info">
-        {% else %}
+        {% endif %}
+
+        {% if modo == 'LISTA' %}
         <input type="submit" value="Enviar solicitação" name="btn_enviar"
                class="btn btn-danger"
                onClick='return confirma("Confirma o envio da requisição?")'>
@@ -42,6 +44,14 @@
         {{cliente.nome}}</br>
         CNPJ: {{cliente.cnpj}}
     </p>
+
+    {% if modo == 'FICHA' %}
+
+        {% include "lgpd/consentimento_upload.html" %}
+
+    {% endif %}
+
+    {% if modo != 'FICHA' %}
 
     {% if consentimentos %}
 
@@ -64,12 +74,13 @@
             <label>Estado civil</label>
             <input value="{{ estadocivil }}" required type="text" name="estadocivil" class="form-control">
 
-            {% else %}
+            {% elif modo == 'LISTA' %}
             <label>E-mail</label>
             <input value="{{ email }}" required type="email" name="email" class="form-control">
             {% endif %}
 
         </div>
+
         <div class="col-12 col-md-8 form-group">
             <h5>Itens de Consentimento</h5>
             {% for c in consentimentos %}
@@ -79,6 +90,7 @@
             </div>
             {% endfor %}
         </div>
+
     </div>
 
     <input value="{{ finalidade_1 }}" required type="text" name="finalidade_1"
@@ -87,15 +99,6 @@
            class="form-control">
     <input value="{{ finalidade_3 }}" type="text" name="finalidade_3" placeholder="finalidade de tratamento"
            class="form-control">
-
-    {% if modo == 'ANEXO' %}
-    </br>
-    <div class="input-group mb-3">
-        {{ form.file }}
-        <input style="position: absolute; right: 0" type="submit" value="Anexar documento" name="btn_anexar"
-               class="btn btn-danger">
-    </div>
-    {% endif %}
 
     {% else %}
 
@@ -136,7 +139,7 @@
 
     {% endif %}
 
-    <!--    <input type="hidden" name="consentimentos" value="{{ consentimentos }}">-->
+    {% endif %}
 
 </form>
 
