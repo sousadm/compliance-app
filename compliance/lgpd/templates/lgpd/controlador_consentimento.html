@@ -12,11 +12,12 @@
                 <i class="fas fa-user"></i>Cliente
             </button>
         </a>
+
         {% if consentimentos %}
         <a href="{% url 'url_cliente_consentimento' cliente.id %}">
             <input type="button" class="btn btn-secondary" value="Limpar">
         </a>
-        {% if formulario %}
+        {% if modo == 'FICHA' %}
         <input formtarget="_blank" type="submit" value="Imprimir ficha" name="btn_imprmir"
                class="btn btn-secondary">
         <input type="submit" value="Enviar ficha" name="btn_enviar_ficha"
@@ -25,13 +26,16 @@
         <input type="submit" value="Enviar solicitação" name="btn_enviar"
                class="btn btn-danger"
                onClick='return confirma("Confirma o envio da requisição?")'>
+
         {% endif %}
+
         {% else %}
         <input type="submit" class="btn btn-danger" value="Solicitar Consentimento"
                name="btn_solicita_consentimento">
         <input type="submit" value="Formulário" name="btn_formulario"
                class="btn btn-success" title="formulário manual">
         {% endif %}
+
     </div>
     <h2>LGPD - Consentimento de Dados</h2>
     <p>
@@ -50,7 +54,7 @@
             <input value="{{cpf}}" required type="text" name="cpf" maxlength="11" minlength="11"
                    class="form-control">
 
-            {% if formulario %}
+            {% if modo == 'FICHA' %}
             <label>Identidade</label>
             <input value="{{ identidade }}" required type="text" name="identidade" class="form-control">
 
@@ -84,7 +88,7 @@
     <input value="{{ finalidade_3 }}" type="text" name="finalidade_3" placeholder="finalidade de tratamento"
            class="form-control">
 
-    {% if anexo %}
+    {% if modo == 'ANEXO' %}
     </br>
     <div class="input-group mb-3">
         {{ form.file }}

@@ -16,7 +16,6 @@
         <input type="submit" class="btn btn-warning" value="Filtrar dados">
         <input formtarget="_blank" {% if not lista %} disabled {% endif %} type="submit" class="btn btn-warning"
                value="Imprimir" name="btn_imprimir">
-        <!--        <input formtarget="_blank" type="submit" class="btn btn-warning" value="Imprimir" name="btn_imprimir">-->
     </div>
     </br>
     <div class="row">
@@ -25,14 +24,11 @@
         </div>
         <div class="col-12 col-md-9">
             <select class="form-control" name="situacao">
-                <option {% if situacao==
-                "0" %} selected {% endif %} value="0">Não iniciado</option>
-                <option {% if situacao==
-                "1" %} selected {% endif %} value="1">Em produção</option>
-                <option {% if situacao==
-                "2" %} selected {% endif %} value="2">Atualizado no cliente</option>
-                <option {% if situacao==
-                "3" %} selected {% endif %} value="3">Encerrada</option>
+                <option {% if situacao == "0" %} selected {% endif %} value="0">Todas</option>
+                <option {% if situacao == "1" %} selected {% endif %} value="1">Não iniciada</option>
+                <option {% if situacao == "2" %} selected {% endif %} value="2">Em produção</option>
+                <option {% if situacao == "3" %} selected {% endif %} value="3">Atualizada no cliente</option>
+                <option {% if situacao == "4" %} selected {% endif %} value="4">Encerrada</option>
             </select>
         </div>
     </div>
@@ -44,7 +40,7 @@
         <div class="col-12 col-md-9">
             <select class="form-control" name="usuario">
                 {% for u in user_list %}
-                <option value="{{u.value}}" {% if u.value== usuario %} selected{% endif %}>{{u.label}}
+                <option value="{{u.value}}" {% if u.value == usuario %} selected{% endif %}>{{u.label}}
                 </option>
                 {% endfor %}
             </select>
@@ -58,7 +54,7 @@
         <div class="col-12 col-md-9">
             <select class="form-control" name="modulo">
                 {% for m in modulo_lista %}
-                <option value="{{m.value}}" {% if m.value== modulo %} selected{% endif %}>{{m.label}}
+                <option value="{{m.value}}" {% if m.value == modulo %} selected{% endif %}>{{m.label}}
                 </option>
                 </option>
                 {% endfor %}

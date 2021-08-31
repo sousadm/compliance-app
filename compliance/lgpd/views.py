@@ -446,13 +446,14 @@ def LgpdControladorConsentimento(request, pk):
         finalidade_2 = request.POST.get('finalidade_2') or 'teste 2'
         finalidade_3 = request.POST.get('finalidade_3') or ''
         consentimentos = request.POST.get('consentimentos') or ''
-        anexo = True if request.POST.get('btn_enviar_ficha') else False
-        if anexo or request.POST.get('btn_formulario'):
-            formulario = True
+        if request.POST.get('btn_enviar_ficha'):
+            modo = 'ANEXO'
+        elif request.POST.get('btn_formulario'):
+            modo = 'FICHA'
         else:
-            formulario = False
+            modo = 'LISTA'
 
-        if request.POST.get('btn_solicita_consentimento') or request.POST.get('btn_formulario'):
+        if request.method == 'POST':
             url = settings.LGPD_URL + 'lista_finalidade'
             response = requests.get(url, auth=("assist", "123456"))
             if response.status_code == 200:
@@ -498,7 +499,8 @@ def LgpdControladorConsentimento(request, pk):
             folder = "clientes/cli-" + str(cliente.cnpj) + "/consentimentos/"
             form = UploadFileOnlyForm(request.POST, request.FILES)
             if form.is_valid():
-                file_name = folder + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + secure_filename(request.FILES['file'].name)
+                file_name = folder + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + secure_filename(
+                    request.FILES['file'].name)
                 s3_upload_small_files(request.FILES['file'],
                                       settings.AWS_STORAGE_BUCKET_NAME,
                                       file_name,
@@ -520,7 +522,7 @@ def LgpdControladorConsentimento(request, pk):
         messages.error(request, e)
 
     context['form'] = form
-    context['anexo'] = anexo
+    context['modo'] = modo
     context['consentimentos'] = consentimentos
     context['cliente'] = cliente
     context['lista'] = lista_consentimento
@@ -533,12 +535,5 @@ def LgpdControladorConsentimento(request, pk):
     context['finalidade_1'] = finalidade_1
     context['finalidade_2'] = finalidade_2
     context['finalidade_3'] = finalidade_3
-    context['formulario'] = formulario
 
     return render(request, 'lgpd/controlador_consentimento.html', context)
-
-
-@login_required(login_url='login')
-def LgpdControladorConsentimentoAnexo(request, data):
-    context = {}
-    pass

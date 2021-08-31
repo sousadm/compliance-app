@@ -945,13 +945,16 @@ def getListaTarefa(request):
         filtro_nome = Q(Q(identificador=valor) | Q(cliente__cnpj=valor))
     else:
         filtro_nome = Q(Q(resumo__icontains=valor) | Q(cliente__nome__icontains=valor))
-    if situacao == '0':
+
+    if situacao == '0': #todos
         filtro_periodo = Q(created_at__range=[data_inicial, data_final])
-    elif situacao == '1':
-        filtro_periodo = Q(iniciado_dt__range=[data_inicial, data_final])
-    elif situacao == '2':
+    elif situacao == '1': #não iniciado
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True, iniciado_dt__isnull=True)
+    elif situacao == '2': #em produção
+        filtro_periodo = Q(iniciado_dt__range=[data_inicial, data_final], encerrado_dt__isnull=True)
+    elif situacao == '3': #atualizado no cliente
         filtro_periodo = Q(implantado_dt__range=[data_inicial, data_final])
-    elif situacao == '3':
+    elif situacao == '4': #encerrada
         filtro_periodo = Q(encerrado_dt__range=[data_inicial, data_final])
 
     if request.POST.get('modulo') != 'TODOS':
@@ -971,19 +974,19 @@ def getListaTarefa(request):
                 .exclude(modulo='SAC') \
                 .order_by('identificador')
     for tar in tarefas:
-        if situacao == '0':
+        if situacao == '0' or situacao == '1':
             data = tar.created_at
-        elif situacao == '1':
-            data = tar.iniciado_dt
         elif situacao == '2':
-            data = tar.implantado_dt
+            data = tar.iniciado_dt
         elif situacao == '3':
+            data = tar.implantado_dt
+        elif situacao == '4':
             data = tar.encerrado_dt
         lista.append({
             "identificador": tar.identificador,
             "resumo": tar.resumo,
             "modulo": tar.modulo,
-            "data": data.strftime('%d/%m/%Y'),
+            "data": data.strftime('%d/%m/%Y') if data else '',
             "nome": tar.cliente.nome
         })
 
