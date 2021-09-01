@@ -429,11 +429,38 @@ def send_mail(tratamento, mensagem):
     )
 
 
+def getModoLgpd(request):
+    if request.POST.get('btn_solicita'):
+        return 'SOLICITA'
+    elif request.POST.get('btn_enviar_ficha'):
+        return 'ANEXO'
+    elif request.POST.get('btn_formulario'):
+        return 'FICHA'
+    else:
+        return 'LISTA'
+
+
+def gravar_consentimento(request, arquivo, cliente, nome, cpf):
+    s3_upload_small_files(request.FILES['file'],
+                          settings.AWS_STORAGE_BUCKET_NAME,
+                          arquivo,
+                          request.content_type)
+    consentimento = Consentimento()
+    consentimento.cpf = cpf
+    consentimento.nome = nome
+    consentimento.cliente = cliente
+    consentimento.created_dt = datetime.now()
+    consentimento.autorizado_dt = consentimento.created_dt
+    consentimento.updated_dt = consentimento.created_dt
+    consentimento.arquivo = arquivo
+    consentimento.save()
+    DefineConsentimentoEvento(cliente, consentimento, 'consentimento realizado por assinatura em arquivo anexo')
+
+
 @login_required(login_url='login')
 def LgpdControladorConsentimento(request, pk):
     context = {}
     try:
-        form = UploadFileOnlyForm()
         cliente = Cliente.objects.get(pk=pk)
         lista_consentimento = Consentimento.objects.filter(cliente=cliente).order_by('id').reverse()
         nome = request.POST.get('nome') or 'Francisco Sousa'
@@ -447,79 +474,61 @@ def LgpdControladorConsentimento(request, pk):
         finalidade_2 = request.POST.get('finalidade_2') or 'teste 2'
         finalidade_3 = request.POST.get('finalidade_3') or ''
         consentimentos = request.POST.get('consentimentos') or ''
-
-        if request.POST.get('btn_enviar_ficha'):
-            modo = 'ANEXO'
-        elif request.POST.get('btn_formulario'):
-            modo = 'FICHA'
-        else:
-            modo = 'LISTA'
-
-        if request.POST.get('btn_anexar'):
-            modo = 'ANEXO'
-            folder = "clientes/cli-" + str(cliente.cnpj) + "/consentimentos/"
-            form = UploadFileOnlyForm(request.POST, request.FILES)
-            messages.info(request, request.FILES['file'].name)
-            if form.is_valid():
-                file_name = folder + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + secure_filename(
-                    request.FILES['file'].name)
-                s3_upload_small_files(request.FILES['file'],
-                                      settings.AWS_STORAGE_BUCKET_NAME,
-                                      file_name,
-                                      request.content_type)
-                messages.info(request, file_name)
-                # consentimento = Consentimento()
-                # consentimento.cpf = cpf
-                # consentimento.nome = nome
-                # consentimento.cliente = cliente
-                # consentimento.autorizado_dt = datetime.now()
-                # consentimento.arquivo = file_name
-                # consentimento.save()
-
-                # return HttpResponseRedirect(reverse('url_cliente_consentimento', kwargs={'pk': cliente.pk}))
-                pass
+        modo = getModoLgpd(request)
 
         if request.method == 'POST':
-            url = settings.LGPD_URL + 'lista_finalidade'
-            response = requests.get(url, auth=("assist", "123456"))
-            if response.status_code == 200:
-                consentimentos = response.json()
-                request.session['consentimentos'] = consentimentos
+            form = UploadFileOnlyForm(request.POST, request.FILES)
+            if not consentimentos:
+                url = settings.LGPD_URL + 'lista_finalidade'
+                response = requests.get(url, auth=("assist", "123456"))
+                if response.status_code == 200:
+                    consentimentos = response.json()
+                    request.session['consentimentos'] = consentimentos
 
-        if request.POST.get('btn_imprmir'):
-            pdf = render_to_pdf('lgpd/termo_consentimento.html', get_data_impressao(request, cliente))
-            return HttpResponse(pdf, content_type='application/pdf')
+            if request.POST.get('btn_upload'):
+                if form.is_valid():
+                    folder = "clientes/cli-" + str(cliente.cnpj) + "/consentimentos/"
+                    file_name = folder + datetime.now().strftime('%Y%m%d_%H%M%S') + "_" + secure_filename(
+                        request.FILES['file'].name)
+                    gravar_consentimento(request, file_name, cliente, nome, cpf)
+                    return HttpResponseRedirect(reverse('url_cliente_consentimento', kwargs={'pk': cliente.pk}))
 
-        if request.POST.get('btn_enviar'):
-            lista_consentimentos = []
-            valor = request.session.get('consentimentos')
-            for c in valor:
-                if request.POST.get(c.get('tipo')):
-                    lista_consentimentos.append(c.get('tipo'))
-            if not lista_consentimentos:
-                consentimentos = request.session.get('consentimentos')
-                raise Exception('selecione pelo menos um consentimento')
+            if request.POST.get('btn_imprmir'):
+                pdf = render_to_pdf('lgpd/termo_consentimento.html', get_data_impressao(request, cliente))
+                return HttpResponse(pdf, content_type='application/pdf')
 
-            solicitacao = {
-                "operador": {
-                    "nome": "Administrador",
-                    "email": cliente.email
-                },
-                "tratamentos": get_tratamentos(request),
-                "consentimentos": lista_consentimentos,
-                "titulares": [
-                    {
-                        "nome": nome,
-                        "cpf": cpf,
-                        "email": email
-                    }
-                ]
-            }
-            url = settings.LGPD_URL + 'cnpj=' + cliente.cnpj + '/consentimento'
-            response = requests.post(url, json.dumps(solicitacao), auth=("assist", "123456"))
-            if response.status_code == 200:
-                messages.success(request, 'sucesso na solicitação')
-                request.session['consentimentos'] = None
+            if request.POST.get('btn_enviar'):
+                lista_consentimentos = []
+                valor = request.session.get('consentimentos')
+                for c in valor:
+                    if request.POST.get(c.get('tipo')):
+                        lista_consentimentos.append(c.get('tipo'))
+                if not lista_consentimentos:
+                    consentimentos = request.session.get('consentimentos')
+                    raise Exception('selecione pelo menos um consentimento')
+
+                solicitacao = {
+                    "operador": {
+                        "nome": "Administrador",
+                        "email": cliente.email
+                    },
+                    "tratamentos": get_tratamentos(request),
+                    "consentimentos": lista_consentimentos,
+                    "titulares": [
+                        {
+                            "nome": nome,
+                            "cpf": cpf,
+                            "email": email
+                        }
+                    ]
+                }
+                url = settings.LGPD_URL + 'cnpj=' + cliente.cnpj + '/consentimento'
+                response = requests.post(url, json.dumps(solicitacao), auth=("assist", "123456"))
+                if response.status_code == 200:
+                    messages.success(request, 'sucesso na solicitação')
+                    request.session['consentimentos'] = None
+        else:
+            form = UploadFileOnlyForm()
 
     except Exception as e:
         messages.error(request, e)

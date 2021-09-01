@@ -1,3 +1,5 @@
+import urllib
+
 from django.db import models
 
 # Create your models here.
@@ -25,6 +27,10 @@ class Consentimento(models.Model):
     class Meta:
         managed = False
         db_table = 'consentimento'
+
+    @property
+    def url_arquivo(self):
+        return urllib.parse.quote_plus(self.arquivo)
 
 
 class Tratamento(models.Model):

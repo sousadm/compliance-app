@@ -1,7 +1,10 @@
+import pickle
 import urllib
 
 import boto3
 from boto.s3.connection import S3Connection
+from django.contrib import messages
+from django.http import HttpResponse
 
 import compliance.settings as conf
 from compliance import settings
@@ -80,3 +83,4 @@ def s3_delete_file(s3_bucket_name, inp_file_key):
     client = s3_client()
     delete_file_response = client.delete_object(Bucket=s3_bucket_name, Key=inp_file_key)
     return delete_file_response
+

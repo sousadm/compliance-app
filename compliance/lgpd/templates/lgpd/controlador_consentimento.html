@@ -2,21 +2,37 @@
 
 {% block content %}
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 
     {% csrf_token %}
 
     <div style="text-align: right; margin-top: 10px">
+
         <a href="{% url 'url_cliente_update' cliente.id %}">
             <button type="button" class="btn btn-secondary btn-sm">
                 <i class="fas fa-user"></i>Cliente
             </button>
         </a>
 
-        {% if consentimentos %}
+        {% if modo != 'LISTA' %}
         <a href="{% url 'url_cliente_consentimento' cliente.id %}">
             <input type="button" class="btn btn-secondary" value="Limpar">
         </a>
+        {% endif %}
+
+        {% if modo == 'LISTA' %}
+        <input type="submit" class="btn btn-danger" value="Solicitar Consentimento"
+               id="btn_solicita" name="btn_solicita">
+        <input type="submit" value="Formulário" name="btn_formulario"
+               class="btn btn-success" title="formulário manual">
+        {% endif %}
+
+        {% if modo == 'SOLICITA' %}
+        <input type="submit" value="Enviar solicitação" name="btn_enviar"
+               class="btn btn-danger"
+               onClick='return confirma("Confirma o envio da requisição?")'>
+        {% endif %}
+
         {% if modo == 'FICHA' %}
         <input formtarget="_blank" type="submit" value="Imprimir ficha" name="btn_imprmir"
                class="btn btn-secondary">
@@ -24,36 +40,26 @@
                class="btn btn-info">
         {% endif %}
 
-        {% if modo == 'LISTA' %}
-        <input type="submit" value="Enviar solicitação" name="btn_enviar"
-               class="btn btn-danger"
-               onClick='return confirma("Confirma o envio da requisição?")'>
-
-        {% endif %}
-
-        {% else %}
-        <input type="submit" class="btn btn-danger" value="Solicitar Consentimento"
-               name="btn_solicita_consentimento">
-        <input type="submit" value="Formulário" name="btn_formulario"
-               class="btn btn-success" title="formulário manual">
+        {% if modo == 'ANEXO' %}
+        <input type="submit" value="Enviar arquivo" name="btn_upload" class="btn btn-danger"
+               onClick='return confirma("Confirma o envio de anexo para consentimento?")'>
         {% endif %}
 
     </div>
+
     <h2>LGPD - Consentimento de Dados</h2>
     <p>
         {{cliente.nome}}</br>
         CNPJ: {{cliente.cnpj}}
     </p>
 
-    {% if modo == 'FICHA' %}
+    {% if modo == 'ANEXO' %}
 
-        {% include "lgpd/consentimento_upload.html" %}
+    {% include "lgpd/consentimento_upload.html" %}
 
     {% endif %}
 
-    {% if modo != 'FICHA' %}
-
-    {% if consentimentos %}
+    {% if modo == 'SOLICITA' or modo == 'FICHA' %}
 
     <div class="row">
         <div class="col-12 col-md-4 form-group">
@@ -82,6 +88,7 @@
         </div>
 
         <div class="col-12 col-md-8 form-group">
+            {% if consentimentos %}
             <h5>Itens de Consentimento</h5>
             {% for c in consentimentos %}
             <div>
@@ -89,6 +96,9 @@
                 <label for="{{c.tipo}}">{{c.valor}}</label>
             </div>
             {% endfor %}
+            {% else %}
+            <p style="color: red">não foi possível obter a lista de consentimentos</p>
+            {% endif %}
         </div>
 
     </div>
@@ -100,10 +110,10 @@
     <input value="{{ finalidade_3 }}" type="text" name="finalidade_3" placeholder="finalidade de tratamento"
            class="form-control">
 
-    {% else %}
+    {% endif %}
 
+    {% if modo == 'LISTA' %}
     {% if lista %}
-
     <div class="table-responsive" style="margin-top: 15px">
         <table class="table table-striped">
             <tr>
@@ -124,10 +134,18 @@
                 <td>{{ n.cpf }}</td>
                 <td>{{ n.nome }}</td>
                 <td>
+                    {% if n.arquivo %}
+                    <a href="{% url 'url_download_s3' n.url_arquivo %}" target="_blank">
+                        <button type="button" class="btn btn-sm" title="abrir arquivo">
+                            <i class='fas fa-file-pdf'></i>
+                        </button>
+                    </a>
+                    {% else %}
                     <button type="button" class="btn btn-sm" title="visualizar dados"
                             onclick="window.open('{% url 'lgpd_dados_id' n.pk %}','popup','width=800,height=600'); return false;">
                         <i class="fas fa-address-book"></i>
                     </button>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -136,9 +154,6 @@
     {% else %}
     <p style="color: red">Não foram identificados registros em seu controle</p>
     {% endif %}
-
-    {% endif %}
-
     {% endif %}
 
 </form>
