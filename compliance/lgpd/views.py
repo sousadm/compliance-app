@@ -463,15 +463,15 @@ def LgpdControladorConsentimento(request, pk):
     try:
         cliente = Cliente.objects.get(pk=pk)
         lista_consentimento = Consentimento.objects.filter(cliente=cliente).order_by('id').reverse()
-        nome = request.POST.get('nome') or 'Francisco Sousa'
-        email = request.POST.get('email') or 'sousa.fco@hotmail.com'
-        cpf = request.POST.get('cpf') or '41193148391'
-        identidade = request.POST.get('identidade') or '982848 SSP/PI'
+        nome = request.POST.get('nome') or ''
+        email = request.POST.get('email') or ''
+        cpf = request.POST.get('cpf') or ''
+        identidade = request.POST.get('identidade') or ''
         nacionalidade = request.POST.get('nacionalidade') or 'Brasileiro'
-        estadocivil = request.POST.get('estadocivil') or 'Casado'
+        estadocivil = request.POST.get('estadocivil') or ''
 
-        finalidade_1 = request.POST.get('finalidade_1') or 'teste 1'
-        finalidade_2 = request.POST.get('finalidade_2') or 'teste 2'
+        finalidade_1 = request.POST.get('finalidade_1') or ''
+        finalidade_2 = request.POST.get('finalidade_2') or ''
         finalidade_3 = request.POST.get('finalidade_3') or ''
         consentimentos = request.POST.get('consentimentos') or ''
         modo = getModoLgpd(request)

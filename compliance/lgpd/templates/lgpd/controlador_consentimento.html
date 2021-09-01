@@ -21,10 +21,12 @@
         {% endif %}
 
         {% if modo == 'LISTA' %}
-        <input type="submit" class="btn btn-danger" value="Solicitar Consentimento"
+        <input type="submit" class="btn btn-danger" value="Solicitar"
                id="btn_solicita" name="btn_solicita">
         <input type="submit" value="Formulário" name="btn_formulario"
                class="btn btn-success" title="formulário manual">
+        <input type="submit" value="Enviar ficha" name="btn_enviar_ficha"
+               class="btn btn-info">
         {% endif %}
 
         {% if modo == 'SOLICITA' %}
@@ -70,6 +72,11 @@
             <input value="{{cpf}}" required type="text" name="cpf" maxlength="11" minlength="11"
                    class="form-control">
 
+            {% if modo == 'SOLICITA' %}
+            <label>E-mail</label>
+            <input value="{{ email }}" required type="email" name="email" class="form-control">
+            {% endif %}
+
             {% if modo == 'FICHA' %}
             <label>Identidade</label>
             <input value="{{ identidade }}" required type="text" name="identidade" class="form-control">
@@ -79,10 +86,6 @@
 
             <label>Estado civil</label>
             <input value="{{ estadocivil }}" required type="text" name="estadocivil" class="form-control">
-
-            {% elif modo == 'LISTA' %}
-            <label>E-mail</label>
-            <input value="{{ email }}" required type="email" name="email" class="form-control">
             {% endif %}
 
         </div>
