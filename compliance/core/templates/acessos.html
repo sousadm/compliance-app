@@ -12,18 +12,21 @@ $("#btn").click();
 
 {% block content %}
 
+<script xmlns="http://www.w3.org/1999/html">
+         function atualizar() {
+            document.getElementById("btn_resetar").click();
+         }
+
+</script>
+
 <form id="form" method="post">
 
     {% csrf_token %}
 
     <h2>Monitor de acessos</h2>
 
-    <div style="text-align: right; margin-top: -20px;">
-        {{ form.inicio }}
-        <button class="btn btn-primary">
-            <i class="fas fa-search"></i>Pesquisar
-        </button>
-    </div>
+    <input style="float: right" type="date" name="data_inicial" value="{{data_inicial}}" onchange="atualizar()">
+    <input name="btn_resetar" id="btn_resetar" type="submit" hidden>
 
     <div class="table-responsive-sm">
         <table class="table table-sm">
@@ -54,10 +57,7 @@ $("#btn").click();
             {% endfor %}
             </tbody>
 
-            {% include "core/paginacao.html" %}
-
         </table>
-
 
     </div>
 

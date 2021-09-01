@@ -97,18 +97,6 @@ WSGI_APPLICATION = 'compliance.wsgi.application'
 
 DATABASES = {
 
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'OPTIONS': {
-            'options': '-c search_path=compliance'
-        },
-        'NAME': 'assist',
-        'USER': 'postgres',
-        'PASSWORD': 'contrate',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     #     'OPTIONS': {
@@ -116,10 +104,22 @@ DATABASES = {
     #     },
     #     'NAME': 'assist',
     #     'USER': 'postgres',
-    #     'PASSWORD': 'abc123456',
-    #     'HOST': 'compliance.cckc3qamx2hw.us-east-1.rds.amazonaws.com',
+    #     'PASSWORD': 'contrate',
+    #     'HOST': 'localhost',
     #     'PORT': '5432',
     # }
+
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'OPTIONS': {
+            'options': '-c search_path=compliance'
+        },
+        'NAME': 'assist',
+        'USER': 'postgres',
+        'PASSWORD': 'abc123456',
+        'HOST': 'compliance.cckc3qamx2hw.us-east-1.rds.amazonaws.com',
+        'PORT': '5432',
+    }
 
 }
 

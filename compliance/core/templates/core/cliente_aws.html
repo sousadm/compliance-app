@@ -4,11 +4,19 @@
 
 {% block botao %}
 <div style="text-align: right; margin-top: 10px">
+
     <a href="{% url 'url_cliente_update' cliente.id %}">
         <button type="button" class="btn btn-secondary">
             <i class="fas fa-user"></i>Cliente
         </button>
     </a>
+
+    <a href="{% url 'url_cliente_aws' cliente.id %}">
+        <button type="button" class="btn btn-warning">
+            <i class="fas fa-sync-alt"></i>Reload
+        </button>
+    </a>
+
 </div>
 {% endblock %}
 

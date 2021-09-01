@@ -142,42 +142,6 @@ def MonitorBackupNew(request):
 
 
 @login_required(login_url='login')
-def acessos(request):
-    lista = []
-    context = {}
-    form = MonitorForm(request.POST or None)
-
-    if request.POST:
-        form.inicio = request.POST.get('inicio')
-        termino = datetime.strptime(form.inicio, "%Y-%m-%d")
-        termino = termino.date() + timedelta(days=1)
-
-        lista = Evento.objects \
-            .values('cliente', 'cliente__nome') \
-            .filter(setor__isnull=False, created_at__range=(form.inicio, termino.isoformat())) \
-            .annotate(prim_acesso=Min('created_at')) \
-            .annotate(ult_acesso=Max('created_at')) \
-            .annotate(qt_setor=Count('setor', distinct=True)) \
-            .order_by('cliente__nome')
-    else:
-        context['inicio'] = datetime.today().date().isoformat()
-
-    page = request.GET.get('page') or '1'
-    paginator = Paginator(lista, 10)
-    try:
-        eventos = paginator.page(page)
-    except PageNotAnInteger:
-        eventos = paginator.page(1)
-    except EmptyPage:
-        eventos = paginator.page(paginator.num_pages)
-
-    context['lista'] = eventos
-    context['form'] = form
-
-    return render(request, "acessos.html", context)
-
-
-@login_required(login_url='login')
 def TarefaReopen(request, pk):
     context = {}
     tarefa = Tarefa.objects.get(pk=pk)
@@ -286,11 +250,13 @@ def download(request, pk):
     response = FileResponse(open(absolute_path, 'rb'), as_attachment=True)
     return response
 
+
 def get_lista_modulos():
     modulo_lista = [{"value": "TODOS", "label": "Todos"}, ]
     for m in MODULO_CHOICE:
         modulo_lista.append({"value": m[0], "label": m[1]})
     return modulo_lista
+
 
 def get_lista_usuarios():
     lst = User.objects.filter(is_consulta=False).order_by('name')
@@ -298,6 +264,7 @@ def get_lista_usuarios():
     for u in lst:
         user_list.append({"value": str(u.pk), "label": u.name})
     return user_list
+
 
 @login_required(login_url='login')
 def TarefaLista(request):
@@ -946,15 +913,17 @@ def getListaTarefa(request):
     else:
         filtro_nome = Q(Q(resumo__icontains=valor) | Q(cliente__nome__icontains=valor))
 
-    if situacao == '0': #todos
+    if situacao == '0':  # todos
         filtro_periodo = Q(created_at__range=[data_inicial, data_final])
-    elif situacao == '1': #não iniciado
-        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True, iniciado_dt__isnull=True)
-    elif situacao == '2': #em produção
-        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True, iniciado_dt__isnull=False)
-    elif situacao == '3': #atualizado no cliente
+    elif situacao == '1':  # não iniciado
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True,
+                           iniciado_dt__isnull=True)
+    elif situacao == '2':  # em produção
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True,
+                           iniciado_dt__isnull=False)
+    elif situacao == '3':  # atualizado no cliente
         filtro_periodo = Q(implantado_dt__range=[data_inicial, data_final])
-    elif situacao == '4': #encerrada
+    elif situacao == '4':  # encerrada
         filtro_periodo = Q(encerrado_dt__range=[data_inicial, data_final])
 
     if request.POST.get('modulo') != 'TODOS':
@@ -971,8 +940,8 @@ def getListaTarefa(request):
 
     lista = []
     tarefas = Tarefa.objects.filter(filtro_periodo, filtro_usuario, filtro_modulo, filtro_nome, filtro_cliente) \
-                .exclude(modulo='SAC') \
-                .order_by('identificador')
+        .exclude(modulo='SAC') \
+        .order_by('identificador')
     for tar in tarefas:
         if situacao == '0' or situacao == '1':
             data = tar.created_at
@@ -1046,3 +1015,27 @@ def GeradorRelatorio(request):
     context['lista'] = lista
 
     return render(request, 'core/relatorio.html', context)
+
+
+@login_required(login_url='login')
+def acessos(request):
+    lista = []
+    context = {}
+    data = datetime.today().strftime('%Y-%m-%d')
+    data_inicial = request.POST.get('data_inicial') or data
+
+    inicio = datetime.strptime(data_inicial, "%Y-%m-%d")
+    termino = inicio.date() + timedelta(days=1)
+
+    lista = Evento.objects \
+        .values('cliente', 'cliente__nome') \
+        .filter(setor__isnull=False, created_at__range=(inicio.isoformat(), termino.isoformat())) \
+        .annotate(prim_acesso=Min('created_at')) \
+        .annotate(ult_acesso=Max('created_at')) \
+        .annotate(qt_setor=Count('setor', distinct=True)) \
+        .order_by('cliente__nome')
+
+    context['lista'] = lista
+    context['data_inicial'] = data_inicial
+
+    return render(request, "acessos.html", context)
