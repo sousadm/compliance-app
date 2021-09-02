@@ -473,52 +473,6 @@ def downloadObjectS3(request, nome):
     # raise Http404
 
 
-@login_required(login_url='login')
-def clienteUpdate(request, pk):
-    context = {}
-    cliente = Cliente.objects.get(pk=pk)
-    usuarios = UserCliente.objects.filter(cliente=cliente)
-
-    if request.user.is_consulta:
-        form = ClienteConsultaForm(request.POST or None, instance=cliente)
-    else:
-        form = ClienteForm(request.POST or None, instance=cliente)
-
-    if request.method == 'POST':
-        if request.POST.get('btn_ativa'):
-            cliente.is_active = not cliente.is_active
-            cliente.save()
-            return HttpResponseRedirect(reverse('url_cliente_update', kwargs={'pk': cliente.pk}))
-        if request.POST.get('btn_add_user'):
-            if AddClienteUser(request, cliente):
-                messages.success(request, 'Usuário adicionado com sucesso')
-            return HttpResponseRedirect(reverse('url_cliente_update', kwargs={'pk': cliente.pk}))
-        if form.is_valid():
-            cliente = Cliente.objects.get(pk=pk)
-            cliente.nome = form.data.get('nome')
-            cliente.monitora = form.data.get('monitora') or cliente.monitora
-            cliente.nivel = form.data.get('nivel')
-            cliente.fone = form.data.get('fone')
-            cliente.celular = form.data.get('celular')
-            cliente.email = form.data.get('email')
-            cliente.logradouro = form.data.get('logradouro')
-            cliente.bairro = form.data.get('bairro')
-            cliente.numero = form.data.get('numero')
-            cliente.contato = form.data.get('contato')
-            cliente.cidade = form.data.get('cidade')
-            cliente.pode_sms = form.data.get('pode_sms')
-            cliente.pode_lgpd = form.data.get('pode_lgpd')
-            cliente.uf = form.data.get('uf')
-            cliente.cep = form.data.get('cep')
-            cliente.complemento = form.data.get('complemento')
-            cliente.save()
-            messages.success(request, 'modificado com sucesso')
-
-    context['form'] = form
-    context['cliente'] = cliente
-    context['sem_usuario'] = not usuarios
-
-    return render(request, 'core/cliente_edit.html', context)
 
 
 @login_required(login_url='login')
@@ -1039,3 +993,70 @@ def acessos(request):
     context['data_inicial'] = data_inicial
 
     return render(request, "acessos.html", context)
+
+def salvar_cliente_form(pk, form):
+    cliente = Cliente.objects.get(pk=pk)
+    if form.data.get('nome'):
+        cliente.nome = form.data.get('nome')
+    if form.data.get('monitora'):
+        cliente.monitora = form.data.get('monitora')
+    if form.data.get('nivel'):
+        cliente.nivel = form.data.get('nivel')
+    if form.data.get('fone'):
+        cliente.fone = form.data.get('fone')
+    if form.data.get('celular'):
+        cliente.celular = form.data.get('celular')
+    if form.data.get('email'):
+        cliente.email = form.data.get('email')
+    if form.data.get('logradouro'):
+        cliente.logradouro = form.data.get('logradouro')
+    if form.data.get('bairro'):
+        cliente.bairro = form.data.get('bairro')
+    if form.data.get('numero'):
+        cliente.numero = form.data.get('numero')
+    if form.data.get('contato'):
+        cliente.contato = form.data.get('contato')
+    if form.data.get('cidade'):
+        cliente.cidade = form.data.get('cidade')
+    if form.data.get('pode_sms'):
+        cliente.pode_sms = form.data.get('pode_sms')
+    if form.data.get('pode_lgpd'):
+        cliente.pode_lgpd = form.data.get('pode_lgpd')
+    if form.data.get('uf'):
+        cliente.uf = form.data.get('uf')
+    if form.data.get('cep'):
+        cliente.cep = form.data.get('cep')
+    if form.data.get('complemento'):
+        cliente.complemento = form.data.get('complemento')
+    cliente.save()
+
+
+@login_required(login_url='login')
+def clienteUpdate(request, pk):
+    context = {}
+    cliente = Cliente.objects.get(pk=pk)
+    usuarios = UserCliente.objects.filter(cliente=cliente)
+
+    if request.user.is_consulta:
+        form = ClienteConsultaForm(request.POST or None, instance=cliente)
+    else:
+        form = ClienteForm(request.POST or None, instance=cliente)
+
+    if request.method == 'POST':
+        if request.POST.get('btn_ativa'):
+            cliente.is_active = not cliente.is_active
+            cliente.save()
+            return HttpResponseRedirect(reverse('url_cliente_update', kwargs={'pk': cliente.pk}))
+        if request.POST.get('btn_add_user'):
+            if AddClienteUser(request, cliente):
+                messages.success(request, 'Usuário adicionado com sucesso')
+            return HttpResponseRedirect(reverse('url_cliente_update', kwargs={'pk': cliente.pk}))
+        if form.is_valid():
+            salvar_cliente_form(pk, form)
+            messages.success(request, 'modificado com sucesso')
+
+    context['form'] = form
+    context['cliente'] = cliente
+    context['sem_usuario'] = not usuarios
+
+    return render(request, 'core/cliente_edit.html', context)
