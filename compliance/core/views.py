@@ -473,8 +473,6 @@ def downloadObjectS3(request, nome):
     # raise Http404
 
 
-
-
 @login_required(login_url='login')
 def ClienteTarefaNew(request, pk):
     context = {}
@@ -918,57 +916,21 @@ def getListaTarefa(request):
 
 def getTituloRelatorio(request):
     titulo = ''
-    if request.POST.get('situacao') == "0":
-        titulo += ' Não iniciado'
-    elif request.POST.get('situacao') == "1":
-        titulo += ' Em produção'
-    elif request.POST.get('situacao') == "2":
-        titulo += ' Atualizado no cliente'
-    elif request.POST.get('situacao') == "3":
-        titulo += ' Encerrada'
     titulo += ' Período '
     data = datetime.strptime(request.POST.get('data_inicial'), '%Y-%m-%d')
     titulo += ' de ' + data.strftime('%d/%m/%Y')
     data = datetime.strptime(request.POST.get('data_final'), '%Y-%m-%d')
     titulo += ' a ' + data.strftime('%d/%m/%Y')
+    if request.POST.get('situacao') == "1":
+        titulo += ' / Não iniciado'
+    elif request.POST.get('situacao') == "2":
+        titulo += ' / Em produção'
+    elif request.POST.get('situacao') == "3":
+        titulo += ' / Atualizado no cliente'
+    elif request.POST.get('situacao') == "4":
+        titulo += ' / Encerradas'
+
     return titulo
-
-
-@login_required(login_url='login')
-def GeradorRelatorio(request):
-    lista = []
-    context = {}
-    situacao = request.POST.get('situacao') or '2'
-    data = datetime.today().strftime('%Y-%m-%d')
-    data_inicial = request.POST.get('data_inicial') or data
-    data_final = request.POST.get('data_final') or data
-    usuario = request.POST.get('usuario') or ''
-    modulo = request.POST.get('modulo') or ''
-    nome = request.POST.get('nome') or ''
-    if request.POST:
-        lista = getListaTarefa(request)
-        if request.POST.get('btn_imprimir'):
-            url = settings.COMPLIANCE_URL + 'lista_tarefa/'
-            data = {
-                "titulo": getTituloRelatorio(request),
-                "lista": lista
-            }
-            response = requests.post(url, json.dumps(data), auth=("assist", "123456"))
-            if response.status_code == 200:
-                return FileResponse(open(response.text, 'rb'), content_type='application/pdf')
-            else:
-                return HttpResponse(response.status_code)
-    context['situacao'] = situacao
-    context['usuario'] = usuario
-    context['modulo'] = modulo
-    context['nome'] = nome
-    context['user_list'] = get_lista_usuarios()
-    context['modulo_lista'] = get_lista_modulos()
-    context['data_inicial'] = data_inicial
-    context['data_final'] = data_final
-    context['lista'] = lista
-
-    return render(request, 'core/relatorio.html', context)
 
 
 @login_required(login_url='login')
@@ -993,6 +955,7 @@ def acessos(request):
     context['data_inicial'] = data_inicial
 
     return render(request, "acessos.html", context)
+
 
 def salvar_cliente_form(pk, form):
     cliente = Cliente.objects.get(pk=pk)
@@ -1060,3 +1023,40 @@ def clienteUpdate(request, pk):
     context['sem_usuario'] = not usuarios
 
     return render(request, 'core/cliente_edit.html', context)
+
+
+@login_required(login_url='login')
+def GeradorRelatorio(request):
+    lista = []
+    context = {}
+    situacao = request.POST.get('situacao') or '2'
+    data = datetime.today().strftime('%Y-%m-%d')
+    data_inicial = request.POST.get('data_inicial') or data
+    data_final = request.POST.get('data_final') or data
+    usuario = request.POST.get('usuario') or ''
+    modulo = request.POST.get('modulo') or ''
+    nome = request.POST.get('nome') or ''
+    if request.POST:
+        lista = getListaTarefa(request)
+        if request.POST.get('btn_imprimir'):
+            url = settings.COMPLIANCE_URL + 'lista_tarefa/'
+            data = {
+                "titulo": getTituloRelatorio(request),
+                "lista": lista
+            }
+            response = requests.post(url, json.dumps(data), auth=("assist", "123456"))
+            if response.status_code == 200:
+                return FileResponse(open(response.text, 'rb'), content_type='application/pdf')
+            else:
+                return HttpResponse(response.status_code)
+    context['situacao'] = situacao
+    context['usuario'] = usuario
+    context['modulo'] = modulo
+    context['nome'] = nome
+    context['user_list'] = get_lista_usuarios()
+    context['modulo_lista'] = get_lista_modulos()
+    context['data_inicial'] = data_inicial
+    context['data_final'] = data_final
+    context['lista'] = lista
+
+    return render(request, 'core/relatorio.html', context)
