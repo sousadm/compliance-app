@@ -1,3 +1,9 @@
+.imagemDeFundo{
+    background-image: url('compliance/core/static/img/fundo.jpg');
+    width: 400px;
+    height: 400px;
+}
+
 table {
     border: 1px !important;
 }
@@ -6,7 +12,7 @@ th, td {
   padding: 2px;
 }
 
-tr {
+.tr {
     font-size: 1em;
     height: 20px !important;
 }

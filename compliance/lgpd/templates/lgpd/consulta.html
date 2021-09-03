@@ -39,11 +39,18 @@
                     <td>{{ n.cliente.nome }}</td>
                     <td>{{ n.autorizado_dt|date:'d/m/Y H:i' }}</td>
                     <td>
-                        <a href="{% url 'lgpd_tratamento_id' n.id %}">
-                            <button type="button" class="btn btn-sm" title="solicitar informações">
-                                <i class="fas fa-question-circle"></i>
+                        {% if n.arquivo %}
+                        <a href="{% url 'url_download_s3' n.url_arquivo %}" target="_blank">
+                            <button type="button" class="btn btn-sm" title="abrir arquivo">
+                                <i class='fas fa-file-pdf'></i>
                             </button>
                         </a>
+                        {% else %}
+                        <button type="button" class="btn btn-sm" title="visualizar dados"
+                                onclick="window.open('{% url 'lgpd_dados_id' n.pk %}','popup','width=800,height=600'); return false;">
+                            <i class="fas fa-address-book"></i>
+                        </button>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

@@ -3,20 +3,22 @@ table {
 }
 
 th, td {
-  padding: 2px;
+  padding: 0px;
 }
 
 tr {
     font-size: 1em;
-    height: 50px !important;
+    height: 14px !important;
 }
 
 .btn {
     padding: 0px 0px;
     border-radius: 0px;
     border: 0px;
-    padding: .3rem .5rem !important;
+    padding: .2rem .5rem !important;
 }
+
+#
 
 #height: 100% !important;
 

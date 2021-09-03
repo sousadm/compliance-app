@@ -42,10 +42,19 @@
                 <td>{{ n.protocolo }}</td>
                 <td>{{ n.opcao }}</td>
                 <td>
+
+                    {% if n.consentimento.arquivo %}
+                    <a href="{% url 'url_download_s3' n.consentimento.url_arquivo %}" target="_blank">
+                        <button type="button" class="btn btn-sm" title="abrir arquivo">
+                            <i class='fas fa-file-pdf'></i>
+                        </button>
+                    </a>
+                    {% else %}
                     <button type="button" class="btn btn-sm" title="visualizar dados"
                             onclick="window.open('{% url 'lgpd_dados_id' n.consentimento.pk %}','popup','width=800,height=600'); return false;">
                         <i class="fas fa-address-book"></i>
                     </button>
+                    {% endif %}
 
                     <a href="{% url 'url_lgpd_resposta' n.pk %}">
                         <button type="button" class="btn btn-sm" title="resposta à solicitação">

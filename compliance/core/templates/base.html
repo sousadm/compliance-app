@@ -1,7 +1,6 @@
 <!doctype html>
 
 {% load static %}
-
 {% load bootstrap %}
 <!--{% load crispy_forms_tags %}-->
 
@@ -11,21 +10,18 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-
-    <!--    <script type="text/javascript" src="{% static 'js/jquery.mask.js' %}"></script>-->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
-
     <meta name="description" content="Sistema de Gerenciamento"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title> {% block titulo %} Compliance {% endblock %} </title>
 
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.11.2/jquery.mask.js"></script>
-
-    <title> {% block titulo %} Compliance {% endblock %} </title>
 
     <script language=javascript type="text/javascript">
 function abrirJanela(pagina, largura, altura) {
@@ -33,11 +29,6 @@ function abrirJanela(pagina, largura, altura) {
     var topo = (screen.height - altura)/2;
     minhaJanela = window.open('https://127.0.0.1:8000/' + pagina,'','height=' + altura + ', width=' + largura + ', top=' + topo + ', left=' + esquerda);
 }
-
-
-
-
-
     </script>
 
     <script>
@@ -46,11 +37,6 @@ function abrirJanela(pagina, largura, altura) {
         $("#campoTelefone").mask("(999) 999-9999");
         $("#campoSenha").mask("***-****");
     });
-
-
-
-
-
     </script>
 
     <script>   {% block script %} {% endblock %}
@@ -78,23 +64,11 @@ function abrirJanela(pagina, largura, altura) {
 $(document).ready(function(){
     $('.date').mask('00/00/0000')
 });
-
-
-
-
-
-
-
-
     </script>
 
-
 </head>
+
 <body>
-
-<!--{{ perms.core }}-->
-
-<!--{{ user.id }}-->
 
 <label></label>
 
@@ -102,10 +76,9 @@ $(document).ready(function(){
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
 
-
         <div class="container">
 
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/">
                 <img height="35" src="{% static 'img/assist.bmp' %}" alt="">
             </a>
 

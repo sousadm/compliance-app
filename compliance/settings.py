@@ -177,30 +177,13 @@ AWS_SECRET_ACCESS_KEY = 'SLwSvjyIAIsiNYw6y+T9NtZP6pf929IK4Amta9kK'
 
 DEBUG = True
 SECURE_SSL_REDIRECT = True
+STATIC_URL = '/static/'
 
-if not DEBUG:
-    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
-    STATICFILES_LOCATION = 'static'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    STATIC_URL = 'https://{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
-    MEDIAFILES_LOCATION = 'media'
-    DEFAULT_FILE_STORAGE = 'django_lender.custom_storages.MediaStorage'
-    MEDIA_URL = 'https://{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
-    STATIC_ROOT = STATIC_URL.join('/grappelli/')
-    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-else:
-    STATIC_URL = 'static/'
-    STATIC_ROOT = STATIC_URL.join('grappelli/')
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-STATICFILES_DIRS = ('/opt/venv/lib/python3.8/site-packages/grappelli/static/grappelli/', 'static')
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static/"),
+)
 
 COMPLIANCE_API = 'http://3.224.26.231:8081/'
 # COMPLIANCE_API = 'http://localhost:8081/'
 COMPLIANCE_URL = COMPLIANCE_API + 'compliance/'
 LGPD_URL = COMPLIANCE_API + 'lgpd/'
- 
