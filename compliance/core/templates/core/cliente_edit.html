@@ -45,11 +45,8 @@
             <div class="col-12 col-md-3">
                 {{ form.celular|default_if_none:""|bootstrap }}
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-6">
                 {{ form.email|bootstrap }}
-            </div>
-            <div class="col-12 col-md-2">
-
             </div>
         </div>
 
@@ -163,13 +160,16 @@
             Consentimento
         </button>
     </a>
-
     <a href="{% url 'url_cliente_tratamento' cliente.pk %}">
         <button type="button" class="btn btn-secondary" title="tratamento lgpd">
             Tratamento
         </button>
     </a>
     {% endif %}
+
+    <a href="{% url 'url_cliente_contato' cliente.pk %}">
+        <input type="button" value="Contatos" title="contatos" class="btn btn-secondary">
+    </a>
 
     {% endif %}
 

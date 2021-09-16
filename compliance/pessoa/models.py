@@ -7,7 +7,7 @@ from compliance.core.models import Cliente
 class Contato(models.Model):
     cliente = models.ForeignKey(Cliente, null=True, on_delete=models.CASCADE)
     nome = models.CharField('Nome', max_length=100)
-    celular = models.CharField('Celular', max_length=20)
+    celular = models.CharField('Celular', max_length=20, null=True)
     email = models.EmailField('E-mail', blank=True, null=True)
 
     objects = models.Manager()

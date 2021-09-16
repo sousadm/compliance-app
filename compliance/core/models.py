@@ -43,7 +43,8 @@ MODULO_CHOICE = [
     ('CADASTROS', 'Cadastro'),
     ('CONTRATOS', 'Contrato'),
     ('IPM', 'IPM'),
-    ('VIDA', 'PILATIS VIDA'),
+    ('PILATIS', 'Pilatis'),
+    ('VIDA', 'Pilatis Vida'),
     ('BACKUP', 'Backup'),
 ]
 
