@@ -94,7 +94,7 @@ class Cliente(models.Model):
     celular = models.CharField(max_length=20, blank=True, null=True, verbose_name='Celular')
     uf = models.CharField(max_length=2, blank=True, null=True, verbose_name='UF')
     observacao = models.TextField(blank=True, null=True, verbose_name='Observação')
-    contato = models.CharField(max_length=100, blank=True, null=True, verbose_name='Contato')
+    # contato = models.CharField(max_length=100, blank=True, null=True, verbose_name='Contato')
     cidade = models.CharField(max_length=100, blank=True, null=True, verbose_name='Cidade')
     created_at = models.DateTimeField(blank=True, null=True, verbose_name='Dt.Inclusão')
     updated_at = models.DateTimeField(blank=True, null=True, verbose_name='Dt.Update')

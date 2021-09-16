@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'compliance.aws',
     'compliance.accounts',
     'compliance.lgpd',
+    'compliance.pessoa',
     'crispy_forms',
     'werkzeug_debugger_runserver',
     'django_extensions',

@@ -1,0 +1,27 @@
+{% extends "base_cliente.html" %}
+
+{% load bootstrap %}
+
+{% block titulo %}
+{{ tarefa.titulo }}
+{% endblock %}
+
+{% block botao %}
+{% if not user.is_consulta %}
+<div style="text-align: right; margin-top: 10px">
+    <a href="{% url 'url_cliente_update' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-user"></i>Cliente
+        </button>
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block conteudo %}
+
+<h2>Cliente / Contatos</h2>
+
+{{ cliente }}
+
+{% endblock %}
