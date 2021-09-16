@@ -44,6 +44,7 @@ MODULO_CHOICE = [
     ('CONTRATOS', 'Contrato'),
     ('IPM', 'IPM'),
     ('PILATIS', 'Pilatis'),
+    ('COMPLIANCE', 'Compliance'),
     ('VIDA', 'Pilatis Vida'),
     ('BACKUP', 'Backup'),
 ]
