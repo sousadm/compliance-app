@@ -20,7 +20,8 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
 from compliance.accounts.views import userEdit, userRegister, userList, edit_password, \
-    atendimentoSAC, atendimentoEditSAC, SAC_avulso, SAC_cliente, clienteSerie, encerramento
+    atendimentoSAC, atendimentoEditSAC, SAC_avulso, SAC_cliente, clienteSerie, encerramento, userPassword
+from compliance.atendimento.views import ocorrencia, ocorrenciaEdit, OcorrenciaRemove
 from compliance.core.views import home, ClienteListView, clienteNew, clienteUpdate, ClienteTarefaNew, \
     ClienteTarefaList, ClienteTarefaEdit, ClienteEventoList, MonitorBackupNew, acessos, TarefaLista, \
     TarefaImprimir, TarefaReopen, download, ClienteAWS, ClienteFolderAWS, ClienteBackup, ClienteUsuario, \
@@ -38,7 +39,7 @@ urlpatterns = [
                   path('user/', userList, name='url_user_list'),
                   path('user/add/', userRegister, name='url_user_add'),
                   path('user/<int:pk>/', userEdit, name='url_user_edit'),
-                  path('password/', edit_password, name='password'),
+                  path('password/', userPassword, name='password'),
 
                   path('entrar/', auth_views.LoginView.as_view(
                       redirect_authenticated_user=True,
@@ -86,6 +87,10 @@ urlpatterns = [
                   path('lgpd/tratamento/id=<int:pk>', LgpdTratamentoId, name='lgpd_tratamento_id'),
                   path('lgpd/dados/id=<int:pk>', LgpdTratamentoDados, name='lgpd_dados_id'),
                   path('lgpd/resposta/id=<int:pk>', LgpdResposta, name='url_lgpd_resposta'),
+
+                  path('categoria/', ocorrencia, name='url_ocorrencia'),
+                  path('categoria/<str:uuid>', ocorrenciaEdit, name='url_ocorrencia_edit'),
+                  path('categoria/<str:uuid>/remove/', OcorrenciaRemove, name='url_ocorrencia_remove'),
 
                   path('relatorio/', GeradorRelatorio, name='url_relatorio')
 

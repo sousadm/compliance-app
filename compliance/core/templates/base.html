@@ -29,6 +29,7 @@ function abrirJanela(pagina, largura, altura) {
     var topo = (screen.height - altura)/2;
     minhaJanela = window.open('https://127.0.0.1:8000/' + pagina,'','height=' + altura + ', width=' + largura + ', top=' + topo + ', left=' + esquerda);
 }
+
     </script>
 
     <script>
@@ -37,6 +38,7 @@ function abrirJanela(pagina, largura, altura) {
         $("#campoTelefone").mask("(999) 999-9999");
         $("#campoSenha").mask("***-****");
     });
+
     </script>
 
     <script>   {% block script %} {% endblock %}
@@ -64,6 +66,7 @@ function abrirJanela(pagina, largura, altura) {
 $(document).ready(function(){
     $('.date').mask('00/00/0000')
 });
+
     </script>
 
 </head>
@@ -153,6 +156,9 @@ $(document).ready(function(){
                             {% if user.is_superuser %}
                             <li class="nav-item">
                                 <a style="color: white;" href="{% url 'admin:index' %}">Admin</a>
+                            </li>
+                            <li class="nav-item">
+                                <a style="color: white;" href="{% url 'url_ocorrencia' %}">Ocorrências</a>
                             </li>
                             {% endif %}
 

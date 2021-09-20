@@ -9,7 +9,6 @@ MONITOR_CHOICES = (
     ("2", "Acesso"),
 )
 
-
 class MonitorForm(forms.Form):
     inicio = forms.DateField(widget=forms.widgets.DateInput(attrs={'type': 'date'}))
 

@@ -72,39 +72,6 @@ def atendimentoSAC(request):
 
 
 @login_required
-def userEdit(request, pk):
-    context = {}
-    template_name = 'accounts/edit.html'
-    user = User.objects.get(pk=pk)
-    form = EditAccountForm(request.POST or None, instance=user)
-
-    if request.method == 'POST':
-        try:
-            if request.POST.get('btn_ativa') or request.POST.get('btn_staff'):
-                if request.POST.get('btn_ativa'):
-                    user.is_active = not user.is_active
-
-                if request.POST.get('btn_staff'):
-                    user.is_staff = not user.is_staff
-
-                user.save()
-                return HttpResponseRedirect(reverse('url_user_edit', kwargs={'pk': user.pk}))
-
-            if form.is_valid():
-                user = form.save()
-                messages.success(request, 'modificado com sucesso')
-                return HttpResponseRedirect(reverse('url_user_edit', kwargs={'pk': user.pk}))
-
-        except Exception as e:
-            messages.error(request, e)
-            # return HttpResponseRedirect(reverse('url_sac_edit', kwargs={'pk': pk}))
-
-    context['form'] = form
-    context['usuario'] = user
-    return render(request, template_name, context)
-
-
-@login_required
 def userRegister(request):
     context = {}
     user = User()
@@ -354,6 +321,58 @@ def clienteSerie(request, pk):
 #     return render(request, template_name, context)
 
 
+@login_required(login_url='login')
+def userList(request):
+    context = {}
+    template_name = 'accounts/user_list.html'
+    lista = User.objects.filter(is_consulta=False).order_by('name')
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(lista, 10)
+    try:
+        lista: paginator.page(page)
+    except PageNotAnInteger:
+        lista = paginator.page(1)
+    except EmptyPage:
+        lista = paginator.page(paginator.num_pages)
+
+    context['lista'] = lista
+    return render(request, template_name, context)
+
+
+@login_required
+def userEdit(request, pk):
+    context = {}
+    template_name = 'accounts/edit.html'
+    user = User.objects.get(pk=pk)
+    form = EditAccountForm(request.POST or None, instance=user)
+
+    if request.method == 'POST':
+        try:
+            if request.POST.get('btn_ativa') or request.POST.get('btn_staff'):
+                if request.POST.get('btn_ativa'):
+                    user.is_active = not user.is_active
+
+                if request.POST.get('btn_staff'):
+                    user.is_staff = not user.is_staff
+
+                user.save()
+                return HttpResponseRedirect(reverse('url_user_edit', kwargs={'pk': user.pk}))
+
+            if form.is_valid():
+                user = form.save()
+                messages.success(request, 'modificado com sucesso')
+                return HttpResponseRedirect(reverse('url_user_edit', kwargs={'pk': user.pk}))
+
+        except Exception as e:
+            messages.error(request, e)
+            # return HttpResponseRedirect(reverse('url_sac_edit', kwargs={'pk': pk}))
+
+    context['form'] = form
+    context['usuario'] = user
+    return render(request, template_name, context)
+
+
 @login_required
 def edit_password(request):
     template_name = 'accounts/edit_password.html'
@@ -371,19 +390,24 @@ def edit_password(request):
 
 
 @login_required(login_url='login')
-def userList(request):
+def userPassword(request):
+    template_name = 'accounts/password.html'
     context = {}
-    template_name = 'accounts/user_list.html'
-    lista = User.objects.filter(is_consulta=False).order_by('name')
-
-    page = request.GET.get('page', 1)
-    paginator = Paginator(lista, 10)
     try:
-        lista: paginator.page(page)
-    except PageNotAnInteger:
-        lista = paginator.page(1)
-    except EmptyPage:
-        lista = paginator.page(paginator.num_pages)
+        senha_atual = request.POST.get('senha_atual') or ''
+        nova_senha = request.POST.get('nova_senha') or ''
+        confirma_senha = request.POST.get('confirma_senha') or ''
+        if request.method == 'POST':
+            if nova_senha != confirma_senha:
+                raise Exception('senha nova diferente da confirmação')
+            usuario = request.user
+            usuario.set_password(nova_senha)
+            usuario.save()
+            return HttpResponseRedirect(reverse('login'))
+    except Exception as e:
+        messages.error(request, e)
 
-    context['lista'] = lista
+    context['senha_atual'] = senha_atual
+    context['nova_senha'] = nova_senha
+    context['confirma_senha'] = confirma_senha
     return render(request, template_name, context)

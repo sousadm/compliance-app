@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'validate_docbr',
     'bootstrapform',
     'compliance.core',
+    'compliance.atendimento',
     'compliance.aws',
     'compliance.accounts',
     'compliance.lgpd',

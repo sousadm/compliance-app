@@ -28,14 +28,23 @@ Cliente / Contatos
     {% csrf_token %}
 
     <div class="row">
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-8">
             {{ form.nome|bootstrap }}
         </div>
-        <div class="col-12 col-md-5">
+        <div class="col-12 col-md-4">
+            {{ form.celular|bootstrap }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-6">
             {{ form.email|bootstrap }}
         </div>
-        <div class="col-12 col-md-3">
-            {{ form.celular|bootstrap }}
+        <div class="col-12 col-md-4">
+            {{ form.mes|bootstrap }}
+        </div>
+        <div class="col-12 col-md-2">
+            {{ form.dia|bootstrap }}
         </div>
     </div>
 
