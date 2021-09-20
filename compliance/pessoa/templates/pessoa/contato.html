@@ -14,13 +14,17 @@ Cliente / Contatos
             <i class="fas fa-user"></i>Cliente
         </button>
     </a>
+    <a href="{% url 'url_ficha_cliente' cliente.id %}">
+        <button type="button" class="btn btn-secondary btn-sm">
+            <i class="fas fa-print"></i>Imprimir
+        </button>
+    </a>
 </div>
 {% endif %}
 {% endblock %}
 
 {% block conteudo %}
 <form method="POST">
-
     {% csrf_token %}
 
     <div class="row">

@@ -27,7 +27,7 @@ from compliance.core.views import home, ClienteListView, clienteNew, clienteUpda
     downloadObjectS3, TarefaAnexo, TarefaRemoveAnexo, GeradorRelatorio
 from compliance.lgpd.views import LgpdConsentimento, LgpdConsultaTitular, LgpdTratamentoId, \
     LgpdControladorConsentimento, LgpdControladorTratamento, LgpdConsultaTitularCPF, LgpdTratamentoDados, LgpdResposta
-from compliance.pessoa.views import ClienteContatoView, ContatoView, ContatoRemoveView
+from compliance.pessoa.views import ClienteContatoView, ContatoView, ContatoRemoveView, ImprimirCadastroCliente
 
 urlpatterns = [
                   path('grappelli/', include('grappelli.urls')),
@@ -52,7 +52,8 @@ urlpatterns = [
                   path('cliente/<int:pk>/', clienteUpdate, name='url_cliente_update'),
                   path('cliente/<int:pk>/contato', ClienteContatoView, name='url_cliente_contato'),
                   path('cliente/<int:pk>/usuario', ClienteUsuario, name='url_cliente_usuario'),
-                  path('cliente/<int:pk>/consentimento', LgpdControladorConsentimento, name='url_cliente_consentimento'),
+                  path('cliente/<int:pk>/consentimento', LgpdControladorConsentimento,
+                       name='url_cliente_consentimento'),
                   path('cliente/<int:pk>/tratamento', LgpdControladorTratamento, name='url_cliente_tratamento'),
                   path('cliente/<int:pk>/backup=<str:arquivo>', ClienteBackup, name='url_cliente_backup'),
                   path('cliente/<int:pk>/s3', ClienteAWS, name='url_cliente_aws'),
@@ -63,6 +64,7 @@ urlpatterns = [
                   path('cliente/<int:pk>/evento/', ClienteEventoList, name='url_cliente_evento'),
                   path('contato/<int:pk>/', ContatoView, name='url_contato'),
                   path('contato/<int:pk>/remove', ContatoRemoveView, name='url_contato_remove'),
+                  path('fichacliente/<int:pk>/', ImprimirCadastroCliente, name='url_ficha_cliente'),
 
                   path('tarefa/', TarefaLista, name='url_tarefa_list'),
                   path('tarefa/<int:pk>/', ClienteTarefaEdit, name='url_cliente_tarefa_edit'),

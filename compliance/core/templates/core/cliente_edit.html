@@ -114,6 +114,9 @@
                 Opções
             </button>
             <div class="dropdown-menu">
+                <a href="{% url 'url_ficha_cliente' cliente.id %}">
+                    <input type="button" value="Imprimir cadastro" title="ficha" class="dropdown-item">
+                </a>
                 <a href="{% url 'url_cliente_contato' cliente.pk %}">
                     <input type="button" value="Contatos" title="contatos" class="dropdown-item">
                 </a>

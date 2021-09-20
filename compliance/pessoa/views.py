@@ -1,12 +1,15 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
-
+from datetime import datetime, date
 # Create your views here.
 from django.urls import reverse
 
 from compliance.core.models import Cliente
+from compliance.core.report import render_to_pdf
 from compliance.pessoa.forms import ContatoForm
 from compliance.pessoa.models import Contato
 
@@ -53,3 +56,13 @@ def ContatoRemoveView(request, pk):
     except Exception as e:
         messages.error(request, e)
     return HttpResponseRedirect(reverse('url_cliente_contato', kwargs={'pk': cliente_pk}))
+
+
+@login_required(login_url='login')
+def ImprimirCadastroCliente(request, pk):
+    cliente = Cliente.objects.get(pk=pk)
+    context = cliente.json()
+    context['contatos'] = Contato.objects.filter(cliente=cliente)
+    context['datahora'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+    pdf = render_to_pdf('pessoa/rel_cadastro_pessoa.html', context)
+    return HttpResponse(pdf, content_type='application/pdf')
