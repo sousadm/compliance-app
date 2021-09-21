@@ -1,6 +1,7 @@
 from django import forms
 
 from compliance.atendimento.models import AtendimentoOcorrencia, Atendimento
+from compliance.core.models import MODULO_CHOICE
 
 
 class AtendimentoOcorrenciaForm(forms.ModelForm):
@@ -26,3 +27,13 @@ class AtendimentoForm(forms.ModelForm):
         if instance:
             self.fields['descricao'].widget.attrs['autofocus'] = True
 
+
+# class AtendimentoListForm(forms.Form):
+#     descricao = forms.CharField(label='Pesquisa', required=False)
+#     modulo = forms.ChoiceField(label='Módulo', choices=MODULO_CHOICE, required=False)
+#
+#     def __init__(self, *args, **kwargs):
+#         super(AtendimentoListForm, self).__init__(*args, **kwargs)
+#         instance = getattr(self, 'instance', None)
+#         if instance:
+#             self.fields['descricao'].widget.attrs['autofocus'] = True

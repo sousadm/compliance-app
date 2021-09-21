@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 
 {% load bootstrap %}
 
@@ -109,14 +109,3 @@
 </form>
 
 {% endblock %}
-
-
-
-<!--        <div class="col-12 col-md-2 form-group">-->
-<!--            <label>Status</label>-->
-<!--            <select class="form-control" name="status" id="status">-->
-<!--                {% for m in status_lista %}-->
-<!--                <option value="{{m.value}}" {% if m.value == status %} selected{% endif %}>{{m.label}}</option>-->
-<!--                {% endfor %}-->
-<!--            </select>-->
-<!--        </div>-->

@@ -118,7 +118,7 @@ def home_view(request):
 
     context['lista'] = lista
 
-    return render(request, "home.html", context)
+    return render(request, "core/home.html", context)
 
 
 @login_required(login_url='login')
@@ -526,7 +526,7 @@ def TarefaImprimir(request, pk):
 
 def home(request):
     context = {}
-    template = loader.get_template('home.html')
+    template = loader.get_template('core/home.html')
 
     if request.user.is_authenticated:
         if request.user.pk:

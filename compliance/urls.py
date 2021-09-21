@@ -19,9 +19,10 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
-from compliance.accounts.views import userEdit, userRegister, userList, edit_password, \
+from compliance.accounts.views import userEdit, userRegister, userList, \
     atendimentoSAC, atendimentoEditSAC, SAC_avulso, SAC_cliente, clienteSerie, encerramento, userPassword
-from compliance.atendimento.views import ocorrencia, ocorrenciaEdit, OcorrenciaRemove
+from compliance.atendimento.views import ocorrencia, ocorrenciaEdit, OcorrenciaRemove, atendimentoList, atendimentoAdd, \
+    valor_pesquisa
 from compliance.core.views import home, ClienteListView, clienteNew, clienteUpdate, ClienteTarefaNew, \
     ClienteTarefaList, ClienteTarefaEdit, ClienteEventoList, MonitorBackupNew, acessos, TarefaLista, \
     TarefaImprimir, TarefaReopen, download, ClienteAWS, ClienteFolderAWS, ClienteBackup, ClienteUsuario, \
@@ -45,7 +46,7 @@ urlpatterns = [
                       redirect_authenticated_user=True,
                       template_name='accounts/login.html'), name='login'),
                   path('logout/', auth_views.LogoutView.as_view(
-                      template_name='home.html'), name='logout'),
+                      template_name='core/home.html'), name='logout'),
                   path('sair/', encerramento, name='url_sair'),
 
                   path('cliente/', ClienteListView, name='url_cliente_list'),
@@ -88,10 +89,13 @@ urlpatterns = [
                   path('lgpd/dados/id=<int:pk>', LgpdTratamentoDados, name='lgpd_dados_id'),
                   path('lgpd/resposta/id=<int:pk>', LgpdResposta, name='url_lgpd_resposta'),
 
-                  path('categoria/', ocorrencia, name='url_ocorrencia'),
-                  path('categoria/<str:uuid>', ocorrenciaEdit, name='url_ocorrencia_edit'),
-                  path('categoria/<str:uuid>/remove/', OcorrenciaRemove, name='url_ocorrencia_remove'),
+                  path('ocorrencia/', ocorrencia, name='url_ocorrencia'),
+                  path('ocorrencia/<str:uuid>', ocorrenciaEdit, name='url_ocorrencia_edit'),
+                  path('ocorrencia/<str:uuid>/remove/', OcorrenciaRemove, name='url_ocorrencia_remove'),
+                  path('atendimento/', atendimentoList, name='url_atendimento'),
+                  path('atendimento/add/', atendimentoAdd, name='url_atendimento_new'),
 
-                  path('relatorio/', GeradorRelatorio, name='url_relatorio')
+                  path('relatorio/', GeradorRelatorio, name='url_relatorio'),
+                  path('valor_pesquisa/<int:pk>', valor_pesquisa, name='url_valor_pesquisa')
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
