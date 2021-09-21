@@ -1,0 +1,69 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+
+    <div class="container">
+
+        <!-- Brand -->
+        <div class="navbar-brand">
+            <a href="/">
+                <img height="35" src="{% static 'img/assist.bmp' %}" alt="" title="assist">
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'url_sair' %}" title="sair">
+                <img height="35" src="{% static 'img/logout.png' %}" alt="">
+            </a>
+            {% endif %}
+        </div>
+
+        {% if not user.is_authenticated %}
+        <h2 style="color: white">Compliance</h2>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <p style="color: white">Olá, {{ user.username }}.</p>
+        {% endif %}
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                {% if user.is_authenticated %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'url_cliente_list' %}">Clientes</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'url_tarefa_list' %}">Tarefas</a>
+                </li>
+                {% endif %}
+            </ul>
+
+            {% if user.is_authenticated %}
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Opções
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="{% url 'monitor' %}">Backup</a>
+                    <a class="dropdown-item" href="{% url 'acessos' %}">Acessos</a>
+                    <div class="dropdown-divider"></div>
+                    {% if user.is_superuser %}
+                    <a class="dropdown-item" href="{% url 'url_user_list' %}">Usuários</a>
+                    {% else %}
+                    <a class="dropdown-item" href="{% url 'url_user_edit' user.id %}">Usuário</a>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                    <a class="dropdown-item" href="{% url 'url_ocorrencia' %}">Ocorrências</a>
+                    <a class="dropdown-item" href="{% url 'admin:index' %}">Administração</a>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>
