@@ -10,6 +10,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.dateformat import DateFormat
 
+from compliance.accounts.models import User
 from compliance.atendimento.forms import AtendimentoOcorrenciaForm, AtendimentoForm
 from compliance.atendimento.models import AtendimentoOcorrencia, Atendimento
 from compliance.core.models import MODULO_CHOICE, Cliente
@@ -81,29 +82,43 @@ def atendimentoList(request):
     return render(request, template_name, context)
 
 
-def valor_pesquisa(request, pk):
-    return pk
-
-
 def atendimento_render(request, uuid=None):
     atendimento = Atendimento.objects.get(uuid=uuid) if uuid else Atendimento()
-    cliente = Cliente.objects.get(pk=atendimento.contato.cliente) if atendimento.contato else Cliente()
     lista_ocorrencia = AtendimentoOcorrencia.objects.all()
-    if not atendimento.previsao_dt:
-        atendimento.previsao_dt = datetime.now()
-    context = atendimento.json()
-
-    lista_contato = []
-    template_name = 'atendimento/atendimento_edit.html'
-
-    cliente = request.POST.get('cliente')
-    selecionado = request.POST.get('selecionado') or None
     lista = request.POST.get('lista') or []
     valor = request.POST.get('valor') or ''
+    selecionado = request.POST.get('selecionado') or None
+    if request.POST.get('codigo_pesquisado') and request.POST.get('codigo_pesquisado') != 'None':
+        cliente = Cliente.objects.get(pk=int(request.POST.get('codigo_pesquisado')))
+    elif atendimento.contato:
+        cliente = Cliente.objects.get(pk=atendimento.contato.cliente.pk)
+        selecionado = cliente.pk
+    else:
+        cliente = Cliente()
+
+    # desmembrar este trecho
+    if not atendimento.usuario:
+        atendimento.usuario = request.user
+    if request.POST.get('contato'):
+        atendimento.contato = Contato.objects.get(pk=request.POST.get('contato'))
+    if request.POST.get('ocorrencia'):
+        atendimento.ocorrencia = AtendimentoOcorrencia.objects.get(pk=request.POST.get('ocorrencia'))
+    if request.POST.get('modulo'):
+        atendimento.modulo = request.POST.get('modulo')
+    if request.POST.get('descricao'):
+        atendimento.descricao = request.POST.get('descricao')
+    if request.POST.get('observacao'):
+        atendimento.observacao = request.POST.get('observacao')
+    if request.POST.get('previsao_dt'):
+        atendimento.previsao_dt = datetime.strptime(request.POST.get('previsao_dt'), '%Y-%m-%d')
+    else:
+        atendimento.previsao_dt = datetime.now()
+
+    template_name = 'atendimento/atendimento_edit.html'
 
     try:
         if request.POST.get('btn_seleciona'):
-            selecionado = request.POST.get('codigo')
+            selecionado = request.POST.get('codigo_pesquisado')
             cliente = Cliente.objects.get(pk=selecionado)
 
         if request.POST.get('modo_pesquisa'):
@@ -112,23 +127,31 @@ def atendimento_render(request, uuid=None):
         if request.POST.get('btn_pesquisar'):
             lista = Cliente.objects.filter(nome__icontains=valor)
 
-        # if request.POST.get('btn_salvar'):
-        #     form.save()
-        #     return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
+        if request.POST.get('btn_salvar'):
+            selecionado = request.POST.get('codigo_pesquisado')
+            atendimento.save()
+            return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
 
     except Exception as e:
         messages.error(request, e)
 
-    if cliente:
-        lista_contato = Contato.objects.filter(cliente=cliente)
+    messages.info(request, atendimento.json())
+    context = atendimento.json()
+    # context['created_dt'] = atendimento.created_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.created_dt else ''
+    # context['updated_dt'] = atendimento.updated_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.updated_dt else ''
+    # context['termino_dt'] = atendimento.termino_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.termino_dt else ''
+
+    context['cliente'] = cliente or atendimento.contato.cliente
+    lista_contato = Contato.objects.filter(cliente=cliente)
 
     context['lista'] = lista
     context['valor'] = valor
+    context['username'] = atendimento.usuario.name
+    context['selecionado'] = selecionado
+    context['codigo_pesquisado'] = request.POST.get('codigo_pesquisado')
     context['previsao_dt'] = DateFormat(atendimento.previsao_dt).format('Y-m-d')
-    context['cliente'] = cliente
     context['lista_contato'] = lista_contato
     context['lista_ocorrencia'] = lista_ocorrencia
     context['modulo_lista'] = get_lista_modulos_somente()
-    context['selecionado'] = selecionado
 
     return render(request, template_name, context)

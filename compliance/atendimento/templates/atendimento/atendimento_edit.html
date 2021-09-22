@@ -12,6 +12,10 @@
 
     {% if selecionado %}
 
+    <div style="float: right; text-align: right; margin-top: 15px">
+        <input type="submit" name="btn_salvar" value="Salvar">
+    </div>
+
     <h1>Atendimento</h1>
 
     <div class="row">
@@ -30,48 +34,50 @@
             <label>Nome do Contato</label>
             <select class="form-control" name="contato" id="contato">
                 {% for m in lista_contato %}
-                <option value="{{m}}" {% if m == atendimento.contato %} selected{% endif %}>{{m}}</option>
+                <option value="{{m.pk}}" {% if m == atendimento.contato %} selected{% endif %}>{{m}}</option>
                 {% endfor %}
             </select>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-3">
             <label>Módulo</label>
-            <select class="form-control" name="modulo" id="modulo">
+            <select class="form-control" name="modulo" id="modulo" required>
                 {% for m in modulo_lista %}
                 <option value="{{m.value}}" {% if m.value == modulo %} selected{% endif %}>{{m.label}}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="col-12 col-md-8">
+        <div class="col-12 col-md-6">
             <label>Ocorrência</label>
-            <select class="form-control" name="ocorrencia" id="ocorrencia">
+            <select class="form-control" name="ocorrencia" id="ocorrencia" required>
                 {% for m in lista_ocorrencia %}
-                <option value="{{m}}" {% if m.value == ocorrencia %} selected{% endif %}>{{m}}</option>
+                <option value="{{m.pk}}" {% if m.value == ocorrencia %} selected{% endif %}>{{m}}</option>
                 {% endfor %}
             </select>
+        </div>
+        <div class="col-12 col-md-3">
+            <label>Usuário</label>
+            <input type="text" value="{{ username }}" class="form-control" disabled>
         </div>
     </div>
 
     <div class="row">
         <div class="col-12 col-md-9">
             <label>Descrição</label>
-            <input type="text" class="form-control" id="descricao" value="{{ descricao }}">
+            <input type="text" class="form-control" id="descricao" name="descricao"  value="{{ descricao }}" required>
         </div>
         <div class="col-12 col-md-3">
             <label>Previsão</label>
-            <input type="date" class="form-control" id="previsao_dt" name="previsao_dt" value="{{ previsao_dt }}" >
+            <input type="date" class="form-control" id="previsao_dt" name="previsao_dt" value="{{ previsao_dt }}" required >
         </div>
     </div>
 
-    {% if pk %}
-    <div class="form-group">
+    <div class="form-group" {% if not pk %} hidden {% endif %}>
         <label>Observação</label>
-        <textarea class="form-control" rows="3" id="observacao" value="{{ observacao }}"></textarea>
+        <textarea class="form-control" rows="3" id="observacao" name="obsercacao" value="{{ observacao }}"></textarea>
     </div>
-    {% endif %}
 
     <div class="row">
         <div class="col-12 col-md-4">
@@ -96,6 +102,9 @@
     {% include 'pessoa/pesquisa_pessoa.html' %}
 
     {% endif %}
+
+    <input type="submit" value="Pesquisar" id="btn_seleciona" name="btn_seleciona" hidden>
+    <input type="text" id="codigo_pesquisado" name="codigo_pesquisado" value="{{ codigo_pesquisado }}" hidden>
 
 
 </form>

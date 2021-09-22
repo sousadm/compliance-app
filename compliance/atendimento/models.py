@@ -1,12 +1,11 @@
 import uuid
-from datetime import datetime, date, timedelta
 from django.db import models
 from django.forms import model_to_dict
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from compliance.core.models import MODULO_CHOICE
 from compliance.pessoa.models import Contato
-
+from compliance.accounts.models import User
 
 class AtendimentoOcorrencia(models.Model):
     uuid = models.UUIDField(_("UUID"), editable=False, default=uuid.uuid4)
@@ -26,14 +25,15 @@ class AtendimentoOcorrencia(models.Model):
 
 class Atendimento(models.Model):
     uuid = models.UUIDField(_("UUID"), editable=False, default=uuid.uuid4)
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     contato = models.ForeignKey(Contato, null=True, on_delete=models.CASCADE)
     ocorrencia = models.ForeignKey(AtendimentoOcorrencia, null=True, on_delete=models.CASCADE)
     modulo = models.CharField('Módulo', max_length=30, choices=MODULO_CHOICE, null=True)
     descricao = models.CharField('Descrição', max_length=100)
-    observacao = models.TextField('Observação')
+    observacao = models.TextField('Observação', null=True)
     previsao_dt = models.DateTimeField('Previsão inicio')
-    inicio_dt = models.DateTimeField('Inicio')
-    termino_dt = models.DateTimeField('Término')
+    inicio_dt = models.DateTimeField('Inicio', null=True)
+    termino_dt = models.DateTimeField('Término', null=True)
     created_dt = models.DateTimeField('Criado em', auto_now_add=True)
     updated_dt = models.DateTimeField('Modificado em', auto_now=True, null=True)
 

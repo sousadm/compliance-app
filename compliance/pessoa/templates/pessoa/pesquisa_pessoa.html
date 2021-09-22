@@ -45,11 +45,9 @@
     {% include "core/paginacao.html" %}
 </div>
 
-<input type="text" id="codigo" name="codigo" value="{{ codigo }}" >
-<input type="submit" value="Pesquisar" id="btn_seleciona" name="btn_seleciona" hidden>
 <script>
         function seleciona(valor) {
-            var elemento = document.getElementById("codigo");
+            var elemento = document.getElementById("codigo_pesquisado");
             elemento.value = valor;
             $('#btn_seleciona').click();
         }
