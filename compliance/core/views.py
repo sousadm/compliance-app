@@ -1,13 +1,10 @@
 import json
 import os
 import urllib
-from datetime import datetime, date
-from datetime import timedelta
-import compliance.settings as conf
+from datetime import datetime, date, timedelta
 
 import boto3
 import requests
-from boto.s3.connection import S3Connection
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import PBKDF2PasswordHasher
@@ -26,8 +23,8 @@ from compliance.accounts.models import User
 from compliance.accounts.senha import gerar_senha_letras_numeros
 from compliance.aws.form import UploadFileOnlyForm
 from compliance.aws.views import get_s3_filename_list, get_nome, s3_upload_small_files, s3_delete_file
-from compliance.core.form import ClienteForm, TarefaForm, MonitorForm, TarefaReopenForm, DocumentForm, \
-    ClienteConsultaForm, ClienteAddUser, RelatorioForm
+from compliance.core.form import ClienteForm, TarefaForm, MonitorForm, TarefaReopenForm, ClienteConsultaForm, \
+    ClienteAddUser
 from compliance.core.mail import send_mail_template
 from compliance.core.models import Cliente, Tarefa, Evento, TarefaEvento, MODULO_CHOICE, Documento, UserCliente, Backup, \
     CLIENTE_NIVELS
@@ -253,6 +250,13 @@ def download(request, pk):
 
 def get_lista_modulos():
     modulo_lista = [{"value": "TODOS", "label": "Todos"}, ]
+    for m in MODULO_CHOICE:
+        modulo_lista.append({"value": m[0], "label": m[1]})
+    return modulo_lista
+
+
+def get_lista_modulos_somente():
+    modulo_lista = []
     for m in MODULO_CHOICE:
         modulo_lista.append({"value": m[0], "label": m[1]})
     return modulo_lista
@@ -954,7 +958,7 @@ def acessos(request):
     context['lista'] = lista
     context['data_inicial'] = data_inicial
 
-    return render(request, "acessos.html", context)
+    return render(request, "core/acessos.html", context)
 
 
 def salvar_cliente_form(pk, form):

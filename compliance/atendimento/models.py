@@ -1,10 +1,9 @@
 import uuid
+from datetime import datetime, date, timedelta
 from django.db import models
-
-# Create your models here.
+from django.forms import model_to_dict
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-
 from compliance.core.models import MODULO_CHOICE
 from compliance.pessoa.models import Contato
 
@@ -46,5 +45,13 @@ class Atendimento(models.Model):
     def __str__(self):
         return self.descricao
 
+    # def __init__(self):
+    #     self.previsao_dt = datetime.now()
+
+    def json(self):
+        return model_to_dict(self)
+
     def get_absolute_url(self):
         return reverse("url_atendimento_edit", kwargs={"uuid": self.uuid})
+
+

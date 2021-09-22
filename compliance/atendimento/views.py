@@ -1,3 +1,6 @@
+import json
+from datetime import datetime, date, timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
@@ -5,11 +8,13 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.urls import reverse
+from django.utils.dateformat import DateFormat
 
 from compliance.atendimento.forms import AtendimentoOcorrenciaForm, AtendimentoForm
 from compliance.atendimento.models import AtendimentoOcorrencia, Atendimento
 from compliance.core.models import MODULO_CHOICE, Cliente
-from compliance.core.views import get_lista_modulos
+from compliance.core.views import get_lista_modulos, get_lista_modulos_somente
+from compliance.pessoa.models import Contato
 
 
 def ocorrencia_render(request, uuid):
@@ -81,29 +86,49 @@ def valor_pesquisa(request, pk):
 
 
 def atendimento_render(request, uuid=None):
-    context = {}
     atendimento = Atendimento.objects.get(uuid=uuid) if uuid else Atendimento()
-    form = AtendimentoForm(request.POST or None, instance=atendimento)
+    cliente = Cliente.objects.get(pk=atendimento.contato.cliente) if atendimento.contato else Cliente()
+    lista_ocorrencia = AtendimentoOcorrencia.objects.all()
+    if not atendimento.previsao_dt:
+        atendimento.previsao_dt = datetime.now()
+    context = atendimento.json()
+
+    lista_contato = []
     template_name = 'atendimento/atendimento_edit.html'
 
+    cliente = request.POST.get('cliente')
     selecionado = request.POST.get('selecionado') or None
+    lista = request.POST.get('lista') or []
     valor = request.POST.get('valor') or ''
 
     try:
+        if request.POST.get('btn_seleciona'):
+            selecionado = request.POST.get('codigo')
+            cliente = Cliente.objects.get(pk=selecionado)
+
         if request.POST.get('modo_pesquisa'):
             selecionado = None
 
         if request.POST.get('btn_pesquisar'):
             lista = Cliente.objects.filter(nome__icontains=valor)
-            context['lista'] = lista
 
-        if request.POST.get('btn_salvar'):
-            form.save()
-            return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
+        # if request.POST.get('btn_salvar'):
+        #     form.save()
+        #     return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
+
     except Exception as e:
         messages.error(request, e)
-    context['form'] = form
+
+    if cliente:
+        lista_contato = Contato.objects.filter(cliente=cliente)
+
+    context['lista'] = lista
     context['valor'] = valor
+    context['previsao_dt'] = DateFormat(atendimento.previsao_dt).format('Y-m-d')
+    context['cliente'] = cliente
+    context['lista_contato'] = lista_contato
+    context['lista_ocorrencia'] = lista_ocorrencia
+    context['modulo_lista'] = get_lista_modulos_somente()
     context['selecionado'] = selecionado
-    context['atendimento'] = atendimento
+
     return render(request, template_name, context)
