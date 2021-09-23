@@ -52,12 +52,14 @@
                     <a class="dropdown-item" href="{% url 'acessos' %}">Acessos</a>
                     <a class="dropdown-item" href="{% url 'url_atendimento' %}">Atendimento</a>
                     <div class="dropdown-divider"></div>
+
                     {% if user.is_superuser %}
                     <a class="dropdown-item" href="{% url 'url_user_list' %}">Usuários</a>
                     {% else %}
                     <a class="dropdown-item" href="{% url 'url_user_edit' user.id %}">Usuário</a>
                     {% endif %}
-                    {% if user.is_superuser %}
+
+                    {% if not user.is_consulta %}
                     <a class="dropdown-item" href="{% url 'url_ocorrencia' %}">Ocorrências</a>
                     <a class="dropdown-item" href="{% url 'admin:index' %}">Administração</a>
                     {% endif %}
