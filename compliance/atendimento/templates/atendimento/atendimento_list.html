@@ -10,12 +10,16 @@
     {% csrf_token %}
 
     <div style="margin-top: 15px; float: right">
-        <input type="submit" class="btn btn-primary" value="Pesquisar">
+        <button type="submit" class="btn btn-info btn-sm">
+            <i class="fas fa-search"></i>Pesquisar
+        </button>
+        {% if not user.is_consulta %}
         <a href="{% url 'url_atendimento_new' %}">
             <button type="button" class="btn btn-secondary">
                 <i class="fas fa-file"></i> Incluir
             </button>
         </a>
+        {% endif %}
     </div>
 
     <h1>Lista de Atendimento</h1>
@@ -39,8 +43,8 @@
         <table class="table table-striped table-sm">
             <thead>
             <tr style="background-color: silver;">
-                <th>Descrição</th>
                 <th>Cliente</th>
+                <th>Ocorrência</th>
                 <th>Usuário</th>
                 <th>Previsão</th>
                 <th>Início</th>
@@ -51,8 +55,8 @@
             <tbody>
             {% for item in lista %}
             <tr>
-                <td>{{ item.descricao|default_if_none:"" }}</td>
                 <td>{{ item.contato.cliente|default_if_none:"" }}</td>
+                <td>{{ item.ocorrencia.descricao|default_if_none:"" }}</td>
                 <td>{{ item.usuario }}</td>
                 <td>{{ item.previsao_dt|date:'d/m/Y' }}</td>
                 <td>{{ item.inicio_dt|date:'d/m/Y H:i' }}</td>

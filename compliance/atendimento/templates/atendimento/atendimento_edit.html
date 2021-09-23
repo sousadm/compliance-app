@@ -13,25 +13,29 @@
     {% if selecionado %}
 
     <div style="float: right; text-align: right; margin-top: 15px">
-
+        {% if not user.is_consulta %}
         {% if not termino_dt %}
         <button type="submit" class="btn btn-primary" value="salvar" name="btn_salvar">
             <i class="fas fa-save"></i> Salvar
         </button>
         {% endif %}
-
         {% if created_dt and not inicio_dt and not termino_dt %}
         <button type="submit" class="btn btn-secondary" value="iniciar" name="btn_iniciar"
                 onClick='return confirma("Deseja iniciar este atendimento?")'>
             <i class="fas fa-play-circle"></i> Iniciar
         </button>
         {% endif %}
-
         {% if inicio_dt and not termino_dt %}
         <button type="submit" class="btn btn-danger" value="encerrar" name="btn_encerrar"
                 onClick='return confirma("Deseja encerrar este atendimento?")'>
             <i class="fas fa-stop-circle"></i> Encerrar
         </button>
+        {% endif %}
+        <a href="{% url 'url_atendimento_new' %}">
+            <button type="button" class="btn btn-secondary">
+                <i class="fas fa-file"></i> Novo
+            </button>
+        </a>
         {% endif %}
 
         {% if created_dt %}
@@ -41,24 +45,17 @@
             </button>
         </a>
         {% endif %}
-
-        <a href="{% url 'url_atendimento_new' %}">
-            <button type="button" class="btn btn-secondary">
-                <i class="fas fa-file"></i> Novo
-            </button>
-        </a>
         <a href="{% url 'url_atendimento' %}">
             <button type="button" class="btn btn-secondary">
                 <i class="fas fa-list"></i> Lista
             </button>
         </a>
 
-
     </div>
 
     <h1>Atendimento</h1>
 
-    <fieldset {% if termino_dt %} disabled {% endif %}>
+    <fieldset {% if termino_dt or user.is_consulta %} disabled {% endif %}>
         <div class="row">
             <div class="col-12 col-md-8">
                 <label>Nome do Cliente</label>
@@ -74,7 +71,7 @@
 
             <div class="col-12 col-md-4">
                 <label>Nome do Contato</label>
-                <select class="form-control" name="contato" id="contato">
+                <select class="form-control" name="contato" id="contato" required>
                     {% for m in lista_contato %}
                     <option value="{{m.pk}}" {% if m.pk == contato %} selected{% endif %}>{{m}}</option>
                     {% endfor %}

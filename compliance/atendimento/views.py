@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 
@@ -13,7 +14,7 @@ from django.utils.dateformat import DateFormat
 from compliance.accounts.models import User
 from compliance.atendimento.forms import AtendimentoOcorrenciaForm, AtendimentoForm
 from compliance.atendimento.models import AtendimentoOcorrencia, Atendimento
-from compliance.core.models import MODULO_CHOICE, Cliente
+from compliance.core.models import MODULO_CHOICE, Cliente, UserCliente
 from compliance.core.report import render_to_pdf
 from compliance.core.views import get_lista_modulos, get_lista_modulos_somente
 from compliance.pessoa.models import Contato
@@ -69,9 +70,34 @@ def atendimentoAdd(request):
 
 
 @login_required(login_url='login')
+def ImprimirFichaAtendimento(request, uuid):
+    atendimento = Atendimento.objects.get(uuid=uuid)
+    context = atendimento.json()
+    context['datahora'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+    context['created_dt'] = atendimento.created_dt
+    context['contato'] = atendimento.contato.json()
+    context['cliente'] = atendimento.contato.cliente.json()
+    context['usuario'] = User.objects.get(pk=atendimento.usuario.pk).json()
+    context['ocorrencia'] = AtendimentoOcorrencia.objects.get(pk=atendimento.ocorrencia.pk).json()
+
+    pdf = render_to_pdf('atendimento/rel_atendimento_ficha.html', context)
+    print(atendimento.created_dt)
+    return HttpResponse(pdf, content_type='application/pdf')
+
+
+@login_required(login_url='login')
 def atendimentoList(request):
+
+    filtro_cliente = Q()
+    if request.user.is_consulta:
+        clientes = []
+        lst = UserCliente.objects.filter(user=request.user, cliente__is_active=True)
+        for c in lst:
+            clientes.append(c.cliente.pk)
+        filtro_cliente = Q(contato__cliente__in=clientes)
+    lista = Atendimento.objects.filter(filtro_cliente)
+
     template_name = 'atendimento/atendimento_list.html'
-    lista = Atendimento.objects.all()
     descricao = request.POST.get('descricao') or ''
     modulo = request.POST.get('modulo') or ''
     context = {
@@ -88,7 +114,6 @@ def atendimento_render(request, uuid=None):
     atendimento = Atendimento.objects.get(uuid=uuid) if uuid else Atendimento()
     if not atendimento.pk:
         atendimento.previsao_dt = datetime.today()
-
     lista_ocorrencia = AtendimentoOcorrencia.objects.all()
     lista = request.POST.get('lista') or []
     valor = request.POST.get('valor') or ''
@@ -169,19 +194,3 @@ def atendimento_render(request, uuid=None):
     context['uuid'] = atendimento.uuid
 
     return render(request, template_name, context)
-
-
-@login_required(login_url='login')
-def ImprimirFichaAtendimento(request, uuid):
-    atendimento = Atendimento.objects.get(uuid=uuid)
-    context = atendimento.json()
-    context['datahora'] = datetime.now().strftime('%d/%m/%Y %H:%M')
-    context['created_dt'] = atendimento.created_dt
-    context['contato'] = atendimento.contato.json()
-    context['cliente'] = atendimento.contato.cliente.json()
-    context['usuario'] = User.objects.get(pk=atendimento.usuario.pk).json()
-    context['ocorrencia'] = AtendimentoOcorrencia.objects.get(pk=atendimento.ocorrencia.pk).json()
-
-    pdf = render_to_pdf('atendimento/rel_atendimento_ficha.html', context)
-    print(atendimento.created_dt)
-    return HttpResponse(pdf, content_type='application/pdf')

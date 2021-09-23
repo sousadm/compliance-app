@@ -82,13 +82,13 @@ body {
                 <label>Endereço</label><br/>
                 {{ logradouro|default_if_none:"" }}
             </td>
-            <td colspan="4">
-                <label>Bairro</label><br/>
-                {{ bairro|default_if_none:"" }}
-            </td>
             <td colspan="2">
                 <label>Número</label><br/>
                 {{ numero|default_if_none:"" }}
+            </td>
+            <td colspan="4">
+                <label>Bairro</label><br/>
+                {{ bairro|default_if_none:"" }}
             </td>
         </tr>
         <tr>

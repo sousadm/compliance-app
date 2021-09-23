@@ -823,7 +823,7 @@ def ClienteListView(request):
 
     if request.user.is_consulta:
         clientes = []
-        lst = UserCliente.objects.filter(user=request.user)
+        lst = UserCliente.objects.filter(user=request.user, cliente__is_active=True)
         for c in lst:
             clientes.append(c.cliente.pk)
         if len(clientes) == 1:
@@ -887,7 +887,7 @@ def getListaTarefa(request):
 
     if request.user.is_consulta:
         clientes = []
-        lst = UserCliente.objects.filter(user=request.user)
+        lst = UserCliente.objects.filter(user=request.user, cliente__is_active=True)
         for c in lst:
             clientes.append(c.cliente.pk)
         filtro_cliente = Q(cliente__in=clientes)

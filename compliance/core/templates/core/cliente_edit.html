@@ -146,10 +146,11 @@
                         <i class="fab fa-aws"></i> Aws S3
                     </button>
                 </a>
+                {% if not user.is_consulta %}
                 <a href="{% url 'url_cliente_evento' cliente.pk %}">
                     <input type="button" class="dropdown-item" value="Lista de eventos">
                 </a>
-
+                {% endif %}
             </div>
         </div>
     </div>

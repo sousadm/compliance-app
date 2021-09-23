@@ -43,8 +43,10 @@
                     Opções
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    {% if not user.is_consulta %}
                     <a class="dropdown-item" href="{% url 'monitor' %}">Backup</a>
                     <a class="dropdown-item" href="{% url 'acessos' %}">Acessos</a>
+                    {% endif %}
                     <a class="dropdown-item" href="{% url 'url_atendimento' %}">Atendimento</a>
                     <div class="dropdown-divider"></div>
 
