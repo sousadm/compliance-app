@@ -1,15 +1,9 @@
-<h1>Selecione o Cliente</h1>
-
-{{ selecionado }}
 
 <div class="input-group">
-    <input type="text" value="{{ valor }}" name="valor" class="form-control" autofocus>
+    <input type="text" value="{{ valor }}" name="valor" class="form-control" placeholder="pesquise um cliente" autofocus>
     <div class="input-group-append">
         <button type="submit" name="btn_pesquisar" value="pesquisar" class="btn btn-primary">
             <i class="fas fa-search"></i> Pesquisar
-        </button>
-        <button type="button" name="btn_voltar" value="voltar" class="btn btn-secondary" onclick="seleciona({{ selecionado }})">
-            <i class="fas fa-undo"></i> Voltar
         </button>
     </div>
 </div>

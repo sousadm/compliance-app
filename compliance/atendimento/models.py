@@ -7,6 +7,7 @@ from compliance.core.models import MODULO_CHOICE
 from compliance.pessoa.models import Contato
 from compliance.accounts.models import User
 
+
 class AtendimentoOcorrencia(models.Model):
     uuid = models.UUIDField(_("UUID"), editable=False, default=uuid.uuid4)
     descricao = models.CharField('Descrição', max_length=100)
@@ -31,7 +32,7 @@ class Atendimento(models.Model):
     modulo = models.CharField('Módulo', max_length=30, choices=MODULO_CHOICE, null=True)
     descricao = models.CharField('Descrição', max_length=100)
     observacao = models.TextField('Observação', null=True)
-    previsao_dt = models.DateTimeField('Previsão inicio')
+    previsao_dt = models.DateTimeField('Previsão inicio', auto_now_add=True)
     inicio_dt = models.DateTimeField('Inicio', null=True)
     termino_dt = models.DateTimeField('Término', null=True)
     created_dt = models.DateTimeField('Criado em', auto_now_add=True)
@@ -53,5 +54,3 @@ class Atendimento(models.Model):
 
     def get_absolute_url(self):
         return reverse("url_atendimento_edit", kwargs={"uuid": self.uuid})
-
-

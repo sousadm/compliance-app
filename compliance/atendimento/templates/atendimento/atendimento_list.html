@@ -39,24 +39,30 @@
         <table class="table table-striped table-sm">
             <thead>
             <tr style="background-color: silver;">
-                <th>Ocorrência</th>
                 <th>Descrição</th>
+                <th>Cliente</th>
+                <th>Usuário</th>
                 <th>Previsão</th>
                 <th>Início</th>
                 <th>Término</th>
-                <th width="120"></th>
+                <th width="3    0"></th>
             </tr>
             </thead>
             <tbody>
             {% for item in lista %}
             <tr>
-                <td>{{ item.ocorrencia|default_if_none:"" }}</td>
                 <td>{{ item.descricao|default_if_none:"" }}</td>
-                <td>{{ item.previsao_dt|default_if_none:"" }}</td>
-                <td>{{ item.inicio_dt|default_if_none:"" }}</td>
-                <td>{{ item.termino_dt|default_if_none:"" }}</td>
+                <td>{{ item.contato.cliente|default_if_none:"" }}</td>
+                <td>{{ item.usuario }}</td>
+                <td>{{ item.previsao_dt|date:'d/m/Y' }}</td>
+                <td>{{ item.inicio_dt|date:'d/m/Y H:i' }}</td>
+                <td>{{ item.termino_dt|date:'d/m/Y H:i' }}</td>
                 <td>
-
+                    <a href="{% url 'url_atendimento_edit' item.uuid %}">
+                        <button type="button" class="btn btn-sm" title="edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
                 </td>
             </tr>
             {% empty %}

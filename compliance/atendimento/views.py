@@ -83,7 +83,11 @@ def atendimentoList(request):
 
 
 def atendimento_render(request, uuid=None):
+    template_name = 'atendimento/atendimento_edit.html'
     atendimento = Atendimento.objects.get(uuid=uuid) if uuid else Atendimento()
+    if not atendimento.pk:
+        atendimento.previsao_dt = datetime.today()
+
     lista_ocorrencia = AtendimentoOcorrencia.objects.all()
     lista = request.POST.get('lista') or []
     valor = request.POST.get('valor') or ''
@@ -106,15 +110,11 @@ def atendimento_render(request, uuid=None):
     if request.POST.get('modulo'):
         atendimento.modulo = request.POST.get('modulo')
     if request.POST.get('descricao'):
-        atendimento.descricao = request.POST.get('descricao')
+        atendimento.descricao = str(request.POST.get('descricao')).strip()
     if request.POST.get('observacao'):
-        atendimento.observacao = request.POST.get('observacao')
+        atendimento.observacao = str(request.POST.get('observacao')).strip()
     if request.POST.get('previsao_dt'):
-        atendimento.previsao_dt = datetime.strptime(request.POST.get('previsao_dt'), '%Y-%m-%d')
-    else:
-        atendimento.previsao_dt = datetime.now()
-
-    template_name = 'atendimento/atendimento_edit.html'
+        atendimento.previsao_dt = datetime.strptime(request.POST.get('previsao_dt')[:10], '%Y-%m-%d')
 
     try:
         if request.POST.get('btn_seleciona'):
@@ -127,19 +127,30 @@ def atendimento_render(request, uuid=None):
         if request.POST.get('btn_pesquisar'):
             lista = Cliente.objects.filter(nome__icontains=valor)
 
+        if request.POST.get('btn_iniciar'):
+            atendimento.inicio_dt = datetime.now()
+            atendimento.save()
+            return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
+
+        if request.POST.get('btn_encerrar'):
+            atendimento.termino_dt = datetime.now()
+            atendimento.save()
+            return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
+
         if request.POST.get('btn_salvar'):
             selecionado = request.POST.get('codigo_pesquisado')
             atendimento.save()
+            messages.success(request, 'gravado com sucesso')
             return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
 
     except Exception as e:
         messages.error(request, e)
 
-    messages.info(request, atendimento.json())
     context = atendimento.json()
-    # context['created_dt'] = atendimento.created_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.created_dt else ''
-    # context['updated_dt'] = atendimento.updated_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.updated_dt else ''
-    # context['termino_dt'] = atendimento.termino_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.termino_dt else ''
+    context['created_dt'] = atendimento.created_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.created_dt else ''
+    context['updated_dt'] = atendimento.updated_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.updated_dt else ''
+    context['inicio_dt'] = atendimento.inicio_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.inicio_dt else ''
+    context['termino_dt'] = atendimento.termino_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.termino_dt else ''
 
     context['cliente'] = cliente or atendimento.contato.cliente
     lista_contato = Contato.objects.filter(cliente=cliente)
@@ -150,8 +161,10 @@ def atendimento_render(request, uuid=None):
     context['selecionado'] = selecionado
     context['codigo_pesquisado'] = request.POST.get('codigo_pesquisado')
     context['previsao_dt'] = DateFormat(atendimento.previsao_dt).format('Y-m-d')
+    context['minimo_dt'] = DateFormat(datetime.today()).format('Y-m-d')
     context['lista_contato'] = lista_contato
     context['lista_ocorrencia'] = lista_ocorrencia
     context['modulo_lista'] = get_lista_modulos_somente()
+    context['absolute_url'] = atendimento.get_absolute_url()
 
     return render(request, template_name, context)

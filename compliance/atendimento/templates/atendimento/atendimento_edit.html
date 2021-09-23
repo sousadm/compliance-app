@@ -13,91 +13,146 @@
     {% if selecionado %}
 
     <div style="float: right; text-align: right; margin-top: 15px">
-        <input type="submit" name="btn_salvar" value="Salvar">
+
+        {% if not termino_dt %}
+        <button type="submit" class="btn btn-primary" value="salvar" name="btn_salvar">
+            <i class="fas fa-save"></i> Salvar
+        </button>
+        {% endif %}
+
+        {% if created_dt and not inicio_dt and not termino_dt %}
+        <button type="submit" class="btn btn-secondary" value="iniciar" name="btn_iniciar"
+                onClick='return confirma("Deseja iniciar este atendimento?")'>
+            <i class="fas fa-play-circle"></i> Iniciar
+        </button>
+        {% endif %}
+
+        {% if inicio_dt and not termino_dt %}
+        <button type="submit" class="btn btn-danger" value="encerrar" name="btn_encerrar"
+                onClick='return confirma("Deseja encerrar este atendimento?")'>
+            <i class="fas fa-stop-circle"></i> Encerrar
+        </button>
+        {% endif %}
+
+        <a href="{% url 'url_atendimento_new' %}">
+            <button type="button" class="btn btn-secondary">
+                <i class="fas fa-file"></i> Novo
+            </button>
+        </a>
+        <a href="{% url 'url_atendimento' %}">
+            <button type="button" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Lista
+            </button>
+        </a>
+
+
     </div>
 
     <h1>Atendimento</h1>
 
-    <div class="row">
-        <div class="col-12 col-md-8">
-            <label>Nome do Cliente</label>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <button type="submit" name="modo_pesquisa" value="modo_pesquisa" class="btn btn-secondary">
-                        <i class="fas fa-search"></i>
-                    </button>
+    <fieldset {% if termino_dt %} disabled {% endif %}>
+        <div class="row">
+            <div class="col-12 col-md-8">
+                <label>Nome do Cliente</label>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <button type="submit" name="modo_pesquisa" value="modo_pesquisa" class="btn btn-secondary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <input type="text" value="{{ cliente }}" class="form-control" readonly>
                 </div>
-                <input type="text" value="{{ cliente }}" class="form-control" readonly>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <label>Nome do Contato</label>
+                <select class="form-control" name="contato" id="contato">
+                    {% for m in lista_contato %}
+                    <option value="{{m.pk}}" {% if m.pk == contato %} selected{% endif %}>{{m}}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
-        <div class="col-12 col-md-4">
-            <label>Nome do Contato</label>
-            <select class="form-control" name="contato" id="contato">
-                {% for m in lista_contato %}
-                <option value="{{m.pk}}" {% if m == atendimento.contato %} selected{% endif %}>{{m}}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12 col-md-3">
-            <label>Módulo</label>
-            <select class="form-control" name="modulo" id="modulo" required>
-                {% for m in modulo_lista %}
-                <option value="{{m.value}}" {% if m.value == modulo %} selected{% endif %}>{{m.label}}</option>
-                {% endfor %}
-            </select>
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Módulo</label>
+                <select class="form-control" name="modulo" id="modulo" required>
+                    {% for m in modulo_lista %}
+                    <option value="{{m.value}}" {% if m.value == modulo %} selected{% endif %}>{{m.label}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-6">
+                <label>Ocorrência</label>
+                <select class="form-control" name="ocorrencia" id="ocorrencia" required>
+                    {% for m in lista_ocorrencia %}
+                    <option value="{{m.pk}}" {% if m.value == ocorrencia %} selected{% endif %}>{{m}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <label>Usuário</label>
+                <input type="text" value="{{ username }}" class="form-control" disabled>
+            </div>
         </div>
-        <div class="col-12 col-md-6">
-            <label>Ocorrência</label>
-            <select class="form-control" name="ocorrencia" id="ocorrencia" required>
-                {% for m in lista_ocorrencia %}
-                <option value="{{m.pk}}" {% if m.value == ocorrencia %} selected{% endif %}>{{m}}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-12 col-md-3">
-            <label>Usuário</label>
-            <input type="text" value="{{ username }}" class="form-control" disabled>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12 col-md-9">
-            <label>Descrição</label>
-            <input type="text" class="form-control" id="descricao" name="descricao"  value="{{ descricao }}" required>
+        <div class="row">
+            <div class="col-12 col-md-9">
+                <label>Descrição</label>
+                <input type="text" class="form-control" id="descricao" name="descricao"  {% if descricao %} value="{{ descricao }}" {% endif %} autofocus required>
+            </div>
+            <div class="col-12 col-md-3">
+                <label>Previsão</label>
+                <input type="date" class="form-control" id="previsao_dt" name="previsao_dt" value="{{ previsao_dt }}" min="{{ minimo_dt }}" required >
+            </div>
         </div>
-        <div class="col-12 col-md-3">
-            <label>Previsão</label>
-            <input type="date" class="form-control" id="previsao_dt" name="previsao_dt" value="{{ previsao_dt }}" required >
-        </div>
-    </div>
 
-    <div class="form-group" {% if not pk %} hidden {% endif %}>
-        <label>Observação</label>
-        <textarea class="form-control" rows="3" id="observacao" name="obsercacao" value="{{ observacao }}"></textarea>
-    </div>
+        {% if inicio_dt %}
+        <div class="row">
+            <div class="col-12">
+                <label>Sobre o atendimento</label>
+                <textarea class="form-control" rows="3" id="observacao" name="observacao">{% if observacao %}{{observacao}}{% endif %}</textarea>
+            </div>
+        </div>
+        {% endif %}
 
-    <div class="row">
-        <div class="col-12 col-md-4">
-            {% if created_dt %}
-            <input type="datetime-local" class="form-control" id="created_dt" name="created_dt" disabled>
-            {% endif %}
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <label>Criado em:</label>
+                <input type="text" class="form-control" {% if created_dt %} value="{{ created_dt }}" {% endif %} disabled>
+            </div>
+            <div class="col-12 col-md-3">
+                <label>Atualizado em:</label>
+                <input type="text" class="form-control" {% if updated_dt %} value="{{ updated_dt }}" {% endif %} disabled>
+            </div>
+            <div class="col-12 col-md-3">
+                <label>Iniciado em:</label>
+                <input type="text" class="form-control" {% if inicio_dt %} value="{{ inicio_dt }}" {% endif %} disabled>
+            </div>
+            <div class="col-12 col-md-3">
+                <label>Encerrado em:</label>
+                <input type="text" class="form-control" {% if termino_dt %} value="{{ termino_dt }}" {% endif %} disabled>
+            </div>
         </div>
-        <div class="col-12 col-md-4">
-            {% if updated_dt %}
-            <input type="datetime-local" class="form-control" id="updated_dt" name="updated_dt" disabled>
-            {% endif %}
-        </div>
-        <div class="col-12 col-md-4">
-            {% if termino_dt %}
-            <input type="datetime-local" class="form-control" id="termino_dt" name="termino_dt" disabled>
-            {% endif %}
-        </div>
-    </div>
+    </fieldset>
 
     {% else %}
+
+    <h1>Inclusão de atendimento</h1>
+    {% if created_dt %}
+    <a style="float: right; margin-top: -50px" href="{{ absolute_url }}">
+        <button type="button" class="btn btn-secondary">
+            <i class="fas fa-undo"></i> Voltar
+        </button>
+    </a>
+    {% else %}
+    <a style="float: right; margin-top: -50px" href="{% url 'url_atendimento' %}">
+        <button type="button" class="btn btn-secondary">
+            <i class="fas fa-list"></i> Voltar Lista
+        </button>
+    </a>
+    {% endif %}
 
     {% include 'pessoa/pesquisa_pessoa.html' %}
 
@@ -109,3 +164,6 @@
 
 </form>
 {% endblock %}
+
+
+
