@@ -22,7 +22,7 @@ from django.urls import path, include
 from compliance.accounts.views import userEdit, userRegister, userList, \
     atendimentoSAC, atendimentoEditSAC, SAC_avulso, SAC_cliente, clienteSerie, encerramento, userPassword
 from compliance.atendimento.views import ocorrencia, ocorrenciaEdit, OcorrenciaRemove, atendimentoList, atendimentoAdd, \
-    atendimentoEdit
+    atendimentoEdit, ImprimirFichaAtendimento
 from compliance.core.views import home, ClienteListView, clienteNew, clienteUpdate, ClienteTarefaNew, \
     ClienteTarefaList, ClienteTarefaEdit, ClienteEventoList, MonitorBackupNew, acessos, TarefaLista, \
     TarefaImprimir, TarefaReopen, download, ClienteAWS, ClienteFolderAWS, ClienteBackup, ClienteUsuario, \
@@ -95,6 +95,7 @@ urlpatterns = [
                   path('atendimento/', atendimentoList, name='url_atendimento'),
                   path('atendimento/add/', atendimentoAdd, name='url_atendimento_new'),
                   path('atendimento/<str:uuid>/', atendimentoEdit, name='url_atendimento_edit'),
+                  path('atendimentoficha/<str:uuid>/', ImprimirFichaAtendimento, name='url_atendimento_ficha'),
 
                   path('relatorio/', GeradorRelatorio, name='url_relatorio'),
 

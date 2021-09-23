@@ -34,6 +34,14 @@
         </button>
         {% endif %}
 
+        {% if created_dt %}
+        <a href="{% url 'url_atendimento_ficha' uuid %}">
+            <button type="button" class="btn btn-secondary" title="imprimir ficha">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </a>
+        {% endif %}
+
         <a href="{% url 'url_atendimento_new' %}">
             <button type="button" class="btn btn-secondary">
                 <i class="fas fa-file"></i> Novo

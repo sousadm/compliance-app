@@ -20,6 +20,9 @@ class AtendimentoOcorrencia(models.Model):
     def __str__(self):
         return self.descricao
 
+    def json(self):
+        return model_to_dict(self)
+
     def get_absolute_url(self):
         return reverse("url_ocorrencia_edit", kwargs={"uuid": self.uuid})
 
@@ -50,7 +53,8 @@ class Atendimento(models.Model):
     #     self.previsao_dt = datetime.now()
 
     def json(self):
-        return model_to_dict(self)
+        dados = model_to_dict(self)
+        return dados
 
     def get_absolute_url(self):
         return reverse("url_atendimento_edit", kwargs={"uuid": self.uuid})

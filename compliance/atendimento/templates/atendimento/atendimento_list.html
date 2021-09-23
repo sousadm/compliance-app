@@ -45,7 +45,7 @@
                 <th>Previsão</th>
                 <th>Início</th>
                 <th>Término</th>
-                <th width="3    0"></th>
+                <th width="80"></th>
             </tr>
             </thead>
             <tbody>
@@ -61,6 +61,11 @@
                     <a href="{% url 'url_atendimento_edit' item.uuid %}">
                         <button type="button" class="btn btn-sm" title="edit">
                             <i class="fas fa-edit"></i>
+                        </button>
+                    </a>
+                    <a href="{% url 'url_atendimento_ficha' item.uuid %}">
+                        <button type="button" class="btn btn-sm" title="imprimir ficha">
+                            <i class="fas fa-print"></i>
                         </button>
                     </a>
                 </td>

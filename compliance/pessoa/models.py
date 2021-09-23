@@ -2,6 +2,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 # Create your models here.
+from django.forms import model_to_dict
+
 from compliance.core.models import Cliente
 
 LISTA_MES = [
@@ -25,13 +27,16 @@ class Contato(models.Model):
     nome = models.CharField('Nome', max_length=100)
     celular = models.CharField('Celular', max_length=20, null=True)
     email = models.EmailField('E-mail', blank=True, null=True)
-    mes = models.IntegerField('Mês', null=True, choices=LISTA_MES)
+    mes = models.IntegerField('Mês', null=True, blank=True, choices=LISTA_MES)
     dia = models.IntegerField('Dia', default=1, validators=[MaxValueValidator(31), MinValueValidator(1)])
 
     objects = models.Manager()
 
     def __str__(self):
         return self.nome
+
+    def json(self):
+        return model_to_dict(self)
 
     class Meta:
         verbose_name = 'contato'

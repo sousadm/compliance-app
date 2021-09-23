@@ -135,7 +135,7 @@ def MonitorBackupNew(request):
 
     context['tipo'] = tipo
     context['lista'] = users
-    return render(request, 'monitor.html', context)
+    return render(request, 'core/monitor.html', context)
 
 
 @login_required(login_url='login')

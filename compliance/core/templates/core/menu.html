@@ -9,11 +9,6 @@
             <a href="/">
                 <img height="35" src="{% static 'img/assist.bmp' %}" alt="" title="assist">
             </a>
-            {% if user.is_authenticated %}
-            <a href="{% url 'url_sair' %}" title="sair">
-                <img height="35" src="{% static 'img/logout.png' %}" alt="">
-            </a>
-            {% endif %}
         </div>
 
         {% if not user.is_authenticated %}
@@ -68,5 +63,14 @@
             </div>
             {% endif %}
         </div>
+
+        <div style="margin-left: 10px">
+            {% if user.is_authenticated %}
+            <a href="{% url 'url_sair' %}" title="sair">
+                <img height="35" src="{% static 'img/logout.png' %}" alt="">
+            </a>
+            {% endif %}
+        </div>
+
     </div>
 </nav>

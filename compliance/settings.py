@@ -99,18 +99,6 @@ WSGI_APPLICATION = 'compliance.wsgi.application'
 
 DATABASES = {
 
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'OPTIONS': {
-    #         'options': '-c search_path=compliance'
-    #     },
-    #     'NAME': 'assist',
-    #     'USER': 'postgres',
-    #     'PASSWORD': 'contrate',
-    #     'HOST': 'localhost',
-    #     'PORT': '5432',
-    # }
-
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'OPTIONS': {
@@ -118,10 +106,22 @@ DATABASES = {
         },
         'NAME': 'assist',
         'USER': 'postgres',
-        'PASSWORD': 'abc123456',
-        'HOST': 'compliance.cckc3qamx2hw.us-east-1.rds.amazonaws.com',
+        'PASSWORD': 'contrate',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'OPTIONS': {
+    #         'options': '-c search_path=compliance'
+    #     },
+    #     'NAME': 'assist',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'abc123456',
+    #     'HOST': 'compliance.cckc3qamx2hw.us-east-1.rds.amazonaws.com',
+    #     'PORT': '5432',
+    # }
 
 }
 
@@ -177,13 +177,14 @@ AWS_STORAGE_BUCKET_NAME = 'suporteassist'
 AWS_ACCESS_KEY_ID = 'AKIA46H6AGELQM3ROUM4'
 AWS_SECRET_ACCESS_KEY = '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'
 
-DEBUG = True
+DEBUG = False
 SECURE_SSL_REDIRECT = True
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "/static/")
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static/"),
-)
+# STATICFILES_DIRS = (
+#     os.path.join(BASE_DIR, "static/"),
+# )
 
 COMPLIANCE_API = 'http://3.224.26.231:8081/'
 # COMPLIANCE_API = 'http://localhost:8081/'
