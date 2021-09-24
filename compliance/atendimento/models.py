@@ -34,6 +34,7 @@ class Atendimento(models.Model):
     ocorrencia = models.ForeignKey(AtendimentoOcorrencia, null=True, on_delete=models.CASCADE)
     modulo = models.CharField('Módulo', max_length=30, choices=MODULO_CHOICE, null=True)
     descricao = models.CharField('Descrição', max_length=100)
+    solicitante = models.CharField('Solicitante', max_length=100, null=True)
     observacao = models.TextField('Observação', null=True)
     previsao_dt = models.DateTimeField('Previsão inicio', auto_now_add=True)
     inicio_dt = models.DateTimeField('Inicio', null=True)

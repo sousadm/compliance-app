@@ -57,7 +57,7 @@
 
     <fieldset {% if termino_dt or user.is_consulta %} disabled {% endif %}>
         <div class="row">
-            <div class="col-12 col-md-8">
+            <div class="col-12 col-md-6">
                 <label>Nome do Cliente</label>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
@@ -68,10 +68,14 @@
                     <input type="text" value="{{ cliente }}" class="form-control" readonly>
                 </div>
             </div>
+            <div class="col-12 col-md-3">
 
-            <div class="col-12 col-md-4">
+                <label>Quem solicita</label>
+                <input type="text" value="{{ solicitante|default_if_none:'' }}" name="solicitante" class="form-control" required {% if inicio_dt%} readonly {% else %} autofocus {% endif %} >
+            </div>
+            <div class="col-12 col-md-3">
                 <label>Nome do Contato</label>
-                <select class="form-control" name="contato" id="contato" required>
+                <select class="form-control" name="contato" id="contato" required {% if inicio_dt%} readonly {% endif %}>
                     {% for m in lista_contato %}
                     <option value="{{m.pk}}" {% if m.pk == contato %} selected{% endif %}>{{m}}</option>
                     {% endfor %}
@@ -82,7 +86,7 @@
         <div class="row">
             <div class="col-12 col-md-3">
                 <label>Módulo</label>
-                <select class="form-control" name="modulo" id="modulo" required>
+                <select class="form-control" name="modulo" id="modulo" required {% if inicio_dt%} readonly {% endif %}>
                     {% for m in modulo_lista %}
                     <option value="{{m.value}}" {% if m.value == modulo %} selected{% endif %}>{{m.label}}</option>
                     {% endfor %}
@@ -90,7 +94,7 @@
             </div>
             <div class="col-12 col-md-6">
                 <label>Ocorrência</label>
-                <select class="form-control" name="ocorrencia" id="ocorrencia" required>
+                <select class="form-control" name="ocorrencia" id="ocorrencia" required {% if inicio_dt%} readonly {% endif %}>
                     {% for m in lista_ocorrencia %}
                     <option value="{{m.pk}}" {% if m.value == ocorrencia %} selected{% endif %}>{{m}}</option>
                     {% endfor %}
@@ -103,13 +107,18 @@
         </div>
 
         <div class="row">
-            <div class="col-12 col-md-9">
+            <div class="col-12 col-md-8">
                 <label>Descrição</label>
-                <input type="text" class="form-control" id="descricao" name="descricao"  {% if descricao %} value="{{ descricao }}" {% endif %} autofocus required>
+                <input type="text" class="form-control" id="descricao" name="descricao"  {% if descricao %} value="{{ descricao }}" {% endif %} required {% if inicio_dt%} readonly {% endif %}>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-4">
                 <label>Previsão</label>
-                <input type="date" class="form-control" id="previsao_dt" name="previsao_dt" value="{{ previsao_dt }}" min="{{ minimo_dt }}" required >
+                <div class="input-group">
+                    <input type="date" class="form-control" id="previsao_dt" name="previsao_dt" value="{{ previsao_dt }}" min="{{ minimo_dt }}" required  {% if inicio_dt%} readonly {% endif %}>
+                    <div class="input-group-append">
+                        <input style="margin-left: 10px" type="time" class="form-control" value="{{ previsao_hora }}" name="previsao_hora" required {% if inicio_dt%} readonly {% endif %}>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -117,7 +126,7 @@
         <div class="row">
             <div class="col-12">
                 <label>Sobre o atendimento</label>
-                <textarea class="form-control" rows="3" id="observacao" name="observacao">{% if observacao %}{{observacao}}{% endif %}</textarea>
+                <textarea class="form-control" rows="3" id="observacao" name="observacao" {% if inicio_dt%} autofocus {% endif %}>{% if observacao %}{{observacao}}{% endif %}</textarea>
             </div>
         </div>
         {% endif %}
@@ -165,7 +174,6 @@
 
     <input type="submit" value="Pesquisar" id="btn_seleciona" name="btn_seleciona" hidden>
     <input type="text" id="codigo_pesquisado" name="codigo_pesquisado" value="{{ codigo_pesquisado }}" hidden>
-
 
 </form>
 {% endblock %}

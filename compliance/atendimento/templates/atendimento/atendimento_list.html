@@ -58,7 +58,7 @@
                 <td>{{ item.contato.cliente|default_if_none:"" }}</td>
                 <td>{{ item.ocorrencia.descricao|default_if_none:"" }}</td>
                 <td>{{ item.usuario }}</td>
-                <td>{{ item.previsao_dt|date:'d/m/Y' }}</td>
+                <td>{{ item.previsao_dt|date:'d/m/Y H:i' }}</td>
                 <td>{{ item.inicio_dt|date:'d/m/Y H:i' }}</td>
                 <td>{{ item.termino_dt|date:'d/m/Y H:i' }}</td>
                 <td>

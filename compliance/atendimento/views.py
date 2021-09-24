@@ -137,6 +137,8 @@ def atendimento_render(request, uuid=None):
         atendimento.modulo = request.POST.get('modulo')
     if request.POST.get('descricao'):
         atendimento.descricao = str(request.POST.get('descricao')).strip()
+    if request.POST.get('solicitante'):
+        atendimento.solicitante = str(request.POST.get('solicitante')).strip()
     if request.POST.get('observacao'):
         atendimento.observacao = str(request.POST.get('observacao')).strip()
     if request.POST.get('previsao_dt'):
@@ -165,6 +167,8 @@ def atendimento_render(request, uuid=None):
 
         if request.POST.get('btn_salvar'):
             selecionado = request.POST.get('codigo_pesquisado')
+            previsao_dt = request.POST.get('previsao_dt')[:10]+' '+request.POST.get('previsao_hora')
+            atendimento.previsao_dt = datetime.strptime(previsao_dt, '%Y-%m-%d %H:%M')
             atendimento.save()
             messages.success(request, 'gravado com sucesso')
             return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
@@ -187,6 +191,7 @@ def atendimento_render(request, uuid=None):
     context['selecionado'] = selecionado
     context['codigo_pesquisado'] = request.POST.get('codigo_pesquisado')
     context['previsao_dt'] = DateFormat(atendimento.previsao_dt).format('Y-m-d')
+    context['previsao_hora'] = DateFormat(atendimento.previsao_dt).format('H:i')
     context['minimo_dt'] = DateFormat(datetime.today()).format('Y-m-d')
     context['lista_contato'] = lista_contato
     context['lista_ocorrencia'] = lista_ocorrencia

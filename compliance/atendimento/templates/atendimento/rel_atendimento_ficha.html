@@ -7,7 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.11.2/jquery.mask.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<style type="text/css">
+    <style type="text/css">
+
 table, th, td {
   border: 1px solid black;
   border-collapse: collapse;
@@ -43,15 +44,18 @@ body {
     text-align: center;
     font-size: 20px;
 }
-</style>
-
+    </style>
     <title>Termo</title>
 </head>
 <body>
 
-<p style="text-align: right;"> {{ datahora }} </p>
+<div style="float:left">Third</div>
+         <div style="float:right">First</div>
 
-<h3 class="titulo">FICHA DE OCORRÊNCIA</h3>
+<img height="35" src="{% static 'img/assist.bmp' %}" alt="" title="assist">
+
+<h3 style="float: right;" class="titulo">FICHA DE OCORRÊNCIA</h3>
+
 
 <fieldset {% if not cliente.is_active %} disabled {% endif %}>
 
@@ -120,32 +124,36 @@ body {
         </tr>
         <tr>
             <td colspan="8">
-                <label>Sobre a Visita</label><br/>
-                {{ descricao }}
+                <label>Demanda</label><br/>
+                {{ descricao|default_if_none:"" }}
             </td>
             <td colspan="4">
-                <label>Usuário</label><br/>
-                {{ usuario.name }}
+                <label>Solicitante</label><br/>
+                {{ solicitante|default_if_none:"" }}
             </td>
         </tr>
         <tr>
             <td style="height: 200px;" colspan="12">
                 <label>Atendimento Realizado</label><br/>
-                {{ observacao }}
+                {{ observacao|default_if_none:"" }}
             </td>
         </tr>
         <tr>
-            <td colspan="4">
+            <td colspan="3">
                 <label>Abertura</label><br/>
                 {{ created_dt|date:'d/m/Y H:i' }}
             </td>
-            <td colspan="4">
+            <td colspan="3">
                 <label>Início</label><br/>
                 {{ inicio_dt|date:'d/m/Y H:i' }}
             </td>
-            <td colspan="4">
+            <td colspan="3">
                 <label>Término</label><br/>
                 {{ termino_dt|date:'d/m/Y H:i' }}
+            </td>
+            <td colspan="3">
+                <label>Atendente</label><br/>
+                {{ usuario.name }}
             </td>
         </tr>
     </table>
