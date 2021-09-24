@@ -179,12 +179,13 @@ AWS_SECRET_ACCESS_KEY = 'SLwSvjyIAIsiNYw6y+T9NtZP6pf929IK4Amta9kK'
 
 DEBUG = True
 SECURE_SSL_REDIRECT = True
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "/static/")
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static/"),
+)
 
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, "static/"),
-# )
 
 COMPLIANCE_API = 'http://3.224.26.231:8081/'
 # COMPLIANCE_API = 'http://localhost:8081/'

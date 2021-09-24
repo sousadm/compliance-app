@@ -9,7 +9,7 @@
 
     <style type="text/css">
 
-table, th, td {
+table {
   border: 1px solid black;
   border-collapse: collapse;
 }
@@ -49,13 +49,13 @@ body {
 </head>
 <body>
 
-<div style="float:left">Third</div>
-         <div style="float:right">First</div>
-
-<img height="35" src="{% static 'img/assist.bmp' %}" alt="" title="assist">
-
-<h3 style="float: right;" class="titulo">FICHA DE OCORRÊNCIA</h3>
-
+<table style="border: 0px; important!">
+    <tr>
+        <td><img height="35" src="{% static 'img/logo_assist_deitado.bmp' %}"></td>
+        <td style="width:60%"><h3 class="titulo">FICHA DE OCORRÊNCIA</h3></td>
+        <td><p style="text-align: right; margin-top:-50px"> {{ datahora }} </p></td>
+    </tr>
+</table>
 
 <fieldset {% if not cliente.is_active %} disabled {% endif %}>
 
