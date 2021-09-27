@@ -1,0 +1,35 @@
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding-top: 1px;
+  padding-right: 5px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  vertical-align: top;
+  vertical-align: top;
+}
+
+label {
+    font-size: 10px;
+}
+
+span {width: 100%; }
+
+body {
+    font-weight: 200;
+    font-size: 14px;
+}
+
+.pgrid {
+    background-color: LightGrey;
+    border-style: solid;
+    padding: 5px
+}
+
+.titulo {
+    text-align: center;
+    font-size: 20px;
+}

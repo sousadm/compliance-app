@@ -96,7 +96,7 @@
                 <label>Ocorrência</label>
                 <select class="form-control" name="ocorrencia" id="ocorrencia" required {% if inicio_dt%} readonly {% endif %}>
                     {% for m in lista_ocorrencia %}
-                    <option value="{{m.pk}}" {% if m.value == ocorrencia %} selected{% endif %}>{{m}}</option>
+                    <option value="{{m.pk}}" {% if m.pk == ocorrencia %} selected{% endif %}>{{m}}</option>
                     {% endfor %}
                 </select>
             </div>

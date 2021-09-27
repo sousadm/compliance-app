@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="br" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<html lang="br" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html">
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -49,11 +50,11 @@ body {
 </head>
 <body>
 
-<table style="border: 0px; important!">
+<table style="border: 0px; important!; margin-top:-20px;">
     <tr>
-        <td><img height="35" src="{% static 'img/assist.bmp' %}"></td>
+        <td><img height="60" src="{% static 'img/assist.bmp' %}"></td>
         <td style="width:60%"><h3 class="titulo">FICHA DE OCORRÊNCIA</h3></td>
-        <td><p style="text-align: right; margin-top:-50px"> {{ datahora }} </p></td>
+        <td><p></br></br> {{ datahora }} </p></td>
     </tr>
 </table>
 

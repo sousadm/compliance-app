@@ -175,7 +175,6 @@ def atendimento_render(request, uuid=None):
 
     except Exception as e:
         messages.error(request, e)
-
     context = atendimento.json()
     context['created_dt'] = atendimento.created_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.created_dt else ''
     context['updated_dt'] = atendimento.updated_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.updated_dt else ''
