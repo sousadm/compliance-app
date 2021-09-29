@@ -188,6 +188,8 @@ STATIC_URL = '/static/'
 
 
 COMPLIANCE_API = 'http://3.224.26.231:8081/'
+# COMPLIANCE_API = 'http://54.162.127.17:8081/'
 # COMPLIANCE_API = 'http://localhost:8081/'
 COMPLIANCE_URL = COMPLIANCE_API + 'compliance/'
 LGPD_URL = COMPLIANCE_API + 'lgpd/'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
