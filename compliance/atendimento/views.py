@@ -160,7 +160,7 @@ def atendimento_render(request, uuid=None):
             atendimento.save()
             return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
 
-        if request.POST.get('btn_encgit errar'):
+        if request.POST.get('btn_encerrar'):
             atendimento.termino_dt = datetime.now()
             atendimento.save()
             return HttpResponseRedirect(reverse('url_atendimento_edit', kwargs={'uuid': atendimento.uuid}))
