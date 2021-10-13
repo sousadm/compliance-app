@@ -87,7 +87,6 @@ def ImprimirFichaAtendimento(request, uuid):
 
 @login_required(login_url='login')
 def atendimentoList(request):
-
     filtro_cliente = Q()
     if request.user.is_consulta:
         clientes = []
@@ -167,7 +166,7 @@ def atendimento_render(request, uuid=None):
 
         if request.POST.get('btn_salvar'):
             selecionado = request.POST.get('codigo_pesquisado')
-            previsao_dt = request.POST.get('previsao_dt')[:10]+' '+request.POST.get('previsao_hora')
+            previsao_dt = request.POST.get('previsao_dt')[:10] + ' ' + request.POST.get('previsao_hora')
             atendimento.previsao_dt = datetime.strptime(previsao_dt, '%Y-%m-%d %H:%M')
             atendimento.save()
             messages.success(request, 'gravado com sucesso')
@@ -175,12 +174,12 @@ def atendimento_render(request, uuid=None):
 
     except Exception as e:
         messages.error(request, e)
+
     context = atendimento.json()
     context['created_dt'] = atendimento.created_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.created_dt else ''
     context['updated_dt'] = atendimento.updated_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.updated_dt else ''
     context['inicio_dt'] = atendimento.inicio_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.inicio_dt else ''
     context['termino_dt'] = atendimento.termino_dt.strftime('%d/%m/%Y %H:%M:%S') if atendimento.termino_dt else ''
-
     context['cliente'] = cliente or atendimento.contato.cliente
     lista_contato = Contato.objects.filter(cliente=cliente)
 
