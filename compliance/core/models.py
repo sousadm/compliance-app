@@ -56,6 +56,12 @@ SIM_NAO_CHOICE = [
 ]
 
 
+def tempoSecondsToStr(tempo):
+    hours, remainder = divmod(tempo, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
+
+
 def dt_parser(dt):
     if isinstance(dt, datetime):
         return dt.strftime('%d/%m/%Y %H:%M:%S')
@@ -222,9 +228,8 @@ class Tarefa(models.Model):
                                    not self.pk or not self.user or self.user == user) and self.status == 'INICIO' and not self.encerrado_dt,
             'pode_observar': self.pk and self.user == user and not self.encerrado_dt and self.iniciado_dt,
             'pode_encaminhar': self.user == user and self.pk and not self.encerrado_dt and self.status != 'PAUSA' and self.iniciado_dt,
-            'pode_iniciar': (
-                                    self.user == user or user.is_des) and self.pk and not self.encerrado_dt and not self.iniciado_dt,
-            'pode_reiniciar': self.user == user and self.pk and not self.encerrado_dt and self.status == 'PAUSA',
+            'pode_iniciar': (self.user == user or user.is_des) and self.pk and not self.encerrado_dt and not self.iniciado_dt,
+            'pode_reiniciar': self.pk and not self.encerrado_dt and self.status == 'PAUSA',
             'pode_encerrar': self.user == user and self.pk and not self.encerrado_dt and self.iniciado_dt and not self.status == 'PAUSA',
             'pode_pausar': self.user == user and self.pk and self.status != 'PAUSA',
         }
@@ -257,7 +262,9 @@ class Tarefa(models.Model):
         obj['status'] = getStatus(self.status)
         obj['prioridade'] = getPrioridade(self.prioridade)
         obj['modulo'] = getModulo(self.modulo)
-        obj['tempo_produtivo'] = str(timedelta(seconds=self.tempo_produtivo))
+        obj['tempo_produtivo'] = tempoSecondsToStr(self.tempo_produtivo)
+        obj['tempo_ocioso'] = tempoSecondsToStr(self.tempo_ocioso)
+        obj['tempo_analise'] = tempoSecondsToStr(self.tempo_analise)
         return json.dumps(obj, default=dt_parser)
 
     @property
