@@ -539,8 +539,10 @@ def home(request):
             if request.user.is_consulta:
                 return HttpResponseRedirect(reverse('url_cliente_list'))
 
-            filtro_status = Q(encerrado_dt__isnull=True, user=request.user)
-            filtro_tipo = Q(Q(status='PRODUCAO') | Q(status='PAUSA'))
+            filtro_status = Q(Q(encerrado_dt__isnull=True), ~Q(modulo='SAC'))
+            # filtro_tipo = Q(Q(status='INICIO'), Q(Q(user=request.user), Q(status='PRODUCAO') | Q(status='PAUSA')))
+            filtro_tipo = Q(Q(Q(status='INICIO'), ~Q(user=request.user)) | Q(Q(user=request.user), Q(
+                Q(status='PRODUCAO') | Q(status='PAUSA'))))
             lista = Tarefa.objects.filter(filtro_status, filtro_tipo).order_by('identificador').reverse()
             context['lista'] = lista
         else:
@@ -694,6 +696,8 @@ def ClienteTarefaEdit(request, pk):
                 messages.success(request, 'realizado com sucesso')
                 addEventoTarefaMsg(request, tarefa, msgevento)
 
+                # TODO
+
                 return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
 
             if form.is_valid():
@@ -795,7 +799,7 @@ def TarefaRemoveAnexo(request, pk, nome):
     try:
         arquivo = urllib.parse.unquote(nome)
         response = s3_delete_file(settings.AWS_STORAGE_BUCKET_NAME, arquivo)
-        # messages.success(request, response.HTTPStatusCode)
+        messages.success(request, response.HTTPStatusCode)
         return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': pk}))
     except Exception as e:
         messages.error(request, e)
