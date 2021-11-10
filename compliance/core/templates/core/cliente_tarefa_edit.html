@@ -86,8 +86,8 @@
             <div class="row">
                 <div class="col-12 col-md-8">
 
-                    <a href="{% url 'url_tarefa_imprimir' tarefa.id %}">
-                        <button formtarget="_blank" type="button" class="btn btn-secondary btn-sm" title="imprimir">
+                    <a href="{% url 'url_tarefa_imprimir' tarefa.id %}" target="_blank">
+                        <button type="button" class="btn btn-secondary btn-sm" title="imprimir">
                             <i class="fas fa-print"></i>Imprimir
                         </button>
                     </a>
@@ -108,13 +108,13 @@
                     {% endif %}
 
                     {% if status.pode_iniciar %}
-                    <button type="submit" value="btn_start" name="btn_start" class="btn btn-secondary btn-sm">
+                    <button type="submit" value="btn_start" name="btn_start" class="btn btn-secondary btn-sm"
+                            onClick='return confirma("Deseja iniciar esta tarefa?")'>
                         <i class="fas fa-play-circle"></i>Iniciar
                     </button>
-                    {% endif %}
-
-                    {% if status.pode_reiniciar %}
-                    <button type="submit" value="btn_reinicia" name="btn_reinicia" class="btn btn-secondary btn-sm">
+                    {% elif status.pode_reiniciar %}
+                    <button type="submit" value="btn_reinicia" name="btn_reinicia" class="btn btn-secondary btn-sm"
+                            onClick='return confirma("Deseja reiniciar esta tarefa?")'>
                         <i class="fas fa-power-off"></i>Reiniciar
                     </button>
                     {% endif %}

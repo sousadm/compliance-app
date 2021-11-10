@@ -553,6 +553,12 @@ def home(request):
     return HttpResponse(template.render(context, request))
 
 
+def get_msg_producao(request, tarefa):
+    msg = 'reinicio' if tarefa.status == 'PAUSA' else 'inicio'
+    msg += ' em ' + ('produção' if request.user.is_des else 'análise')
+    return msg
+
+
 @login_required(login_url='login')
 def ClienteTarefaEdit(request, pk):
     msgevento = ''
@@ -592,23 +598,21 @@ def ClienteTarefaEdit(request, pk):
 
             # inicia a produção da tarefa
             if (request.POST.get('btn_start') or request.POST.get('btn_reinicia')) and tarefa.pk:
+                msg = get_msg_producao(request, tarefa)
                 # calcula tempo ocioso
                 if tarefa.status == 'PAUSA':
-                    msg = 'reinício em produção'
                     if tarefa.tempo_ocioso:
                         tarefa.tempo_ocioso = tarefa.tempo_ocioso + tempo
                     else:
                         tarefa.tempo_ocioso = tempo
                 if not tarefa.iniciado_dt:
-                    msg = 'início em produção'
                     tarefa.iniciado_dt = timezone.now()
-
                 tarefa.modulo = request.POST.get('modulo')
                 tarefa.user = request.user
                 tarefa.ultimo_tempo = timezone.now()
-                tarefa.status = 'PRODUCAO'
+                tarefa.status = 'PRODUCAO' if request.user.is_des else 'ANALISE'
                 tarefa.save()
-                messages.success(request, 'sucesso no ' + msg)
+                messages.success(request, msg)
                 addEventoTarefaMsg(request, tarefa, msg)
 
                 if tarefa.identificador:
@@ -618,86 +622,22 @@ def ClienteTarefaEdit(request, pk):
                 return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
 
             # pausar a tarefa
-            if request.POST.get('btn_pausa') and tarefa.status == 'PRODUCAO':
-                if tarefa.tempo_produtivo:
-                    tarefa.tempo_produtivo = tarefa.tempo_produtivo + tempo
-                else:
-                    tarefa.tempo_produtivo = tempo
-                tarefa.status = 'PAUSA'
-                tarefa.ultimo_tempo = timezone.now()
-                tarefa.save()
+            if request.POST.get('btn_pausa'):
+                define_pausa_tarefa(request, tarefa, tempo)
                 messages.success(request, 'pausa realizada com sucesso')
-                addEventoTarefaMsg(request, tarefa, ('pausa/' + msgevento) if msgevento else 'pausa')
                 return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
 
             # encerrar a tarefa
             if (request.POST.get('btn_encerra') or request.POST.get('btn_cancela')) and tarefa.pk:
-                msg = ''
-                if tarefa.status == 'PRODUCAO':
-                    if tarefa.tempo_produtivo:
-                        tarefa.tempo_produtivo = tarefa.tempo_produtivo + tempo
-                    else:
-                        tarefa.tempo_produtivo = tempo
-                elif tarefa.status == 'PAUSA':
-                    if tarefa.tempo_ocioso:
-                        tarefa.tempo_ocioso = tarefa.tempo_ocioso + tempo
-                    else:
-                        tarefa.tempo_ocioso = tempo
-                elif tarefa.status == 'ANALISE':
-                    if tarefa.tempo_analise:
-                        tarefa.tempo_analise = tarefa.tempo_analise + tempo
-                    else:
-                        tarefa.tempo_analise = tempo
-
-                if request.POST.get('btn_encerra'):
-                    tarefa.status = 'ENCERRADO'
-                    msg = 'encerramento de tarefa'
-
-                if request.POST.get('btn_cancela'):
-                    tarefa.status = 'CANCELADO'
-                    msg = 'cancelamento de tarefa'
-
-                if msgevento:
-                    msg = msg + '/' + msgevento
-
-                tarefa.encerrado_dt = timezone.now()
-                tarefa.save()
+                define_encerramento_tarefa(request, tarefa, tempo)
+                msg = 'cancelamento da tarefa' if request.POST.get('btn_cancela') else 'encerramento da tarefa'
                 messages.success(request, 'sucesso no ' + msg)
-                addEventoTarefaMsg(request, tarefa, msg)
                 return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
 
             # liberar para análise
             if request.POST.get('btn_analise'):
-                if tarefa.status == 'PRODUCAO':
-                    if tarefa.tempo_produtivo:
-                        tarefa.tempo_produtivo = tarefa.tempo_produtivo + tempo
-                    else:
-                        tarefa.tempo_produtivo = tempo
-                if tarefa.status == 'PAUSA':
-                    if tarefa.tempo_ocioso:
-                        tarefa.tempo_ocioso = tarefa.tempo_ocioso + tempo
-                    else:
-                        tarefa.tempo_ocioso = tempo
-                if tarefa.status == 'ANALISE':
-                    tarefa.status = 'PAUSA'
-                    if not msgevento:
-                        msgevento = 'tarefa liberada para desenvolvimento'
-                else:
-                    tarefa.status = 'ANALISE'
-                    if not msgevento:
-                        msgevento = 'tarefa liberada para análise'
-
-                tarefa.ultimo_tempo = timezone.now()
-                if usuario:
-                    tarefa.user = usuario
-                    tarefa.status = 'PAUSA'
-
-                tarefa.save()
+                define_analise_tarefa(request, usuario, tarefa, tempo)
                 messages.success(request, 'realizado com sucesso')
-                addEventoTarefaMsg(request, tarefa, msgevento)
-
-                # TODO
-
                 return HttpResponseRedirect(reverse('url_cliente_tarefa_edit', kwargs={'pk': tarefa.pk}))
 
             if form.is_valid():
@@ -1068,3 +1008,46 @@ def GeradorRelatorio(request):
     context['lista'] = lista
 
     return render(request, 'core/relatorio.html', context)
+
+
+def define_pausa_tarefa(request, tarefa, tempo):
+    if tarefa.status == 'PRODUCAO':
+        tarefa.tempo_produtivo += tempo
+    else:
+        tarefa.tempo_analise += tempo
+    tarefa.status = 'PAUSA'
+    tarefa.ultimo_tempo = timezone.now()
+    tarefa.save()
+    addEventoTarefaMsg(request, tarefa, 'pausa')
+
+
+def define_encerramento_tarefa(request, tarefa, tempo):
+    if tarefa.status == 'PRODUCAO':
+        tarefa.tempo_produtivo += tempo
+    elif tarefa.status == 'PAUSA':
+        tarefa.tempo_ocioso += tempo
+    elif tarefa.status == 'ANALISE':
+        tarefa.tempo_analise += tempo
+    tarefa.encerrado_dt = timezone.now()
+    tarefa.save()
+    addEventoTarefaMsg(request, tarefa, 'encerramento da tarefa')
+
+
+def define_analise_tarefa(request, usuario, tarefa, tempo):
+    msgevento = 'tarefa liberada para análise'
+
+    if tarefa.status == 'PRODUCAO':
+        tarefa.tempo_produtivo += tempo
+    elif tarefa.status == 'PAUSA':
+        tarefa.tempo_ocioso += tempo
+    elif tarefa.status == 'ANALISE':
+        tarefa.tempo_analise += tempo
+        msgevento = 'tarefa liberada para desenvolvimento'
+
+    if usuario:
+        tarefa.user = usuario
+        tarefa.status = 'PAUSA'
+    tarefa.status = 'PAUSA'
+    tarefa.ultimo_tempo = timezone.now()
+    tarefa.save()
+    addEventoTarefaMsg(request, tarefa, msgevento)
