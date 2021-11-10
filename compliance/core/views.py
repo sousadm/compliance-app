@@ -22,7 +22,7 @@ from compliance import settings
 from compliance.accounts.models import User
 from compliance.accounts.senha import gerar_senha_letras_numeros
 from compliance.aws.form import UploadFileOnlyForm
-from compliance.aws.views import get_s3_filename_list, get_nome, s3_upload_small_files, s3_delete_file
+from compliance.aws.views import get_s3_filename_list, get_nome, s3_upload_small_files, s3_delete_file, delete_from_s3
 from compliance.core.form import ClienteForm, TarefaForm, MonitorForm, TarefaReopenForm, ClienteConsultaForm, \
     ClienteAddUser
 from compliance.core.mail import send_mail_template
@@ -528,31 +528,6 @@ def TarefaImprimir(request, pk):
         return HttpResponse(response.status_code)
 
 
-def home(request):
-    context = {}
-    template = loader.get_template('core/home.html')
-
-    if request.user.is_authenticated:
-        if request.user.pk:
-            request.session['is_consulta'] = request.user.is_consulta
-
-            if request.user.is_consulta:
-                return HttpResponseRedirect(reverse('url_cliente_list'))
-
-            filtro_status = Q(Q(encerrado_dt__isnull=True), ~Q(modulo='SAC'))
-            # filtro_tipo = Q(Q(status='INICIO'), Q(Q(user=request.user), Q(status='PRODUCAO') | Q(status='PAUSA')))
-            filtro_tipo = Q(Q(Q(status='INICIO'), ~Q(user=request.user)) | Q(Q(user=request.user), Q(
-                Q(status='PRODUCAO') | Q(status='PAUSA'))))
-            lista = Tarefa.objects.filter(filtro_status, filtro_tipo).order_by('identificador').reverse()
-            context['lista'] = lista
-        else:
-            request.session['is_consulta'] = None
-    else:
-        return HttpResponseRedirect(reverse('login'))
-
-    return HttpResponse(template.render(context, request))
-
-
 def get_msg_producao(request, tarefa):
     msg = 'reinicio' if tarefa.status == 'PAUSA' else 'inicio'
     msg += ' em ' + ('produção' if request.user.is_des else 'análise')
@@ -735,16 +710,6 @@ def TarefaAnexo(request, pk):
     return render(request, 'core/cliente_tarefa_anexo.html', context)
 
 
-def TarefaRemoveAnexo(request, pk, nome):
-    try:
-        arquivo = urllib.parse.unquote(nome)
-        response = s3_delete_file(settings.AWS_STORAGE_BUCKET_NAME, arquivo)
-        messages.success(request, response.HTTPStatusCode)
-        return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': pk}))
-    except Exception as e:
-        messages.error(request, e)
-
-
 @login_required(login_url='login')
 def ClienteListView(request):
     context = {}
@@ -796,70 +761,6 @@ def ClienteListView(request):
     context['nivel'] = nivel
 
     return render(request, 'core/cliente_list.html', context)
-
-
-def getListaTarefa(request):
-    filtro_cliente = Q()
-    filtro_periodo = Q()
-    filtro_usuario = Q()
-    filtro_modulo = Q()
-    situacao = request.POST.get('situacao')
-    data_inicial = request.POST.get('data_inicial')
-    data_final = request.POST.get('data_final')
-
-    valor = request.POST.get('nome') or ''
-    if valor.isdigit():
-        filtro_nome = Q(Q(identificador=valor) | Q(cliente__cnpj=valor))
-    else:
-        filtro_nome = Q(Q(resumo__icontains=valor) | Q(cliente__nome__icontains=valor))
-
-    if situacao == '0':  # todos
-        filtro_periodo = Q(created_at__range=[data_inicial, data_final])
-    elif situacao == '1':  # não iniciado
-        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True,
-                           iniciado_dt__isnull=True)
-    elif situacao == '2':  # em produção
-        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True,
-                           iniciado_dt__isnull=False)
-    elif situacao == '3':  # atualizado no cliente
-        filtro_periodo = Q(implantado_dt__range=[data_inicial, data_final])
-    elif situacao == '4':  # encerrada
-        filtro_periodo = Q(encerrado_dt__range=[data_inicial, data_final])
-
-    if request.POST.get('modulo') != 'TODOS':
-        filtro_modulo = Q(modulo=request.POST.get('modulo'))
-
-    if request.user.is_consulta:
-        clientes = []
-        lst = UserCliente.objects.filter(user=request.user, cliente__is_active=True)
-        for c in lst:
-            clientes.append(c.cliente.pk)
-        filtro_cliente = Q(cliente__in=clientes)
-    elif not (request.POST.get('usuario') == '0'):
-        filtro_usuario = Q(user=request.POST.get('usuario'))
-
-    lista = []
-    tarefas = Tarefa.objects.filter(filtro_periodo, filtro_usuario, filtro_modulo, filtro_nome, filtro_cliente) \
-        .exclude(modulo='SAC') \
-        .order_by('identificador')
-    for tar in tarefas:
-        if situacao == '0' or situacao == '1':
-            data = tar.created_at
-        elif situacao == '2':
-            data = tar.iniciado_dt
-        elif situacao == '3':
-            data = tar.implantado_dt
-        elif situacao == '4':
-            data = tar.encerrado_dt
-        lista.append({
-            "identificador": tar.identificador,
-            "resumo": tar.resumo,
-            "modulo": tar.modulo,
-            "data": data.strftime('%d/%m/%Y') if data else '',
-            "nome": tar.cliente.nome
-        })
-
-    return lista
 
 
 def getTituloRelatorio(request):
@@ -1051,3 +952,102 @@ def define_analise_tarefa(request, usuario, tarefa, tempo):
     tarefa.ultimo_tempo = timezone.now()
     tarefa.save()
     addEventoTarefaMsg(request, tarefa, msgevento)
+
+
+def getListaTarefa(request):
+    filtro_cliente = Q()
+    filtro_periodo = Q()
+    filtro_usuario = Q()
+    filtro_modulo = Q()
+    situacao = request.POST.get('situacao')
+    data_inicial = request.POST.get('data_inicial')
+    data_final = request.POST.get('data_final')
+
+    valor = request.POST.get('nome') or ''
+    if valor.isdigit():
+        filtro_nome = Q(Q(identificador=valor) | Q(cliente__cnpj=valor))
+    else:
+        filtro_nome = Q(Q(resumo__icontains=valor) | Q(cliente__nome__icontains=valor))
+
+    if situacao == '0':  # todos
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final])
+    elif situacao == '1':  # não iniciado
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True,
+                           iniciado_dt__isnull=True)
+    elif situacao == '2':  # em produção
+        filtro_periodo = Q(created_at__range=[data_inicial, data_final], encerrado_dt__isnull=True,
+                           iniciado_dt__isnull=False)
+    elif situacao == '3':  # atualizado no cliente
+        filtro_periodo = Q(implantado_dt__range=[data_inicial, data_final])
+    elif situacao == '4':  # encerrada
+        filtro_periodo = Q(encerrado_dt__range=[data_inicial, data_final])
+
+    if request.POST.get('modulo') != 'TODOS':
+        filtro_modulo = Q(modulo=request.POST.get('modulo'))
+
+    if request.user.is_consulta:
+        clientes = []
+        lst = UserCliente.objects.filter(user=request.user, cliente__is_active=True)
+        for c in lst:
+            clientes.append(c.cliente.pk)
+        filtro_cliente = Q(cliente__in=clientes)
+    elif not (request.POST.get('usuario') == '0'):
+        filtro_usuario = Q(user=request.POST.get('usuario'))
+
+    lista = []
+    tarefas = Tarefa.objects.filter(filtro_periodo, filtro_usuario, filtro_modulo, filtro_nome, filtro_cliente) \
+        .exclude(modulo='SAC') \
+        .order_by('identificador')
+    for tar in tarefas:
+        if situacao == '0' or situacao == '1':
+            data = tar.created_at
+        elif situacao == '2':
+            data = tar.iniciado_dt
+        elif situacao == '3':
+            data = tar.implantado_dt
+        elif situacao == '4':
+            data = tar.encerrado_dt
+        lista.append({
+            "identificador": tar.identificador,
+            "resumo": tar.resumo,
+            "modulo": tar.modulo,
+            "data": data.strftime('%d/%m/%Y') if data else '',
+            "nome": tar.cliente.nome
+        })
+
+    return lista
+
+
+def home(request):
+    context = {}
+    template = loader.get_template('core/home.html')
+
+    if request.user.is_authenticated:
+        if request.user.pk:
+            request.session['is_consulta'] = request.user.is_consulta
+
+            if request.user.is_consulta:
+                return HttpResponseRedirect(reverse('url_cliente_list'))
+
+            filtro_status = Q(Q(encerrado_dt__isnull=True), ~Q(modulo='SAC'))
+            filtro_tipo = Q(Q(Q(status='INICIO'), ~Q(user=request.user)) | Q(Q(user=request.user), Q(
+                Q(status='PRODUCAO') | Q(status='PAUSA') | Q(status='INICIO') | Q(status='ANALISE'))))
+            lista = Tarefa.objects.filter(filtro_status, filtro_tipo).order_by('created_at').reverse()
+            context['lista'] = lista
+        else:
+            request.session['is_consulta'] = None
+    else:
+        return HttpResponseRedirect(reverse('login'))
+
+    return HttpResponse(template.render(context, request))
+
+
+def TarefaRemoveAnexo(request, pk, nome):
+    try:
+        arquivo = urllib.parse.unquote(nome)
+        # response = s3_delete_file(settings.AWS_STORAGE_BUCKET_NAME, arquivo)
+        # messages.success(request, response.HTTPStatusCode)
+        delete_from_s3(arquivo)
+        return HttpResponseRedirect(reverse('url_tarefa_anexo', kwargs={'pk': pk}))
+    except Exception as e:
+        messages.error(request, e)

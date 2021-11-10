@@ -1,11 +1,7 @@
-import pickle
 import urllib
 
 import boto3
 from boto.s3.connection import S3Connection
-from django.contrib import messages
-from django.http import HttpResponse
-
 import compliance.settings as conf
 from compliance import settings
 
@@ -42,8 +38,8 @@ def getKeyRetorno(folder, key):
 
 
 def get_s3_filename_list(directory):
-    conn = S3Connection(conf.AWS_ACCESS_KEY_ID, conf.AWS_SECRET_ACCESS_KEY)
-    bucket = conn.get_bucket(conf.AWS_STORAGE_BUCKET_NAME)
+    conn = S3Connection(conf.AWS_BUCKET_KEY, conf.AWS_BUCKET_SECRET_KEY)
+    bucket = conn.get_bucket(conf.AWS_BUCKET)
     retorno = []
     lista = bucket.list(prefix=directory, delimiter="/")
     for key in lista:
@@ -84,3 +80,19 @@ def s3_delete_file(s3_bucket_name, inp_file_key):
     delete_file_response = client.delete_object(Bucket=s3_bucket_name, Key=inp_file_key)
     return delete_file_response
 
+
+
+def delete_from_s3(model):
+    try:
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=conf.AWS_BUCKET_KEY,
+            aws_secret_access_key=conf.AWS_BUCKET_SECRET_KEY
+        )
+        result = s3.get_bucket_acl(Bucket=conf.AWS_BUCKET)
+        print(result)
+        s3.delete_object(Bucket=conf.AWS_BUCKET, Key=model)
+        return True
+    except Exception as ex:
+        print(str(ex))
+        return False
